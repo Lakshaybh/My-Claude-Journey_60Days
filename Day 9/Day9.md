@@ -37,8 +37,11 @@ Featuring a concise 4-column metrics panel (Health Score, Energy Balance, Macro 
 
 ![Initial Polished Dashboard View](initial_dashboard.png)
 
+
 ### 2. Keto Preset Configurations
 
 Sliders successfully adjust to Protein 20% / Carbs 5% / Fat 75% under the expanded ranges, updating targets dynamically:
 
 ![Keto Preset Configuration applied](keto_preset_applied.png)
+
+old website -![1780946523160](image/Day9/1780946523160.png)
