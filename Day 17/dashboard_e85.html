@@ -1,0 +1,556 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALM Fuel Dashboard</title>
+<style>
+  :root {
+    --bg: #f1f5f9;
+    --bg2: #e2e8f0;
+    --glass: rgba(255,255,255,0.75);
+    --border: rgba(0,0,0,0.09);
+    --e85: #d97706;
+    --petrol: #2563eb;
+    --diesel: #475569;
+    --cng: #059669;
+    --ev: #7c3aed;
+    --text: #0f172a;
+    --sub: #475569;
+    --red: #dc2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 16px; }
+
+  /* Header */
+  header { text-align: center; padding: 24px 16px 20px; }
+  header h1 { font-size: clamp(1rem, 3vw, 1.5rem); font-weight: 700; letter-spacing: 0.05em; color: var(--petrol); text-transform: uppercase; }
+  header p { font-size: 0.78rem; color: var(--sub); margin-top: 6px; }
+
+  /* Glass card */
+  .card { background: var(--glass); border: 1px solid var(--border); border-radius: 14px; padding: 18px; backdrop-filter: blur(12px); box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+  /* KPI row */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { text-align: center; }
+  .kpi .val { font-size: clamp(1.3rem, 3vw, 1.9rem); font-weight: 800; line-height: 1.1; }
+  .kpi .lbl { font-size: 0.68rem; color: var(--sub); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+  .kpi .sub { font-size: 0.72rem; color: var(--sub); margin-top: 2px; }
+  .kpi-petrol .val { color: var(--petrol); }
+  .kpi-e85 .val { color: var(--e85); }
+  .kpi-warn .val { color: var(--red); }
+  .kpi-green .val { color: var(--cng); }
+  .kpi-month .val { color: #f472b6; }
+
+  /* Chart grid */
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  @media(max-width:600px){ .chart-row { grid-template-columns: 1fr; } }
+  .chart-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--sub); margin-bottom: 12px; }
+
+  /* Bottom row */
+  .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  @media(max-width:700px){ .bottom-row { grid-template-columns: 1fr; } }
+
+  /* Gauge */
+  .gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .gauge-svg { width: 200px; height: 120px; }
+  .gauge-verdict { font-size: 0.8rem; color: var(--sub); text-align: center; line-height: 1.4; max-width: 300px; }
+  .gauge-score { font-size: 2rem; font-weight: 800; color: var(--e85); }
+
+  /* Fuel cards */
+  .fuel-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .fuel-card { border-radius: 12px; padding: 14px; border: 1.5px solid var(--border); background: var(--glass); box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+  .fuel-card.active { box-shadow: 0 0 18px rgba(59,130,246,0.4); border-color: var(--petrol); }
+  .fuel-card h3 { font-size: 0.82rem; font-weight: 700; margin-bottom: 8px; }
+  .fuel-card .item { font-size: 0.7rem; color: var(--sub); margin: 3px 0; line-height: 1.35; }
+  .fuel-card .best { font-size: 0.68rem; color: var(--cng); margin-top: 6px; }
+
+  /* Tooltip */
+  .tooltip { position: absolute; background: rgba(255,255,255,0.97); color: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.72rem; pointer-events: none; opacity: 0; transition: opacity 0.15s; white-space: nowrap; z-index: 99; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+  /* Paradox table */
+  .paradox-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  .paradox-table td, .paradox-table th { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  .paradox-table th { color: var(--sub); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .paradox-table .plus { color: var(--cng); }
+  .paradox-table .minus { color: var(--red); }
+
+  /* Age line chart hover line */
+  .hover-line { stroke: rgba(255,255,255,0.25); stroke-dasharray: 4; }
+</style>
+</head>
+<body>
+<div id="tt" class="tooltip"></div>
+
+<!-- ═══════════════════ COVER PAGE ═══════════════════ -->
+<section id="cover-page" style="width:100%;min-height:100vh;background:#ffffff;position:relative;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;">
+
+<style>
+@keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+@keyframes slideIn { from { opacity:0; transform:translateX(-40px); } to { opacity:1; transform:translateX(0); } }
+@keyframes drawLine { from { width:0; } to { width:100%; } }
+@keyframes countUp { from { opacity:0; } to { opacity:1; } }
+.cv-fade1 { animation: fadeUp 0.7s ease both; }
+.cv-fade2 { animation: fadeUp 0.7s 0.15s ease both; }
+.cv-fade3 { animation: fadeUp 0.7s 0.30s ease both; }
+.cv-fade4 { animation: fadeUp 0.7s 0.45s ease both; }
+.cv-slide { animation: slideIn 0.8s 0.1s ease both; }
+</style>
+
+<!-- Top accent bar -->
+<div style="width:100%;height:6px;background:linear-gradient(90deg,#1d4ed8 0%,#3b82f6 40%,#7c3aed 70%,#3b82f6 100%);flex-shrink:0;"></div>
+
+<!-- Main body -->
+<div style="flex:1;display:flex;flex-direction:column;max-width:1100px;width:100%;margin:0 auto;padding:52px 48px 48px;">
+
+  <!-- Top row: badge + day counter -->
+  <div class="cv-fade1" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:60px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:9px;height:9px;border-radius:50%;background:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.18);"></div>
+      <span style="font-size:0.72rem;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#2563eb;">AI Claude Challenge &nbsp;·&nbsp; ABTalks</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:100px;padding:8px 22px;">
+      <span style="font-size:0.7rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.12em;">Day</span>
+      <span style="font-size:1rem;font-weight:900;color:#1e3a8a;letter-spacing:-0.02em;">17</span>
+      <span style="font-size:0.7rem;font-weight:500;color:#94a3b8;">/60</span>
+    </div>
+  </div>
+
+  <!-- Big title -->
+  <div class="cv-slide" style="margin-bottom:10px;">
+    <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;color:#3b82f6;margin-bottom:18px;">Honda WR-V i-VTEC &nbsp;·&nbsp; Fuel Analysis Report</div>
+    <div style="font-size:clamp(3rem,8vw,6.5rem);font-weight:900;line-height:0.9;color:#0f172a;letter-spacing:-0.03em;">FUEL<br><span style="color:#2563eb;">INTEL</span></div>
+    <div style="margin-top:18px;width:72px;height:4px;background:linear-gradient(90deg,#2563eb,#7c3aed);border-radius:4px;"></div>
+  </div>
+
+  <div class="cv-fade2" style="font-size:1.05rem;font-weight:400;color:#475569;margin:22px 0 52px;max-width:520px;line-height:1.65;">
+    A data-driven comparison of 5 fuel types across cost, emissions, maintenance &amp; age — built entirely with Claude AI.
+  </div>
+
+  <!-- Stats grid -->
+  <div class="cv-fade3" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:#e2e8f0;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;margin-bottom:52px;">
+    <div style="background:#fff;padding:28px 24px;">
+      <div style="font-size:2rem;font-weight:900;color:#2563eb;line-height:1;">52</div>
+      <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#94a3b8;margin-top:5px;">Fleet Records</div>
+    </div>
+    <div style="background:#fff;padding:28px 24px;">
+      <div style="font-size:2rem;font-weight:900;color:#2563eb;line-height:1;">5</div>
+      <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#94a3b8;margin-top:5px;">Fuel Types</div>
+    </div>
+    <div style="background:#fff;padding:28px 24px;">
+      <div style="font-size:2rem;font-weight:900;color:#2563eb;line-height:1;">₹6.33</div>
+      <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#94a3b8;margin-top:5px;">Your Cost / km</div>
+    </div>
+    <div style="background:#fff;padding:28px 24px;">
+      <div style="font-size:2rem;font-weight:900;color:#7c3aed;line-height:1;">−59%</div>
+      <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#94a3b8;margin-top:5px;">E85 CO₂ Saving</div>
+    </div>
+    <div style="background:#fff;padding:28px 24px;">
+      <div style="font-size:2rem;font-weight:900;color:#059669;line-height:1;">5.8</div>
+      <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#94a3b8;margin-top:5px;">E85 Score /10</div>
+    </div>
+  </div>
+
+  <!-- Fuel colour legend bar -->
+  <div class="cv-fade4" style="margin-bottom:40px;">
+    <div style="font-size:0.62rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#94a3b8;margin-bottom:14px;">Fuel Colour Key</div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;">
+      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:100px;padding:7px 18px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#3b82f6;"></div>
+        <span style="font-size:0.72rem;font-weight:600;color:#334155;">Petrol E20</span>
+        <span style="font-size:0.68rem;color:#94a3b8;">· Your Fuel</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:100px;padding:7px 18px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#d97706;"></div>
+        <span style="font-size:0.72rem;font-weight:600;color:#334155;">E85 Flex-Fuel</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:100px;padding:7px 18px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#475569;"></div>
+        <span style="font-size:0.72rem;font-weight:600;color:#334155;">Diesel</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:100px;padding:7px 18px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#059669;"></div>
+        <span style="font-size:0.72rem;font-weight:600;color:#334155;">CNG</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:100px;padding:7px 18px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#7c3aed;"></div>
+        <span style="font-size:0.72rem;font-weight:600;color:#334155;">Electric EV</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vehicle detail strip -->
+  <div class="cv-fade4" style="border-top:1px solid #e2e8f0;padding-top:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <!-- Mini SVG car icon -->
+      <svg width="52" height="30" viewBox="0 0 52 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="12" width="40" height="14" rx="3" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.2"/>
+        <path d="M10 12 L17 4 L35 4 L42 12" stroke="#cbd5e1" stroke-width="1.2" fill="#f1f5f9"/>
+        <circle cx="14" cy="26" r="4" fill="#94a3b8"/>
+        <circle cx="38" cy="26" r="4" fill="#94a3b8"/>
+        <rect x="19" y="5" width="14" height="6" rx="1.5" fill="#bfdbfe"/>
+      </svg>
+      <div>
+        <div style="font-size:0.95rem;font-weight:800;color:#0f172a;">Honda WR-V i-VTEC</div>
+        <div style="font-size:0.7rem;color:#64748b;">DL XXXXXXX &nbsp;·&nbsp; White &nbsp;·&nbsp; 2018</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;">
+      <div style="font-size:0.72rem;color:#64748b;"><span style="font-weight:700;color:#0f172a;">7 yr</span> &nbsp;age</div>
+      <div style="font-size:0.72rem;color:#64748b;"><span style="font-weight:700;color:#0f172a;">1200 km</span> &nbsp;/&nbsp;mo</div>
+      <div style="font-size:0.72rem;color:#64748b;"><span style="font-weight:700;color:#0f172a;">City + Highway</span> &nbsp;usage</div>
+      <div style="font-size:0.72rem;color:#64748b;"><span style="font-weight:700;color:#0f172a;">15.8 km/L</span> &nbsp;mileage</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom accent -->
+<div style="width:100%;height:4px;background:linear-gradient(90deg,#1d4ed8,#7c3aed);"></div>
+</section>
+<!-- ═══════════════════ END COVER ═══════════════════ -->
+
+<div class="wrap">
+
+<!-- HEADER -->
+<header>
+  <h1>Honda WR-V i-VTEC &nbsp;·&nbsp; Petrol (E20) &nbsp;·&nbsp; Age: 7 yr &nbsp;·&nbsp; 1200 km/mo</h1>
+  <p>Data-driven fuel comparison · City + Highway usage · All figures computed from fleet CSV</p>
+</header>
+
+<!-- KPI CARDS -->
+<div class="kpi-row" style="margin-bottom:16px;">
+  <div class="card kpi kpi-petrol">
+    <div class="val">₹6.33</div>
+    <div class="lbl">Your Cost / km</div>
+    <div class="sub">Petrol · Aged bucket</div>
+  </div>
+  <div class="card kpi kpi-e85">
+    <div class="val">₹6.37</div>
+    <div class="lbl">E85 Cost / km</div>
+    <div class="sub">Flex-Fuel fleet avg</div>
+  </div>
+  <div class="card kpi kpi-warn">
+    <div class="val">+3.6%</div>
+    <div class="lbl">E85 Running Penalty</div>
+    <div class="sub">vs your Petrol cost/km</div>
+  </div>
+  <div class="card kpi kpi-green">
+    <div class="val">₹81.5</div>
+    <div class="lbl">E85 Break-even Price</div>
+    <div class="sub">Current pump: ₹82 · Nearly there!</div>
+  </div>
+  <div class="card kpi kpi-month">
+    <div class="val">₹7,594</div>
+    <div class="lbl">Your Monthly Fuel Cost</div>
+    <div class="sub">1200 km × ₹6.33/km</div>
+  </div>
+</div>
+
+<!-- BAR + DONUT -->
+<div class="chart-row">
+  <!-- Bar chart: Cost/km -->
+  <div class="card">
+    <div class="chart-title">Avg Cost / km by Fuel Type (₹)</div>
+    <svg id="bar-chart" width="100%" viewBox="0 0 400 200" style="overflow:visible;"></svg>
+  </div>
+  <!-- Donut: CO₂/km -->
+  <div class="card">
+    <div class="chart-title">CO₂ / km Share (kg)</div>
+    <svg id="donut-chart" width="100%" viewBox="0 0 300 200" style="overflow:visible;"></svg>
+  </div>
+</div>
+
+<!-- LINE CHART -->
+<div class="card" style="margin-bottom:14px;">
+  <div class="chart-title">Cost / km vs Vehicle Age — All Fuels</div>
+  <svg id="line-chart" width="100%" viewBox="0 0 700 220" style="overflow:visible;"></svg>
+</div>
+
+<!-- GAUGE + PARADOX -->
+<div class="bottom-row">
+  <div class="card">
+    <div class="chart-title">E85 Composite Score</div>
+    <div class="gauge-wrap">
+      <svg class="gauge-svg" viewBox="0 0 200 120" id="gauge-svg"></svg>
+      <div class="gauge-score" id="gauge-label">5.8 / 10</div>
+      <div class="gauge-verdict">E85 scores well on CO₂ and refuel speed but its running cost/km marginally exceeds Petrol — worthwhile only if pump price drops below ₹81.5.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="chart-title">E85 Pump Paradox</div>
+    <table class="paradox-table">
+      <tr><th>Metric</th><th>Value</th><th>Signal</th></tr>
+      <tr><td>Petrol pump price</td><td>₹100/L</td><td>—</td></tr>
+      <tr><td>E85 pump price</td><td>₹82/L</td><td>—</td></tr>
+      <tr><td>Pump saving</td><td>18.0%</td><td class="plus">✅ Cheaper at pump</td></tr>
+      <tr><td>Petrol mileage (7yr)</td><td>15.8 km/L</td><td>—</td></tr>
+      <tr><td>E85 avg mileage</td><td>12.9 km/L</td><td class="minus">❌ −18% range</td></tr>
+      <tr><td>Running cost penalty</td><td>+3.6%</td><td class="minus">❌ Costs more/km</td></tr>
+      <tr><td>Break-even E85 price</td><td>₹81.5/L</td><td class="plus">⚠️ 0.5 away!</td></tr>
+      <tr><td>CO₂ saving vs Petrol</td><td>−59%</td><td class="plus">✅ Green win</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- FUEL CARDS -->
+<div class="fuel-cards">
+  <div class="fuel-card active" style="border-color:var(--petrol);">
+    <h3 style="color:var(--petrol);">⛽ Petrol E20 ★ YOUR FUEL</h3>
+    <div class="item">✅ Wide pump availability</div>
+    <div class="item">✅ Proven engine compatibility</div>
+    <div class="item">❌ High cost/km at ₹6.33</div>
+    <div class="item">❌ CO₂: 0.171 kg/km</div>
+    <div class="best">🚗 Best for: City + highway versatility</div>
+  </div>
+  <div class="fuel-card" style="border-color:var(--e85);">
+    <h3 style="color:var(--e85);">🌽 E85 Flex-Fuel</h3>
+    <div class="item">✅ Lowest CO₂: 0.070 kg/km (−59%)</div>
+    <div class="item">✅ Fast refuel: 5 min</div>
+    <div class="item">❌ Cost/km higher than Petrol (+3.6%)</div>
+    <div class="item">❌ Limited pump network in India</div>
+    <div class="best">🚗 Best for: Eco-conscious + near break-even markets</div>
+  </div>
+  <div class="fuel-card" style="border-color:var(--diesel);">
+    <h3 style="color:var(--diesel);">🛢 Diesel</h3>
+    <div class="item">✅ Low cost/km: ₹4.67</div>
+    <div class="item">✅ High torque highway cruising</div>
+    <div class="item">❌ Highest maintenance/km: ₹1.00</div>
+    <div class="item">❌ Worst CO₂: 0.179 kg/km</div>
+    <div class="best">🚗 Best for: High-mileage highway fleets</div>
+  </div>
+  <div class="fuel-card" style="border-color:var(--cng);">
+    <h3 style="color:var(--cng);">💨 CNG</h3>
+    <div class="item">✅ Low cost/km: ₹3.33</div>
+    <div class="item">✅ Low CO₂: 0.125 kg/km</div>
+    <div class="item">❌ Longer refuel: 8 min</div>
+    <div class="item">❌ Boot space sacrifice</div>
+    <div class="best">🚗 Best for: City daily commuters</div>
+  </div>
+  <div class="fuel-card" style="border-color:var(--ev);">
+    <h3 style="color:var(--ev);">⚡ Electric (EV)</h3>
+    <div class="item">✅ Cheapest/km: ₹1.76</div>
+    <div class="item">✅ Lowest maintenance: ₹0.24/km</div>
+    <div class="item">❌ Slow recharge: 45 min</div>
+    <div class="item">❌ Range anxiety on highway</div>
+    <div class="best">🚗 Best for: Urban short trips, home charging</div>
+  </div>
+</div>
+
+<p style="text-align:center;font-size:0.65rem;color:#94a3b8;margin-top:16px;padding-bottom:20px;">All figures computed from fleet CSV · Honda WR-V i-VTEC · 1200 km/mo</p>
+
+</div><!-- /wrap -->
+
+<script>
+const TT = document.getElementById('tt');
+function showTT(e, html) {
+  TT.innerHTML = html;
+  TT.style.opacity = 1;
+  TT.style.left = (e.pageX + 14) + 'px';
+  TT.style.top = (e.pageY - 28) + 'px';
+}
+function hideTT() { TT.style.opacity = 0; }
+
+/* ── BAR CHART ── */
+(function(){
+  const fuels = ['EV','CNG','Diesel','Petrol','E85'];
+  const vals  = [1.756, 3.334, 4.674, 6.154, 6.374];
+  const cols  = ['#8b5cf6','#10b981','#6b7280','#3b82f6','#f59e0b'];
+  const svg = document.getElementById('bar-chart');
+  const W=400, H=200, PL=40, PR=10, PT=10, PB=30;
+  const cW = W-PL-PR, cH = H-PT-PB;
+  const maxV = 7;
+  const bW = cW/fuels.length * 0.55;
+  const gap = cW/fuels.length;
+  let html = '';
+  // grid lines
+  [0,2,4,6].forEach(v=>{
+    const y = PT + cH - (v/maxV)*cH;
+    html += `<line x1="${PL}" x2="${W-PR}" y1="${y}" y2="${y}" stroke="rgba(0,0,0,0.07)" stroke-width="1"/>`;
+    html += `<text x="${PL-4}" y="${y+4}" fill="#475569" font-size="9" text-anchor="end">₹${v}</text>`;
+  });
+  fuels.forEach((f,i)=>{
+    const x = PL + gap*i + gap/2 - bW/2;
+    const bH = (vals[i]/maxV)*cH;
+    const y = PT + cH - bH;
+    html += `<rect class="bar" x="${x}" y="${y}" width="${bW}" height="${bH}" rx="4" fill="${cols[i]}" opacity="0.85" data-f="${f}" data-v="${vals[i].toFixed(3)}"/>`;
+    html += `<text x="${x+bW/2}" y="${PT+cH+14}" fill="#475569" font-size="8.5" text-anchor="middle">${f}</text>`;
+    html += `<text x="${x+bW/2}" y="${y-5}" fill="${cols[i]}" font-size="9" font-weight="700" text-anchor="middle">₹${vals[i].toFixed(2)}</text>`;
+  });
+  // Y axis
+  html += `<line x1="${PL}" x2="${PL}" y1="${PT}" y2="${PT+cH}" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>`;
+  svg.innerHTML = html;
+  svg.querySelectorAll('.bar').forEach(r=>{
+    r.addEventListener('mouseenter', e=>{ r.style.opacity=1; showTT(e,`<b style="color:${cols[fuels.indexOf(r.dataset.f)]}">${r.dataset.f}</b><br>Cost/km: ₹${r.dataset.v}`); });
+    r.addEventListener('mousemove', e=>{ TT.style.left=(e.pageX+14)+'px'; TT.style.top=(e.pageY-28)+'px'; });
+    r.addEventListener('mouseleave', ()=>{ r.style.opacity=0.85; hideTT(); });
+  });
+})();
+
+/* ── DONUT CHART ── */
+(function(){
+  const fuels = ['EV','CNG','Diesel','Petrol','E85'];
+  const vals  = [0.0918, 0.1254, 0.1787, 0.1705, 0.0698];
+  const cols  = ['#8b5cf6','#10b981','#6b7280','#3b82f6','#f59e0b'];
+  const total = vals.reduce((a,b)=>a+b,0);
+  const cx=110, cy=100, R=75, r=42;
+  let html='', angle=-Math.PI/2;
+  vals.forEach((v,i)=>{
+    const sweep = (v/total)*2*Math.PI;
+    const x1=cx+R*Math.cos(angle), y1=cy+R*Math.sin(angle);
+    const x2=cx+R*Math.cos(angle+sweep), y2=cy+R*Math.sin(angle+sweep);
+    const xi1=cx+r*Math.cos(angle), yi1=cy+r*Math.sin(angle);
+    const xi2=cx+r*Math.cos(angle+sweep), yi2=cy+r*Math.sin(angle+sweep);
+    const lg=sweep>Math.PI?1:0;
+    const d=`M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${xi2},${yi2} A${r},${r} 0 ${lg},0 ${xi1},${yi1} Z`;
+    html+=`<path class="dslice" d="${d}" fill="${cols[i]}" opacity="0.85" data-f="${fuels[i]}" data-v="${v.toFixed(4)}" data-pct="${((v/total)*100).toFixed(1)}"/>`;
+    // label midpoint
+    const ma=angle+sweep/2;
+    if(sweep>0.3){
+      const lx=cx+(R+14)*Math.cos(ma), ly=cy+(R+14)*Math.sin(ma);
+      html+=`<text x="${lx}" y="${ly}" fill="${cols[i]}" font-size="8.5" text-anchor="middle" dominant-baseline="middle">${((v/total)*100).toFixed(0)}%</text>`;
+    }
+    angle+=sweep;
+  });
+  // centre text
+  html+=`<text x="${cx}" y="${cy-7}" fill="#0f172a" font-size="10" font-weight="700" text-anchor="middle">CO₂</text>`;
+  html+=`<text x="${cx}" y="${cy+8}" fill="#475569" font-size="8.5" text-anchor="middle">kg/km share</text>`;
+  // legend
+  fuels.forEach((f,i)=>{
+    const lx=210, ly=30+i*30;
+    html+=`<rect x="${lx}" y="${ly-7}" width="10" height="10" rx="2" fill="${cols[i]}"/>`;
+    html+=`<text x="${lx+14}" y="${ly+2}" fill="#475569" font-size="9">${f}: ${vals[i].toFixed(4)}</text>`;
+  });
+  const svg=document.getElementById('donut-chart');
+  svg.innerHTML=html;
+  svg.querySelectorAll('.dslice').forEach(p=>{
+    p.addEventListener('mouseenter',e=>{p.style.opacity=1;showTT(e,`<b style="color:${cols[fuels.indexOf(p.dataset.f)]}">${p.dataset.f}</b><br>CO₂/km: ${p.dataset.v} kg<br>Share: ${p.dataset.pct}%`);});
+    p.addEventListener('mousemove',e=>{TT.style.left=(e.pageX+14)+'px';TT.style.top=(e.pageY-28)+'px';});
+    p.addEventListener('mouseleave',()=>{p.style.opacity=0.85;hideTT();});
+  });
+})();
+
+/* ── LINE CHART ── */
+(function(){
+  // Data points [age, cost_per_km] per fuel
+  const series = [
+    { name:'Petrol', col:'#3b82f6', pts:[[3.5,5.850],[7.5,6.328]] },
+    { name:'Diesel', col:'#6b7280', pts:[[3.5,4.354],[7.5,4.691],[11,5.291]] },
+    { name:'CNG',    col:'#10b981', pts:[[1,3.079],[4,3.239],[7,3.494]] },
+    { name:'EV',     col:'#8b5cf6', pts:[[1,1.714],[3.5,1.818]] },
+    { name:'E85',    col:'#f59e0b', pts:[[1.5,6.310],[3,6.668]] },
+  ];
+  const W=700,H=220,PL=46,PR=20,PT=18,PB=38;
+  const cW=W-PL-PR, cH=H-PT-PB;
+  const minA=0, maxA=13, minV=0, maxV=8;
+  function ax(a){ return PL + (a-minA)/(maxA-minA)*cW; }
+  function ay(v){ return PT + cH - (v-minV)/(maxV-minV)*cH; }
+  let html='';
+  // grid
+  [0,2,4,6,8].forEach(v=>{
+    const y=ay(v);
+    html+=`<line x1="${PL}" x2="${W-PR}" y1="${y}" y2="${y}" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>`;
+    html+=`<text x="${PL-5}" y="${y+4}" fill="#475569" font-size="9" text-anchor="end">₹${v}</text>`;
+  });
+  [0,2,4,6,8,10,12].forEach(a=>{
+    const x=ax(a);
+    html+=`<line x1="${x}" x2="${x}" y1="${PT}" y2="${PT+cH}" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>`;
+    html+=`<text x="${x}" y="${PT+cH+14}" fill="#475569" font-size="9" text-anchor="middle">${a}yr</text>`;
+  });
+  // axes
+  html+=`<line x1="${PL}" x2="${PL}" y1="${PT}" y2="${PT+cH}" stroke="rgba(0,0,0,0.15)"/>`;
+  html+=`<line x1="${PL}" x2="${W-PR}" y1="${PT+cH}" y2="${PT+cH}" stroke="rgba(0,0,0,0.15)"/>`;
+  // car age line
+  const carAgeX = ax(7);
+  html+=`<line x1="${carAgeX}" x2="${carAgeX}" y1="${PT}" y2="${PT+cH}" stroke="#f472b6" stroke-width="1.5" stroke-dasharray="5,3"/>`;
+  html+=`<text x="${carAgeX+4}" y="${PT+10}" fill="#f472b6" font-size="8.5" font-weight="600">YOUR AGE (7yr)</text>`;
+  // lines + dots
+  series.forEach(s=>{
+    if(s.pts.length<2){
+      // single dot
+      const [a,v]=s.pts[0];
+      html+=`<circle cx="${ax(a)}" cy="${ay(v)}" r="4" fill="${s.col}"/>`;
+      return;
+    }
+    let d='M';
+    s.pts.forEach(([a,v],i)=>{ d+=`${ax(a)},${ay(v)} `; if(i<s.pts.length-1) d+='L'; });
+    html+=`<path d="${d}" stroke="${s.col}" stroke-width="2.5" fill="none" stroke-linejoin="round"/>`;
+    s.pts.forEach(([a,v])=>{
+      html+=`<circle class="ldot" cx="${ax(a)}" cy="${ay(v)}" r="4.5" fill="${s.col}" data-n="${s.name}" data-a="${a}" data-v="${v}"/>`;
+    });
+  });
+  // legend bottom
+  const lx0=PL, ly0=PT+cH+28;
+  series.forEach((s,i)=>{
+    const lx=lx0+i*130;
+    html+=`<line x1="${lx}" x2="${lx+18}" y1="${ly0}" y2="${ly0}" stroke="${s.col}" stroke-width="2.5"/>`;
+    html+=`<text x="${lx+22}" y="${ly0+4}" fill="#475569" font-size="9">${s.name}</text>`;
+  });
+  const svg=document.getElementById('line-chart');
+  svg.innerHTML=html;
+  svg.querySelectorAll('.ldot').forEach(c=>{
+    c.addEventListener('mouseenter',e=>{c.setAttribute('r',6);showTT(e,`<b>${c.dataset.n}</b><br>Age: ~${c.dataset.a}yr<br>₹${c.dataset.v}/km`);});
+    c.addEventListener('mousemove',e=>{TT.style.left=(e.pageX+14)+'px';TT.style.top=(e.pageY-28)+'px';});
+    c.addEventListener('mouseleave',()=>{c.setAttribute('r',4.5);hideTT();});
+  });
+})();
+
+/* ── GAUGE ── */
+(function(){
+  const score=5.8, max=10;
+  const cx=100, cy=100, R=80;
+  const startA = Math.PI, endA = 0; // bottom semicircle
+  const sweep = (score/max)*Math.PI;
+  const angle = Math.PI + sweep; // goes from left (π) to right (0)
+  // track
+  const tx1=cx+R*Math.cos(Math.PI), ty1=cy+R*Math.sin(Math.PI);
+  const tx2=cx+R*Math.cos(0), ty2=cy+R*Math.sin(0);
+  const ix1=cx+60*Math.cos(Math.PI), iy1=cy+60*Math.sin(Math.PI);
+  const ix2=cx+60*Math.cos(0), iy2=cy+60*Math.sin(0);
+  // filled arc
+  const fx2=cx+R*Math.cos(Math.PI+sweep), fy2=cy+R*Math.sin(Math.PI+sweep);
+  const fi2=cx+60*Math.cos(Math.PI+sweep), fiy2=cy+60*Math.sin(Math.PI+sweep);
+  let html='';
+  // bg track
+  html+=`<path d="M${tx1},${ty1} A${R},${R} 0 0,1 ${tx2},${ty2} L${ix2},${iy2} A60,60 0 0,0 ${ix1},${iy1} Z" fill="rgba(0,0,0,0.05)"/>`;
+  // filled
+  const lg=sweep>Math.PI?1:0;
+  html+=`<path d="M${tx1},${ty1} A${R},${R} 0 ${lg},1 ${fx2},${fy2} L${fi2},${fiy2} A60,60 0 ${lg},0 ${ix1},${iy1} Z" fill="#f59e0b" opacity="0.85" id="gauge-arc"/>`;
+  // needle
+  const nA=Math.PI+sweep;
+  const nx=cx+72*Math.cos(nA), ny=cy+72*Math.sin(nA);
+  html+=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" id="gauge-needle"/>`;
+  html+=`<circle cx="${cx}" cy="${cy}" r="6" fill="#f1f5f9" stroke="#1e293b" stroke-width="2"/>`;
+  // ticks
+  [0,2,4,6,8,10].forEach(v=>{
+    const a=Math.PI+(v/10)*Math.PI;
+    const x1t=cx+R*Math.cos(a), y1t=cy+R*Math.sin(a);
+    const x2t=cx+(R+8)*Math.cos(a), y2t=cy+(R+8)*Math.sin(a);
+    html+=`<line x1="${x1t}" y1="${y1t}" x2="${x2t}" y2="${y2t}" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>`;
+    html+=`<text x="${cx+(R+18)*Math.cos(a)}" y="${cy+(R+18)*Math.sin(a)}" fill="#475569" font-size="8" text-anchor="middle" dominant-baseline="middle">${v}</text>`;
+  });
+  document.getElementById('gauge-svg').innerHTML=html;
+  // animate
+  const arc=document.getElementById('gauge-arc');
+  const needle=document.getElementById('gauge-needle');
+  let cur=0;
+  const t=setInterval(()=>{
+    cur+=0.12;
+    if(cur>=score){ cur=score; clearInterval(t); }
+    const s2=(cur/10)*Math.PI;
+    const lg2=s2>Math.PI?1:0;
+    const fx=cx+R*Math.cos(Math.PI+s2), fy=cy+R*Math.sin(Math.PI+s2);
+    const fi=cx+60*Math.cos(Math.PI+s2), fiy=cy+60*Math.sin(Math.PI+s2);
+    arc.setAttribute('d',`M${tx1},${ty1} A${R},${R} 0 ${lg2},1 ${fx},${fy} L${fi},${fiy} A60,60 0 ${lg2},0 ${ix1},${iy1} Z`);
+    const na=Math.PI+s2;
+    needle.setAttribute('x2',cx+72*Math.cos(na));
+    needle.setAttribute('y2',cy+72*Math.sin(na));
+    document.getElementById('gauge-label').textContent=(cur.toFixed(1))+' / 10';
+  },30);
+  // fix variable references for animation closure
+  const tx1c=tx1,ty1c=ty1,ix1c=ix1,iy1c=iy1;
+})();
+</script>
+</body>
+</html>
