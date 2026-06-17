@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Hospital Management System — Project Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8f5f0; color: #1a1a1a; min-height: 100vh; }
+
+  .header { background: linear-gradient(135deg, #ea580c 0%, #c2410c 50%, #9a3412 100%); padding: 36px 48px; border-bottom: 1px solid #c2410c; }
+  .header-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #fed7aa; font-weight: 600; margin-bottom: 8px; }
+  .header h1 { font-size: 26px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+  .header .subtitle { color: #ffedd5; font-size: 13px; margin-top: 4px; }
+  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 24px; }
+  .meta-card { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 12px 16px; }
+  .meta-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #fed7aa; font-weight: 600; }
+  .meta-card .value { font-size: 12px; color: #fff; font-weight: 500; margin-top: 4px; line-height: 1.4; }
+
+  .main { padding: 32px 48px; max-width: 1400px; margin: 0 auto; }
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #ea580c; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, #ea580c55, transparent); }
+
+  .summary-box { background: #fff; border: 1px solid #fed7aa; border-left: 4px solid #ea580c; border-radius: 12px; padding: 20px 24px; line-height: 1.8; color: #374151; font-size: 14px; box-shadow: 0 1px 4px rgba(234,88,12,0.08); }
+
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px 20px; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; cursor: default; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card:hover { border-color: #ea580c; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(234,88,12,0.12); }
+  .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .card-title { font-size: 13px; font-weight: 700; color: #111827; margin-bottom: 6px; }
+  .card-body { font-size: 12px; color: #6b7280; line-height: 1.6; }
+
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .badge-high { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+  .badge-med { background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; }
+  .badge-low { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+  .badge-pending { background: #fffbeb; color: #b45309; border: 1px solid #fcd34d; }
+  .badge-done { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+
+  .table-wrap { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead tr { background: #fff7ed; }
+  thead th { padding: 11px 16px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #ea580c; border-bottom: 1px solid #fed7aa; }
+  tbody tr { border-bottom: 1px solid #f3f4f6; transition: background 0.15s; }
+  tbody tr:hover { background: #fff7ed; }
+  tbody td { padding: 11px 16px; color: #374151; vertical-align: middle; }
+
+  .collapsible { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .collapsible summary { padding: 13px 20px; cursor: pointer; font-weight: 600; font-size: 13px; color: #111827; list-style: none; user-select: none; display: flex; align-items: center; gap: 8px; }
+  .collapsible summary::-webkit-details-marker { display: none; }
+  .collapsible summary::before { content: '▶'; font-size: 9px; color: #ea580c; transition: transform 0.2s; }
+  .collapsible[open] summary::before { transform: rotate(90deg); }
+  .collapsible summary:hover { background: #fff7ed; }
+  .collapsible-body { padding: 14px 20px 16px; color: #6b7280; font-size: 12px; line-height: 1.7; border-top: 1px solid #f3f4f6; }
+
+  .risk-item { background: #fff; border: 1px solid #e5e7eb; border-left: 3px solid #dc2626; border-radius: 0 10px 10px 0; padding: 13px 18px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .risk-item.med { border-left-color: #ea580c; }
+  .risk-item.low { border-left-color: #16a34a; }
+  .risk-title { font-weight: 700; font-size: 13px; color: #111827; margin-bottom: 4px; }
+  .risk-desc { font-size: 12px; color: #6b7280; line-height: 1.5; }
+
+  .open-q { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 13px 18px; margin-bottom: 10px; }
+  .open-q-title { font-size: 13px; font-weight: 600; color: #c2410c; margin-bottom: 4px; }
+  .open-q-desc { font-size: 12px; color: #9a3412; line-height: 1.5; }
+
+  .conflict-item { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 10px; padding: 13px 18px; margin-bottom: 10px; }
+  .conflict-title { font-size: 13px; font-weight: 700; color: #b91c1c; margin-bottom: 4px; }
+  .conflict-desc { font-size: 12px; color: #dc2626; line-height: 1.5; }
+
+  .tag { display: inline-block; background: #fff7ed; color: #c2410c; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; border: 1px solid #fed7aa; margin: 2px; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .kpi-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-top: 3px solid #ea580c; }
+  .kpi-val { font-size: 22px; font-weight: 800; color: #ea580c; }
+  .kpi-label { font-size: 11px; color: #9ca3af; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .phase-row { display: flex; gap: 0; margin-bottom: 10px; }
+  .phase-num { background: #ea580c; color: #fff; font-weight: 800; font-size: 13px; min-width: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px 0 0 8px; }
+  .phase-content { background: #fff; border: 1px solid #e5e7eb; border-left: none; border-radius: 0 8px 8px 0; padding: 10px 16px; flex: 1; }
+  .phase-name { font-weight: 700; color: #111827; font-size: 13px; }
+  .phase-tech { color: #ea580c; font-size: 11px; margin-top: 2px; }
+  .phase-del { color: #6b7280; font-size: 11px; margin-top: 3px; }
+
+  .data-table-mini { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .data-table-mini .dtitle { background: #fff7ed; padding: 10px 16px; font-size: 12px; font-weight: 700; color: #ea580c; border-bottom: 1px solid #fed7aa; }
+
+  .cred-table { background: #fff; border: 1px solid #fed7aa; border-radius: 10px; overflow: hidden; }
+  .cred-row { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid #f3f4f6; }
+  .cred-row:last-child { border-bottom: none; }
+  .cred-cell { padding: 10px 16px; font-size: 12px; color: #374151; }
+  .cred-header { background: #fff7ed; }
+  .cred-header .cred-cell { color: #ea580c; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
+  .arch-flow { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 14px 20px; font-size: 12px; color: #7c3aed; font-family: 'Courier New', monospace; margin-bottom: 16px; line-height: 1.8; }
+  .arch-flow span { color: #ea580c; font-weight: 700; }
+
+  .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+  .chart-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 22px 22px 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: box-shadow 0.2s, border-color 0.2s; }
+  .chart-card:hover { border-color: #ea580c; box-shadow: 0 4px 14px rgba(234,88,12,0.1); }
+  .chart-title { font-size: 13px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+  .chart-sub { font-size: 11px; color: #9ca3af; margin-bottom: 16px; }
+  .chart-wrap { position: relative; width: 100%; }
+  .chart-wrap canvas { max-height: 260px; }
+
+  @media (max-width: 768px) {
+    .header, .main { padding: 20px 16px; }
+    .meta-grid { grid-template-columns: 1fr 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+<body>
+
+<div class="header">
+  <div class="header-tag">Mini Project (BCS554) Report · Academic Session 2025-26</div>
+  <h1>Hospital Management System</h1>
+  <div class="subtitle">Department of Computer Science and Engineering · KCC Institutes of Technology and Management, Greater Noida</div>
+  <div class="meta-grid">
+    <div class="meta-card"><div class="label">Student</div><div class="value">Lakshay Sharma (2304921540088)</div></div>
+    <div class="meta-card"><div class="label">Guide / Mentor</div><div class="value">Mr Sanjay Kumar (Assistant Professor, Dept-CSE DS)</div></div>
+    <div class="meta-card"><div class="label">HOD Coordinator</div><div class="value">Ms. Geetanjali Mittal</div></div>
+    <div class="meta-card"><div class="label">Declaration Date</div><div class="value">12/01/2026 · Greater Noida</div></div>
+    <div class="meta-card"><div class="label">Programme</div><div class="value">BTECH 3rd Year, 5th Semester</div></div>
+    <div class="meta-card"><div class="label">Total Pages</div><div class="value">36</div></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Live KPIs from dashboard screenshot -->
+  <div class="section">
+    <div class="section-title">Live Dashboard KPIs (from system output)</div>
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-val">11</div><div class="kpi-label">Total Patients</div></div>
+      <div class="kpi-card"><div class="kpi-val">6</div><div class="kpi-label">Total Doctors</div></div>
+      <div class="kpi-card"><div class="kpi-val">8</div><div class="kpi-label">Appointments</div></div>
+      <div class="kpi-card"><div class="kpi-val">₹12,700</div><div class="kpi-label">Total Revenue</div></div>
+      <div class="kpi-card"><div class="kpi-val">8</div><div class="kpi-label">Billing Records</div></div>
+      <div class="kpi-card"><div class="kpi-val">36</div><div class="kpi-label">Report Pages</div></div>
+    </div>
+  </div>
+
+  <!-- Analytics Charts -->
+  <div class="section">
+    <div class="section-title">Analytics Dashboard — Charts</div>
+    <div class="charts-grid">
+
+      <!-- Disease Distribution -->
+      <div class="chart-card">
+        <div class="chart-title">Disease-wise Patient Distribution</div>
+        <div class="chart-sub">Based on 11 admitted patients · hospital_data.xlsx</div>
+        <div class="chart-wrap"><canvas id="chartDisease"></canvas></div>
+      </div>
+
+      <!-- Gender Distribution -->
+      <div class="chart-card">
+        <div class="chart-title">Gender-wise Patient Distribution</div>
+        <div class="chart-sub">Male vs Female ratio across all patients</div>
+        <div class="chart-wrap"><canvas id="chartGender"></canvas></div>
+      </div>
+
+      <!-- Monthly Admissions -->
+      <div class="chart-card">
+        <div class="chart-title">Monthly Patient Admission Trend</div>
+        <div class="chart-sub">Admissions by month — Nov 2024 to Dec 2025</div>
+        <div class="chart-wrap"><canvas id="chartMonthly"></canvas></div>
+      </div>
+
+      <!-- Department Revenue -->
+      <div class="chart-card">
+        <div class="chart-title">Department-wise Revenue Analysis</div>
+        <div class="chart-sub">Total revenue ₹12,700 split across departments</div>
+        <div class="chart-wrap"><canvas id="chartRevenue"></canvas></div>
+      </div>
+
+      <!-- Billing Breakdown -->
+      <div class="chart-card">
+        <div class="chart-title">Consultation Fee vs Medicine Charges</div>
+        <div class="chart-sub">Per bill breakdown — B001 to B008</div>
+        <div class="chart-wrap"><canvas id="chartBilling"></canvas></div>
+      </div>
+
+      <!-- Doctor Department Distribution -->
+      <div class="chart-card">
+        <div class="chart-title">Doctors by Department</div>
+        <div class="chart-sub">6 doctors across 4 departments</div>
+        <div class="chart-wrap"><canvas id="chartDoctors"></canvas></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="section">
+    <div class="section-title">Summary</div>
+    <div class="summary-box">
+      The <strong style="color:#93c5fd">Hospital Management System</strong> is a web-based mini project (BCS554) developed by Lakshay Sharma, Mahek, and Achala Singh under the guidance of <strong style="color:#93c5fd">Mr Sanjay Kumar</strong> (Assistant Professor, Dept-CSE DS) at KCC Institutes of Technology and Management, Greater Noida, for the Academic Session 2025-26. The system is designed to manage hospital operations for small and medium healthcare facilities, including patient management, doctor management, appointment scheduling, billing, and data analytics. It uses <strong style="color:#93c5fd">HTML, CSS, JavaScript</strong> (frontend), <strong style="color:#93c5fd">Python + Flask</strong> (backend), <strong style="color:#93c5fd">Excel (hospital_data.xlsx)</strong> as a lightweight database, <strong style="color:#93c5fd">Pandas</strong> for data analysis, and <strong style="color:#93c5fd">Chart.js</strong> for visualizations. The project follows the <strong style="color:#93c5fd">Agile Iterative Development Model</strong> and was implemented in 4 phases: Planning & Design, Backend Development, Frontend Development, and Integration & Testing. The system is declared complete as of 12/01/2026.
+    </div>
+  </div>
+
+  <!-- Key Takeaways -->
+  <div class="section">
+    <div class="section-title">Key Takeaways</div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🏗️</div>
+        <div class="card-title">3-Layer Architecture</div>
+        <div class="card-body">Presentation Layer (HTML5, CSS3, JS ES6, Chart.js) → Application Layer (Flask Port 5000, REST APIs) → Data Layer (hospital_data.xlsx with 5 sheets: Patients, Doctors, Appointments, Billing, Users).</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗄️</div>
+        <div class="card-title">Excel as Database</div>
+        <div class="card-body">Primary data stored in hospital_data.xlsx. Managed via excel_handler.py. 4 core entities: Patients, Doctors, Appointments, Billing. No enforced foreign-key constraints — code validates references manually.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🐍</div>
+        <div class="card-title">Backend — Python Flask</div>
+        <div class="card-body">app.py (entry point), analytics.py (metrics engine), excel_handler.py (read/write helpers), create_excel_db.py (seed/init utility). REST endpoints: /api/patients, /api/doctors, /api/appointments, /api/billing*, /api/login.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <div class="card-title">Frontend — 8 HTML Pages</div>
+        <div class="card-body">index.html, login.html, dashboard.html, analytics.html, patients.html, doctors.html, appointments.html, billing.html. Styled with css/style.css, behavior via js/script.js (AJAX + form handling).</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Analytics Module</div>
+        <div class="card-body">4 charts: Disease-wise Patient Distribution (bar), Gender-wise Patient Distribution (doughnut/pie), Monthly Patient Admission Trend (line), Department-wise Revenue Analysis (pie). Powered by Chart.js + Pandas.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <div class="card-title">Role-Based Login</div>
+        <div class="card-body">3 user roles with sample credentials: Admin / Admin123 (Administrator), Doctor / Doctor123 (Doctor), Receptionist / Reception123 (Receptionist). Demographic credentials added for sample login activity.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">Development Model</div>
+        <div class="card-body">Agile Iterative Development Model. 5 stages: Requirement Gathering → System Design → Implementation → Testing and Review → Deployment and Maintenance. Each module developed and tested separately.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧪</div>
+        <div class="card-title">Testing Methodology</div>
+        <div class="card-body">Unit Testing (individual functions and APIs), Integration Testing (frontend-backend communication), System Testing (complete workflow), Acceptance Testing (usability and requirements verification).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Items / Modules -->
+  <div class="section">
+    <div class="section-title">Action Items / Module Completion Status</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Phase</th>
+            <th>Module / Deliverable</th>
+            <th>Key Activities</th>
+            <th>Technology</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Phase 1</td>
+            <td>Planning and Design</td>
+            <td>Requirement analysis, system architecture design, Excel data structure, UI layout, API planning</td>
+            <td><span class="tag">Agile Model</span></td>
+            <td><span class="badge badge-done">✅ Completed</span></td>
+          </tr>
+          <tr>
+            <td>Phase 2</td>
+            <td>Backend Development</td>
+            <td>Python env setup, Flask + Pandas install, Excel DB creation, CRUD via Pandas, REST APIs, analytics logic</td>
+            <td><span class="tag">Flask==2.3.0</span> <span class="tag">pandas==2.0.0</span> <span class="tag">openpyxl==3.1.0</span> <span class="tag">flask-cors==4.0.0</span></td>
+            <td><span class="badge badge-done">✅ Completed</span></td>
+          </tr>
+          <tr>
+            <td>Phase 3</td>
+            <td>Frontend Development</td>
+            <td>8 HTML pages designed, CSS styling, JavaScript form handling, Chart.js integration</td>
+            <td><span class="tag">HTML5</span> <span class="tag">CSS3</span> <span class="tag">JavaScript ES6</span> <span class="tag">Chart.js</span></td>
+            <td><span class="badge badge-done">✅ Completed</span></td>
+          </tr>
+          <tr>
+            <td>Phase 4</td>
+            <td>Integration and Testing</td>
+            <td>Frontend-backend integration, API testing, UI testing, data validation, bug fixing</td>
+            <td><span class="tag">Unit</span> <span class="tag">Integration</span> <span class="tag">System</span> <span class="tag">Acceptance</span></td>
+            <td><span class="badge badge-done">✅ Completed</span></td>
+          </tr>
+          <tr>
+            <td>Documentation</td>
+            <td>Mini Project Report (36 pages)</td>
+            <td>Abstract, literature review, methodology, results, conclusion, future scope, references (IEEE)</td>
+            <td><span class="tag">Word/PDF</span></td>
+            <td><span class="badge badge-done">✅ Completed</span></td>
+          </tr>
+          <tr>
+            <td>Future</td>
+            <td>MySQL/PostgreSQL Migration</td>
+            <td>Replace Excel with relational DBMS for large data, referential integrity, concurrent access</td>
+            <td><span class="tag">MySQL / PostgreSQL</span></td>
+            <td><span class="badge badge-pending">⏳ Future Scope</span></td>
+          </tr>
+          <tr>
+            <td>Future</td>
+            <td>Cloud Deployment</td>
+            <td>Remote access, data backup, high availability, scalability across locations</td>
+            <td><span class="tag">Cloud Platform</span></td>
+            <td><span class="badge badge-pending">⏳ Future Scope</span></td>
+          </tr>
+          <tr>
+            <td>Future</td>
+            <td>Online Payment Gateway</td>
+            <td>Digital billing and payment processing for real hospital environments</td>
+            <td>Not specified</td>
+            <td><span class="badge badge-pending">⏳ Future Scope</span></td>
+          </tr>
+          <tr>
+            <td>Future</td>
+            <td>ML Predictive Analytics</td>
+            <td>Predict patient inflow, disease trends, hospital resource requirements</td>
+            <td><span class="tag">Machine Learning</span></td>
+            <td><span class="badge badge-pending">⏳ Future Scope</span></td>
+          </tr>
+          <tr>
+            <td>Future</td>
+            <td>Mobile Application</td>
+            <td>Easy access for doctors and staff, improving usability and responsiveness</td>
+            <td>Not specified</td>
+            <td><span class="badge badge-pending">⏳ Future Scope</span></td>
+          </tr>
+          <tr>
+            <td>Future</td>
+            <td>EHR / Government Health System Integration</td>
+            <td>Compliance with healthcare standards, comprehensive records</td>
+            <td>Not specified</td>
+            <td><span class="badge badge-pending">⏳ Future Scope</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- System Architecture -->
+  <div class="section">
+    <div class="section-title">System Architecture &amp; Data Flow</div>
+    <div class="arch-flow">
+      <span>User Action (Browser)</span> → <span>JavaScript (Fetch API / AJAX)</span> → <span>Flask Web Server (Port 5000)</span> → <span>REST Endpoints (/api/patients, /api/doctors, /api/appointments, /api/billing*, /api/login)</span><br>
+      → <span>Excel Handler / Analytics Engine / Auth Handler</span> → <span>Pandas Library</span> → <span>hospital_data.xlsx (5 sheets)</span><br>
+      → Response as <span>JSON</span> → <span>Frontend UI Update</span> → <span>Chart.js renders charts</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Component</th><th>Technology</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Presentation</td><td>Frontend Pages</td><td>HTML5, CSS3, JS ES6, Chart.js</td><td>8 pages: index, login, dashboard, analytics, patients, doctors, appointments, billing</td></tr>
+          <tr><td>Application</td><td>Flask Web Server</td><td>Flask==2.3.0 (Port 5000)</td><td>REST API endpoints, route definitions, authentication checks</td></tr>
+          <tr><td>Application</td><td>app.py</td><td>Python</td><td>Application entry point; Flask instance and route definitions</td></tr>
+          <tr><td>Application</td><td>analytics.py</td><td>Python + Pandas</td><td>Computes metrics and aggregates data for dashboard</td></tr>
+          <tr><td>Application</td><td>excel_handler.py</td><td>Python + openpyxl</td><td>Read/write helpers for patients, appointments, billing sheets</td></tr>
+          <tr><td>Application</td><td>create_excel_db.py</td><td>Python</td><td>Utility script to initialize/seed Excel database</td></tr>
+          <tr><td>Data</td><td>hospital_data.xlsx</td><td>Excel (5 worksheets)</td><td>Patients Sheet, Doctors Sheet, Appointments Sheet, Billing Sheet, Users Sheet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Sample Data -->
+  <div class="section">
+    <div class="section-title">Sample Data (from Excel Database)</div>
+    <div class="data-table-mini">
+      <div class="dtitle">Patient Data (11 records, shown: P001–P011)</div>
+      <table>
+        <thead><tr><th>Patient ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Disease</th><th>Admission Date</th><th>Contact</th></tr></thead>
+        <tbody>
+          <tr><td>P001</td><td>Rajesh Kumar</td><td>45</td><td>Male</td><td>Diabetes</td><td>2024-11-15</td><td>9876543210</td></tr>
+          <tr><td>P002</td><td>Priya Sharma</td><td>32</td><td>Female</td><td>Hypertension</td><td>2024-11-20</td><td>9876543211</td></tr>
+          <tr><td>P003</td><td>Amit Patel</td><td>58</td><td>Male</td><td>Asthma</td><td>2024-11-22</td><td>9876543212</td></tr>
+          <tr><td>P004</td><td>Sneha Reddy</td><td>28</td><td>Female</td><td>Fever</td><td>2024-11-25</td><td>9876543213</td></tr>
+          <tr><td>P005</td><td>Vikram Singh</td><td>51</td><td>Male</td><td>Heart Disease</td><td>2024-12-01</td><td>9876543214</td></tr>
+          <tr><td>P006</td><td>Anita Desai</td><td>39</td><td>Female</td><td>Migraine</td><td>2024-12-03</td><td>9876543215</td></tr>
+          <tr><td>P007</td><td>Rahul Verma</td><td>42</td><td>Male</td><td>Diabetes</td><td>2024-12-05</td><td>9876543216</td></tr>
+          <tr><td>P008</td><td>Kavita Nair</td><td>35</td><td>Female</td><td>Hypertension</td><td>2024-12-08</td><td>9876543217</td></tr>
+          <tr><td>P009</td><td>Suresh Gupta</td><td>62</td><td>Male</td><td>Arthritis</td><td>2024-12-10</td><td>9876543218</td></tr>
+          <tr><td>P010</td><td>Meera Iyer</td><td>29</td><td>Female</td><td>Fever</td><td>2024-12-12</td><td>9876543219</td></tr>
+          <tr><td>P011</td><td>lakshay</td><td>20</td><td>Male</td><td>flu</td><td>2025-12-24</td><td>1234567654</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="data-table-mini">
+      <div class="dtitle">Doctor Data (6 records)</div>
+      <table>
+        <thead><tr><th>Doctor ID</th><th>Name</th><th>Department</th><th>Availability</th></tr></thead>
+        <tbody>
+          <tr><td>D001</td><td>Dr. Arun Mehta</td><td>Cardiology</td><td>Mon-Fri 9AM-5PM</td></tr>
+          <tr><td>D002</td><td>Dr. Shalini Kapoor</td><td>General Medicine</td><td>Mon-Sat 10AM-6PM</td></tr>
+          <tr><td>D003</td><td>Dr. Manoj Tiwari</td><td>Orthopedics</td><td>Tue-Sat 9AM-4PM</td></tr>
+          <tr><td>D004</td><td>Dr. Nisha Rao</td><td>Neurology</td><td>Mon-Fri 11AM-7PM</td></tr>
+          <tr><td>D005</td><td>Dr. Vinod Kumar</td><td>General Medicine</td><td>Mon-Fri 9AM-5PM</td></tr>
+          <tr><td>D006</td><td>Dr. Anjali Bose</td><td>Cardiology</td><td>Mon-Sat 10AM-6PM</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="data-table-mini">
+      <div class="dtitle">Billing Data (8 records)</div>
+      <table>
+        <thead><tr><th>Bill ID</th><th>Patient ID</th><th>Consultation Fee</th><th>Medicine Charges</th><th>Total Amount</th><th>Billing Date</th></tr></thead>
+        <tbody>
+          <tr><td>B001</td><td>P001</td><td>500</td><td>1200</td><td>1700</td><td>2024-11-16</td></tr>
+          <tr><td>B002</td><td>P002</td><td>500</td><td>800</td><td>1300</td><td>2024-11-21</td></tr>
+          <tr><td>B003</td><td>P003</td><td>800</td><td>1500</td><td>2300</td><td>2024-11-23</td></tr>
+          <tr><td>B004</td><td>P004</td><td>500</td><td>300</td><td>800</td><td>2024-11-26</td></tr>
+          <tr><td>B005</td><td>P005</td><td>800</td><td>2000</td><td>2800</td><td>2024-12-02</td></tr>
+          <tr><td>B006</td><td>P006</td><td>500</td><td>600</td><td>1100</td><td>2024-12-04</td></tr>
+          <tr><td>B007</td><td>P007</td><td>500</td><td>1000</td><td>1500</td><td>2024-12-06</td></tr>
+          <tr><td>B008</td><td>P008</td><td>500</td><td>700</td><td>1200</td><td>2024-12-09</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Login Credentials -->
+  <div class="section">
+    <div class="section-title">Login API Credentials (Sample / Demo)</div>
+    <div class="cred-table">
+      <div class="cred-row cred-header">
+        <div class="cred-cell">Username</div>
+        <div class="cred-cell">Password</div>
+        <div class="cred-cell">Role</div>
+      </div>
+      <div class="cred-row">
+        <div class="cred-cell">Admin</div>
+        <div class="cred-cell">Admin123</div>
+        <div class="cred-cell">Administrator</div>
+      </div>
+      <div class="cred-row">
+        <div class="cred-cell">Doctor</div>
+        <div class="cred-cell">Doctor123</div>
+        <div class="cred-cell">Doctor</div>
+      </div>
+      <div class="cred-row">
+        <div class="cred-cell">Receptionist</div>
+        <div class="cred-cell">Reception123</div>
+        <div class="cred-cell">Receptionist</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Questions -->
+  <div class="section">
+    <div class="section-title">Open Questions</div>
+    <div class="open-q">
+      <div class="open-q-title">❓ Semester Number Not Filled in Declaration</div>
+      <div class="open-q-desc">The declaration page states "submitted as minor project report of the ...... Semester" — the semester number field is blank. The cover page states 5th Semester but the declaration body is incomplete.</div>
+    </div>
+    <div class="open-q">
+      <div class="open-q-title">❓ "Guide name" Placeholder in Declaration</div>
+      <div class="open-q-desc">The declaration states "done under the guidance of 'Guide name' Department of Computer Science & Engineering" — the literal placeholder text "Guide name" was not replaced with the actual name (Mr Sanjay Kumar).</div>
+    </div>
+    <div class="open-q">
+      <div class="open-q-title">❓ Evaluation / Grading Criteria Not Specified</div>
+      <div class="open-q-desc">The report does not mention how the mini project (BCS554) will be evaluated, the marking scheme, or the viva/demo format expected by the department.</div>
+    </div>
+    <div class="open-q">
+      <div class="open-q-title">❓ Flask Server Deployment Target Not Stated</div>
+      <div class="open-q-desc">The system runs on Flask Port 5000 locally. Whether the project is expected to be deployed on a server for evaluation or run locally during demo is not specified.</div>
+    </div>
+  </div>
+
+  <!-- Risks / Blockers -->
+  <div class="section">
+    <div class="section-title">Risks / Blockers</div>
+    <div class="risk-item">
+      <div class="risk-title">🔴 Excel concurrency — no concurrent write support</div>
+      <div class="risk-desc">Excel files do not handle concurrent writes. If multiple users (Admin, Doctor, Receptionist) are logged in simultaneously and write data, corruption or data loss may occur. The report itself acknowledges: "Consider a locking strategy (simple file lock) if multiple processes may edit files concurrently."</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-title">🔴 No enforced referential integrity</div>
+      <div class="risk-desc">There are no database-level foreign-key constraints in Excel. The code must validate references manually (e.g., when creating an Appointment, ensure patient_id and doctor_id exist). A missed validation could create orphaned records.</div>
+    </div>
+    <div class="risk-item med">
+      <div class="risk-title">🟠 Hardcoded plaintext credentials in Excel (Users Sheet)</div>
+      <div class="risk-desc">Passwords (Admin123, Doctor123, Reception123) are stored in the Excel Users Sheet. There is no mention of hashing or encryption, making it unsuitable for any real-world or production deployment.</div>
+    </div>
+    <div class="risk-item med">
+      <div class="risk-title">🟠 Declaration page has unfilled placeholder text</div>
+      <div class="risk-desc">The literal text "Guide name" and "...... Semester" remain in the declaration page as unfilled placeholders. This may affect academic submission acceptability.</div>
+    </div>
+    <div class="risk-item med">
+      <div class="risk-title">🟠 No backup strategy implemented</div>
+      <div class="risk-desc">The report recommends "periodically snapshot the Excel file(s)" and that "automated backups are recommended before bulk operations" — but no backup mechanism is implemented in the current system.</div>
+    </div>
+    <div class="risk-item low">
+      <div class="risk-title">🟢 Scalability ceiling of Excel-based storage</div>
+      <div class="risk-desc">Excel is acknowledged as a lightweight solution suitable for small-scale use. For any production use with hundreds of records or concurrent users, migration to SQLite or MySQL/PostgreSQL is required.</div>
+    </div>
+  </div>
+
+  <!-- Conflicts -->
+  <div class="section">
+    <div class="section-title">Conflicts</div>
+    <div class="conflict-item">
+      <div class="conflict-title">⚠️ Typo in Project Title on Declaration Page</div>
+      <div class="conflict-desc">The declaration page reads "Hospital Manageent System" (missing 'm' in Management). The cover page correctly reads "Hospital Management System". This discrepancy exists between two formal pages of the submitted report.</div>
+    </div>
+    <div class="conflict-item">
+      <div class="conflict-title">⚠️ Acknowledgement Uses "my" Instead of "our" (Group Project)</div>
+      <div class="conflict-desc">The acknowledgement page begins "We would like to express my sincere gratitude..." and later uses "I am extremely thankful..." and "I am grateful..." — mixing first-person singular and plural. The project is submitted by 3 students, so plural ("our / we") should be consistent throughout.</div>
+    </div>
+    <div class="conflict-item">
+      <div class="conflict-title">⚠️ Monthly Admission Trend Shows Inconsistent Date Axis</div>
+      <div class="conflict-desc">The Monthly Patient Admission Trend chart (FIG. 4.2) shows axis labels "December 2024 → December 2025 → November 2024" — November 2024 appearing after December 2025 is chronologically inconsistent and suggests a data or chart rendering issue.</div>
+    </div>
+  </div>
+
+  <!-- Technologies -->
+  <div class="section">
+    <div class="section-title">Technologies &amp; Hardware Requirements</div>
+    <div class="table-wrap" style="margin-bottom:16px;">
+      <table>
+        <thead><tr><th>Category</th><th>Technology</th><th>Version / Detail</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>Backend Framework</td><td>Flask</td><td>2.3.0</td><td>Create backend APIs and handle requests</td></tr>
+          <tr><td>Data Analysis</td><td>Pandas</td><td>2.0.0</td><td>Excel data handling, analysis, report generation</td></tr>
+          <tr><td>Excel I/O</td><td>openpyxl</td><td>3.1.0</td><td>Read/write Excel files</td></tr>
+          <tr><td>CORS</td><td>flask-cors</td><td>4.0.0</td><td>Cross-origin request handling</td></tr>
+          <tr><td>Visualization</td><td>Chart.js</td><td>Not specified</td><td>Display graphs and analytics on frontend</td></tr>
+          <tr><td>Frontend</td><td>HTML5, CSS3, JavaScript ES6</td><td>—</td><td>Web user interface</td></tr>
+          <tr><td>Database</td><td>Microsoft Excel (hospital_data.xlsx)</td><td>—</td><td>Lightweight data storage (5 worksheets)</td></tr>
+          <tr><td>Language</td><td>Python</td><td>Not specified</td><td>Backend scripting and data processing</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Hardware Component</th><th>Specification</th></tr></thead>
+        <tbody>
+          <tr><td>Processor</td><td>Intel Core i5 / AMD Ryzen 5 or higher</td></tr>
+          <tr><td>RAM</td><td>8 GB DDR4 or higher</td></tr>
+          <tr><td>Storage</td><td>2 GB available space (SSD preferred)</td></tr>
+          <tr><td>Display</td><td>1920 x 1080 Full HD or higher</td></tr>
+          <tr><td>Network</td><td>High-speed broadband connection</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Additional Notes -->
+  <div class="section">
+    <div class="section-title">Additional Notes</div>
+
+    <details class="collapsible">
+      <summary>Database Entity Relationships</summary>
+      <div class="collapsible-body">
+        <strong>Patient ↔ Appointments:</strong> One-to-many. One Patient may have many Appointments. Appointments carry patient_id.<br><br>
+        <strong>Doctor ↔ Appointments:</strong> One-to-many. One Doctor can have many Appointments. Appointments carry doctor_id.<br><br>
+        <strong>Appointment ↔ Billing:</strong> One-to-one (usually). A completed Appointment produces a Billing record referencing appointment_id and patient_id.<br><br>
+        <strong>Referential integrity:</strong> No enforced database-level foreign-key constraint in Excel. Code must validate references. Recommended: add helper functions in excel_handler.py for common checks.
+      </div>
+    </details>
+
+    <details class="collapsible">
+      <summary>Research Gap Identified (Literature Review)</summary>
+      <div class="collapsible-body">
+        Gaps identified in existing Hospital Management Systems:<br><br>
+        1. Lack of simple and lightweight systems for small hospitals<br>
+        2. Limited integration of data analytics in traditional systems<br>
+        3. Over-dependence on complex databases for small-scale applications<br>
+        4. Poor focus on user-friendly and visually appealing interfaces<br><br>
+        Traditional systems commonly use MySQL or Oracle and require complex setup and technical expertise, making them unsuitable for small organizations.
+      </div>
+    </details>
+
+    <details class="collapsible">
+      <summary>Future Scope Summary</summary>
+      <div class="collapsible-body">
+        1. Integration with MySQL or PostgreSQL for large data volumes, referential integrity, concurrent access<br>
+        2. Advanced user authentication and role-based access control (beyond current 3-role demo)<br>
+        3. Online appointment booking and patient portals (self-registration, history, medical info access)<br>
+        4. Online payment gateway integration for digital billing<br>
+        5. Cloud platform deployment for remote access, backup, and high availability<br>
+        6. Machine learning for predicting patient inflow, disease trends, resource requirements<br>
+        7. Mobile application for doctors and staff<br>
+        8. Integration with government health systems and Electronic Health Records (EHR)
+      </div>
+    </details>
+
+    <details class="collapsible">
+      <summary>References (IEEE Format)</summary>
+      <div class="collapsible-body">
+        [1] R. S. Pressman and B. R. Maxim, Software Engineering: A Practitioner's Approach, 8th ed. New York, NY, USA: McGraw-Hill, 2015.<br><br>
+        [2] I. Sommerville, Software Engineering, 10th ed. Boston, MA, USA: Pearson Education, 2016.<br><br>
+        [3] Python Software Foundation, "Python 3 Documentation," 2024. [Online]. Available: https://docs.python.org/3/<br><br>
+        [4] P. McKinney, "Data Analysis with Pandas," Pandas Documentation, 2024. [Online]. Available: https://pandas.pydata.org/docs/<br><br>
+        [5] Pallets Projects, "Flask Documentation," 2024. [Online]. Available: https://flask.palletsprojects.com/<br><br>
+        [6] Chart.js Contributors, "Chart.js Documentation," 2024. [Online]. Available: https://www.chartjs.org/docs/<br><br>
+        [7] Microsoft Corporation, "Microsoft Excel Documentation," 2024. [Online]. Available: https://support.microsoft.com/excel<br><br>
+        [8] Mozilla Developer Network, "HTML, CSS, and JavaScript Documentation," 2024. [Online]. Available: https://developer.mozilla.org/<br><br>
+        [9] Antigravity AI, "Antigravity Agent – AI-Assisted Software Development Tool," 2024. [Online]. Available: https://antigravity.ai/
+      </div>
+    </details>
+
+    <details class="collapsible">
+      <summary>Analytics Dashboard Charts (4 visualizations)</summary>
+      <div class="collapsible-body">
+        <strong>FIG. 4.1 — Disease-wise Patient Distribution:</strong> Bar chart showing most common diseases treated: Diabetes, Hypertension, Fever, Asthma, Heart Disease, Migraine, Arthritis, Flu.<br><br>
+        <strong>FIG. 4.2 — Monthly Patient Admission Trend:</strong> Line chart showing number of patients admitted per month (December 2024, December 2025, November 2024 — axis order appears inconsistent).<br><br>
+        <strong>FIG. 4.3 — Department-wise Revenue Analysis:</strong> Pie chart showing revenue generated by Cardiology, General Medicine, Neurology, Orthopedics.<br><br>
+        <strong>FIG. 4.4 — Gender-wise Patient Distribution:</strong> Doughnut/pie chart representing male and female patient ratio.
+      </div>
+    </details>
+  </div>
+
+</div>
+<script>
+Chart.defaults.color = '#6b7280';
+Chart.defaults.borderColor = '#e5e7eb';
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+Chart.defaults.font.size = 11;
+
+const BLUE   = 'rgba(234,88,12,0.85)';
+const TEAL   = 'rgba(251,146,60,0.85)';
+const PURPLE = 'rgba(249,115,22,0.85)';
+const ORANGE = 'rgba(194,65,12,0.85)';
+const PINK   = 'rgba(154,52,18,0.85)';
+const GREEN  = 'rgba(253,186,116,0.9)';
+const YELLOW = 'rgba(252,211,77,0.9)';
+const RED    = 'rgba(239,68,68,0.85)';
+
+const gridOpts = { color: '#f3f4f6' };
+const tooltipOpts = {
+  backgroundColor: '#1a1a1a',
+  borderColor: '#ea580c',
+  borderWidth: 1,
+  titleColor: '#fff',
+  bodyColor: '#d1d5db',
+  padding: 10
+};
+
+// 1. Disease Distribution (bar)
+new Chart(document.getElementById('chartDisease'), {
+  type: 'bar',
+  data: {
+    labels: ['Diabetes','Hypertension','Fever','Asthma','Heart Disease','Migraine','Arthritis','Flu'],
+    datasets: [{
+      label: 'No. of Patients',
+      data: [2, 2, 2, 1, 1, 1, 1, 1],
+      backgroundColor: [BLUE, TEAL, PURPLE, ORANGE, PINK, GREEN, YELLOW, RED],
+      borderRadius: 6,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.raw} patient${c.raw > 1 ? 's' : ''}` }, ...tooltipOpts } },
+    scales: {
+      x: { grid: gridOpts, ticks: { maxRotation: 35 } },
+      y: { grid: gridOpts, ticks: { stepSize: 1 }, beginAtZero: true, max: 3 }
+    }
+  }
+});
+
+// 2. Gender Distribution (doughnut)
+new Chart(document.getElementById('chartGender'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Male', 'Female'],
+    datasets: [{
+      data: [6, 5],
+      backgroundColor: [BLUE, PINK],
+      borderColor: '#0a0a12',
+      borderWidth: 3,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '62%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } },
+      tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} patients (${((c.raw/11)*100).toFixed(1)}%)` }, ...tooltipOpts }
+    }
+  }
+});
+
+// 3. Monthly Admissions (line)
+new Chart(document.getElementById('chartMonthly'), {
+  type: 'line',
+  data: {
+    labels: ['Nov 2024', 'Dec 2024', 'Dec 2025'],
+    datasets: [{
+      label: 'Patient Admissions',
+      data: [4, 6, 1],
+      borderColor: BLUE,
+      backgroundColor: 'rgba(59,130,246,0.12)',
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: BLUE,
+      pointRadius: 6,
+      pointHoverRadius: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.raw} admissions` }, ...tooltipOpts } },
+    scales: {
+      x: { grid: gridOpts },
+      y: { grid: gridOpts, beginAtZero: true, ticks: { stepSize: 1 }, max: 8 }
+    }
+  }
+});
+
+// 4. Department Revenue (pie)
+new Chart(document.getElementById('chartRevenue'), {
+  type: 'pie',
+  data: {
+    labels: ['General Medicine', 'Cardiology', 'Orthopedics', 'Neurology'],
+    datasets: [{
+      data: [6400, 3200, 2300, 800],
+      backgroundColor: [TEAL, BLUE, PURPLE, ORANGE],
+      borderColor: '#0a0a12',
+      borderWidth: 3,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true } },
+      tooltip: { callbacks: { label: c => ` ${c.label}: ₹${c.raw.toLocaleString()} (${((c.raw/12700)*100).toFixed(1)}%)` }, ...tooltipOpts }
+    }
+  }
+});
+
+// 5. Billing Breakdown (grouped bar)
+new Chart(document.getElementById('chartBilling'), {
+  type: 'bar',
+  data: {
+    labels: ['B001','B002','B003','B004','B005','B006','B007','B008'],
+    datasets: [
+      {
+        label: 'Consultation Fee (₹)',
+        data: [500, 500, 800, 500, 800, 500, 500, 500],
+        backgroundColor: BLUE,
+        borderRadius: 4
+      },
+      {
+        label: 'Medicine Charges (₹)',
+        data: [1200, 800, 1500, 300, 2000, 600, 1000, 700],
+        backgroundColor: TEAL,
+        borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, padding: 12 } },
+      tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ₹${c.raw}` }, ...tooltipOpts }
+    },
+    scales: {
+      x: { grid: gridOpts },
+      y: { grid: gridOpts, beginAtZero: true, ticks: { callback: v => '₹'+v } }
+    }
+  }
+});
+
+// 6. Doctors by Department (horizontal bar)
+new Chart(document.getElementById('chartDoctors'), {
+  type: 'bar',
+  data: {
+    labels: ['General Medicine', 'Cardiology', 'Orthopedics', 'Neurology'],
+    datasets: [{
+      label: 'Doctors',
+      data: [2, 2, 1, 1],
+      backgroundColor: [TEAL, BLUE, PURPLE, ORANGE],
+      borderRadius: 6,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.raw} doctor${c.raw > 1 ? 's' : ''}` }, ...tooltipOpts } },
+    scales: {
+      x: { grid: gridOpts, ticks: { stepSize: 1 }, beginAtZero: true, max: 3 },
+      y: { grid: gridOpts }
+    }
+  }
+});
+</script>
+</body>
+</html>
