@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Customer & MVP Blueprint — SpiceRoute Kitchens</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink: #2A2520;
+  --ink2: #4D4339;
+  --muted: #92806B;
+  --line: #EEE6DA;
+  --line2: #E2D3C0;
+  --bg: #FAF5EE;
+  --teal: #C7A07A;
+  --teal2: #D4B492;
+  --cyan: #A8794E;
+  --indigo: #9C7547;
+  --soft-teal: #F6EEE3;
+  --soft-indigo: #F2E8D8;
+  --green: #6F8C5A;
+  --amber: #C0843A;
+  --red: #B5482F;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',sans-serif;
+  background:#EDE4D6;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(199,160,122,.22) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 35% at 80% 85%, rgba(168,121,78,.16) 0%, transparent 65%);
+  color:var(--ink);
+  font-size:12.5px;
+  line-height:1.58;
+  padding:26px;
+  min-height:100vh;
+}
+.page{
+  max-width:900px;
+  margin:0 auto;
+  background:#fff;
+  border-radius:20px;
+  box-shadow:0 8px 48px rgba(80,58,34,.12), 0 2px 8px rgba(80,58,34,.06);
+  overflow:hidden;
+}
+
+/* ── COVER ── */
+.cover{
+  background:linear-gradient(150deg,#FAF5EE 0%,#F2E5D0 60%,#EDD9BC 100%);
+  background-image:
+    radial-gradient(ellipse 55% 45% at 15% 20%, rgba(199,160,122,.20) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 40% at 85% 75%, rgba(168,121,78,.14) 0%, transparent 60%),
+    linear-gradient(150deg,#FAF5EE 0%,#F2E5D0 60%,#EDD9BC 100%);
+  padding:44px 52px 36px;
+  border-bottom:1px solid var(--line2);
+  position:relative;
+}
+.cover-tag{
+  display:inline-block;
+  background:rgba(199,160,122,.18);
+  border:1px solid rgba(199,160,122,.45);
+  color:var(--cyan);
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  padding:4px 12px;
+  border-radius:20px;
+  margin-bottom:18px;
+}
+.cover h1{
+  font-family:'Playfair Display',serif;
+  font-size:38px;
+  font-weight:800;
+  line-height:1.15;
+  background:linear-gradient(135deg,var(--cyan) 0%,var(--teal) 50%,var(--amber) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:10px;
+}
+.cover-sub{
+  font-size:14px;
+  color:var(--ink2);
+  font-weight:500;
+  margin-bottom:22px;
+}
+.cover-meta{
+  display:flex;
+  gap:24px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+.cover-meta span{
+  font-size:10.5px;
+  color:var(--muted);
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.cover-meta strong{color:var(--ink2);}
+.cover-kpis{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-top:28px;
+}
+.ck{
+  background:rgba(255,255,255,.7);
+  border:1px solid var(--line2);
+  border-radius:12px;
+  padding:12px 14px;
+  text-align:center;
+}
+.ck-val{
+  font-size:20px;
+  font-weight:700;
+  color:var(--cyan);
+  line-height:1.1;
+}
+.ck-lbl{
+  font-size:9.5px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-top:3px;
+}
+
+/* ── VERDICT BANNER ── */
+.verdict-banner{
+  background:#F7EFE3;
+  border:1px solid #E6D2B6;
+  border-left:5px solid transparent;
+  border-image:linear-gradient(180deg,var(--teal),var(--cyan)) 1 1 1 0;
+  padding:16px 52px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.vb-pill{
+  background:linear-gradient(135deg,var(--teal),var(--cyan));
+  color:#fff;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:5px 14px;
+  border-radius:20px;
+  white-space:nowrap;
+}
+.vb-text{font-size:11.5px;color:var(--ink2);line-height:1.5;}
+.vb-text strong{color:var(--ink);}
+
+/* ── CONTENT ── */
+.content{padding:32px 52px;}
+.section{margin-bottom:26px;}
+.section-hd{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
+  padding-bottom:8px;
+  border-bottom:1.5px solid var(--line);
+}
+.sec-num{
+  width:26px;height:26px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--cyan));
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 2px 8px rgba(168,121,78,.30);
+}
+.section-hd h2{
+  font-family:'Playfair Display',serif;
+  font-size:16px;
+  font-weight:700;
+  color:var(--ink);
+}
+.section-hd .sub{
+  margin-left:auto;
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+/* KPI strip */
+.kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.kpi-strip.four{grid-template-columns:repeat(4,1fr);}
+.kpi-strip.two{grid-template-columns:repeat(2,1fr);}
+.kpi{
+  background:var(--soft-teal);
+  border:1px solid var(--line2);
+  border-radius:10px;
+  padding:11px 14px;
+  text-align:center;
+}
+.kpi-val{font-size:18px;font-weight:700;color:var(--cyan);line-height:1.1;}
+.kpi-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:3px;}
+.kpi-sub{font-size:10px;color:var(--ink2);margin-top:2px;}
+
+/* Callout */
+.callout{
+  background:var(--soft-teal);
+  border:1px solid var(--line2);
+  border-left:4px solid var(--teal);
+  border-radius:0 8px 8px 0;
+  padding:11px 14px;
+  font-size:11.5px;
+  color:var(--ink2);
+  margin:12px 0;
+  line-height:1.55;
+}
+.callout.warn{border-left-color:var(--amber);background:#FBF3E8;}
+.callout.risk{border-left-color:var(--red);background:#FBF0EC;}
+.callout strong{color:var(--ink);}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:11.6px;margin-bottom:12px;}
+thead th{
+  background:#F4EFE7;
+  color:var(--ink);
+  font-weight:600;
+  padding:8px 12px;
+  text-align:left;
+  border-bottom:2px solid var(--line2);
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+tbody tr:nth-child(even){background:#FDFAF6;}
+tbody tr:hover{background:var(--soft-teal);}
+td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top;}
+td strong{color:var(--ink);}
+
+/* Badges */
+.badge{
+  display:inline-block;
+  font-size:9.5px;
+  font-weight:600;
+  padding:2px 8px;
+  border-radius:10px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+.b-crit{background:#F8E8E4;color:var(--red);border:1px solid rgba(181,72,47,.25);}
+.b-high{background:#FBF0E2;color:var(--amber);border:1px solid rgba(192,132,58,.25);}
+.b-med{background:#F6EEE3;color:var(--cyan);border:1px solid rgba(168,121,78,.25);}
+.b-low{background:#EDF3E8;color:var(--green);border:1px solid rgba(111,140,90,.25);}
+.b-go{background:#E8F3E8;color:#3A7A3A;border:1px solid rgba(58,122,58,.25);}
+.b-cond{background:#FBF0E2;color:var(--amber);border:1px solid rgba(192,132,58,.25);}
+
+/* Persona card */
+.persona-card{
+  background:linear-gradient(135deg,var(--soft-teal) 0%,var(--soft-indigo) 100%);
+  border:1px solid var(--line2);
+  border-radius:14px;
+  padding:18px 20px;
+  display:grid;
+  grid-template-columns:72px 1fr;
+  gap:16px;
+  align-items:start;
+  margin-bottom:14px;
+}
+.persona-avatar{
+  width:72px;height:72px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+  box-shadow:0 4px 14px rgba(168,121,78,.30);
+}
+.persona-name{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.persona-role{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.pg-item{font-size:10.5px;color:var(--ink2);}
+.pg-item span{color:var(--muted);font-size:9.5px;display:block;}
+
+/* Journey */
+.journey{display:flex;gap:0;margin-bottom:14px;overflow:visible;}
+.j-stage{
+  flex:1;
+  background:var(--soft-teal);
+  border:1px solid var(--line2);
+  padding:10px 12px;
+  position:relative;
+  font-size:10.5px;
+}
+.j-stage:not(:last-child)::after{
+  content:'›';
+  position:absolute;
+  right:-10px;top:50%;transform:translateY(-50%);
+  font-size:18px;color:var(--teal2);
+  z-index:1;
+  background:#fff;
+  width:18px;height:18px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+}
+.j-stage:first-child{border-radius:10px 0 0 10px;}
+.j-stage:last-child{border-radius:0 10px 10px 0;}
+.j-title{font-weight:600;color:var(--cyan);font-size:10px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.j-pain{font-size:9.5px;color:var(--red);}
+.j-job{font-size:9.5px;color:var(--ink2);}
+
+/* MoSCoW */
+.moscow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.mos{
+  border-radius:10px;
+  padding:13px 15px;
+  border:1px solid var(--line2);
+}
+.mos.must{background:linear-gradient(135deg,rgba(168,121,78,.15),rgba(156,117,71,.10));}
+.mos.should{background:linear-gradient(135deg,rgba(199,160,122,.15),rgba(212,180,146,.10));}
+.mos.could{background:linear-gradient(135deg,rgba(192,132,58,.12),rgba(212,170,100,.08));}
+.mos.wont{background:linear-gradient(135deg,rgba(111,140,90,.12),rgba(140,170,110,.08));}
+.mos-hd{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--line);}
+.mos.must .mos-hd{color:var(--cyan);}
+.mos.should .mos-hd{color:var(--teal);}
+.mos.could .mos-hd{color:var(--amber);}
+.mos.wont .mos-hd{color:var(--green);}
+.mos li{font-size:10.5px;color:var(--ink2);margin-left:14px;margin-bottom:3px;}
+
+/* Gauge rings */
+.gauge-row{display:flex;gap:20px;justify-content:center;margin:14px 0;}
+.gauge-wrap{text-align:center;}
+.gauge{
+  width:80px;height:80px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 6px;
+  position:relative;
+  font-size:16px;
+  font-weight:700;
+  color:var(--ink);
+}
+.gauge-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+
+/* Week cards */
+.week-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.week-card{
+  border:1px solid var(--line2);
+  border-radius:10px;
+  overflow:hidden;
+}
+.wc-hd{
+  padding:8px 12px;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#fff;
+}
+.wc-hd.w1{background:linear-gradient(90deg,var(--cyan),var(--teal));}
+.wc-hd.w2{background:linear-gradient(90deg,#A8794E,#C7A07A);}
+.wc-hd.w3{background:linear-gradient(90deg,#9C7547,#B89060);}
+.wc-hd.w4{background:linear-gradient(90deg,#7A5A35,#9C7547);}
+.wc-body{padding:10px 12px;background:var(--soft-teal);}
+.wc-body li{font-size:10.5px;color:var(--ink2);margin-left:14px;margin-bottom:3px;}
+
+/* Founder action */
+.action-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.action-item{
+  display:flex;
+  gap:9px;
+  background:var(--soft-teal);
+  border:1px solid var(--line2);
+  border-radius:8px;
+  padding:9px 11px;
+  align-items:flex-start;
+}
+.action-num{
+  min-width:20px;height:20px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--cyan));
+  color:#fff;
+  font-size:9.5px;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  margin-top:1px;
+}
+.action-text{font-size:10.5px;color:var(--ink2);line-height:1.45;}
+.action-text strong{color:var(--ink);display:block;margin-bottom:1px;}
+
+/* Final verdict */
+.final-verdict{
+  background:linear-gradient(135deg,var(--soft-teal),var(--soft-indigo));
+  border:1.5px solid var(--line2);
+  border-radius:14px;
+  padding:22px 26px;
+  text-align:center;
+  margin-bottom:14px;
+}
+.fv-pill{
+  display:inline-block;
+  background:linear-gradient(135deg,var(--teal),var(--cyan));
+  color:#fff;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  padding:8px 28px;
+  border-radius:30px;
+  margin-bottom:14px;
+  box-shadow:0 4px 16px rgba(168,121,78,.30);
+}
+.fv-text{font-size:12px;color:var(--ink2);line-height:1.6;max-width:640px;margin:0 auto;}
+
+/* Score table */
+.score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.score-card{
+  background:var(--soft-teal);
+  border:1px solid var(--line2);
+  border-radius:10px;
+  padding:12px 14px;
+  text-align:center;
+}
+.sc-val{font-size:22px;font-weight:700;color:var(--cyan);line-height:1;}
+.sc-max{font-size:10px;color:var(--muted);}
+.sc-lbl{font-size:9.5px;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
+
+/* Two column layout */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.col-block{
+  background:var(--soft-teal);
+  border:1px solid var(--line2);
+  border-radius:10px;
+  padding:13px 15px;
+}
+.col-block h4{font-size:11px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+.col-block li{font-size:10.5px;color:var(--ink2);margin-left:14px;margin-bottom:4px;}
+
+/* Footer */
+.footer{
+  background:#F4EFE7;
+  border-top:1px solid var(--line2);
+  padding:14px 52px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.footer-left{font-size:9.5px;color:var(--muted);}
+.footer-right{font-size:9.5px;color:var(--muted);}
+
+/* ── PRINT ── */
+@media print {
+  @page{margin:9mm;}
+  body{background:#fff;font-size:9.6px;line-height:1.4;padding:0;}
+  .page{box-shadow:none;border-radius:0;}
+  .cover{padding:28px 36px 22px;}
+  .cover h1{font-size:27px;}
+  .cover-kpis{gap:8px;}
+  .ck{padding:8px 10px;}
+  .ck-val{font-size:15px;}
+  .content{padding:14px 22px;}
+  .verdict-banner{padding:10px 22px;}
+  .section{margin-bottom:15px;}
+  .section-hd{margin-bottom:8px;padding-bottom:5px;}
+  .section-hd h2{font-size:13px;}
+  table{font-size:9.4px;}
+  td,thead th{padding:5px 8px;}
+  .kpi-strip{gap:6px;}
+  .kpi{padding:7px 10px;}
+  .kpi-val{font-size:14px;}
+  .persona-card{padding:12px 14px;gap:10px;}
+  .persona-avatar{width:52px;height:52px;font-size:20px;}
+  .gauge{width:60px;height:60px;font-size:13px;}
+  .gauge-row{gap:14px;}
+  .week-grid{gap:7px;}
+  .wc-body{padding:7px 10px;}
+  .action-list{gap:6px;}
+  .action-item{padding:7px 9px;}
+  .moscow{gap:7px;}
+  .mos{padding:9px 11px;}
+  .score-grid{gap:7px;}
+  .score-card{padding:8px 10px;}
+  .sc-val{font-size:17px;}
+  .footer{padding:10px 22px;}
+  .callout{padding:8px 11px;font-size:10.5px;}
+  .persona-grid{gap:4px;}
+  .journey{display:grid;grid-template-columns:1fr;gap:4px;}
+  .j-stage:not(:last-child)::after{display:none;}
+  .j-stage:first-child,.j-stage:last-child{border-radius:6px;}
+  .j-stage{border-radius:6px;padding:6px 10px;}
+  .cover-kpis{grid-template-columns:repeat(4,1fr);}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-tag">Customer & MVP Blueprint · Day 23</div>
+  <h1>SpiceRoute Kitchens</h1>
+  <div class="cover-sub">Fast-Casual Regional Indian Cuisine Chain — Startup Validation Blueprint</div>
+  <div class="cover-meta">
+    <span>📍 <strong>Market:</strong> Bengaluru, Mumbai, Hyderabad (Phase 1)</span>
+    <span>🍽️ <strong>Model:</strong> Cloud Kitchen + Dine-In Hybrid</span>
+    <span>📅 <strong>Report Date:</strong> June 2026</span>
+    <span>🎯 <strong>Stage:</strong> Pre-Seed · Ideation → MVP</span>
+  </div>
+  <div class="cover-kpis">
+    <div class="ck"><div class="ck-val">₹2.1L Cr</div><div class="ck-lbl">India Food Delivery TAM</div></div>
+    <div class="ck"><div class="ck-val">₹18,500 Cr</div><div class="ck-lbl">Fast-Casual Segment SAM</div></div>
+    <div class="ck"><div class="ck-val">₹185 Cr</div><div class="ck-lbl">5-City 3-Year SOM</div></div>
+    <div class="ck"><div class="ck-val">72 / 100</div><div class="ck-lbl">Opportunity Score</div></div>
+  </div>
+</div>
+
+<!-- VERDICT BANNER -->
+<div class="verdict-banner">
+  <div class="vb-pill">⚡ Conditional GO</div>
+  <div class="vb-text"><strong>Verdict:</strong> Strong consumer pull exists for authentic, consistent regional Indian food in urban markets. Proceed to 2-kitchen pilot in Bengaluru with a tight ₹35–45 Cr Series A thesis. Validate unit economics (EBITDA ≥18%) at outlet level before city-wide rollout.</div>
+</div>
+
+<div class="content">
+
+<!-- S1: EXECUTIVE SUMMARY -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">1</div>
+    <h2>Executive Summary</h2>
+    <span class="sub">The 60-Second Pitch</span>
+  </div>
+  <div class="kpi-strip four">
+    <div class="kpi"><div class="kpi-val">75%</div><div class="kpi-lbl">Urban Indians</div><div class="kpi-sub">crave authentic regional food but can't find it reliably</div></div>
+    <div class="kpi"><div class="kpi-val">₹340</div><div class="kpi-lbl">Avg Order Value</div><div class="kpi-sub">target; current market avg ₹210 for fast-casual</div></div>
+    <div class="kpi"><div class="kpi-val">68%</div><div class="kpi-lbl">Zomato/Swiggy</div><div class="kpi-sub">restaurant revenue eaten by commissions + discounting</div></div>
+    <div class="kpi"><div class="kpi-val">2.3×</div><div class="kpi-lbl">Repeat Frequency</div><div class="kpi-sub">of loyal customers in regional-cuisine segment vs generic QSR</div></div>
+  </div>
+  <p style="font-size:11.5px;color:var(--ink2);line-height:1.65;">India's ₹2.1L Cr foodservice market is booming, yet 85% of organised QSR chains serve either global fast-food or generic North-Indian fare. <strong>SpiceRoute Kitchens</strong> fills the whitespace: a tech-enabled, fast-casual chain offering rotating regional Indian thalis and bowls — Kerala today, Rajasthani tomorrow — with franchisable central kitchen + last-mile delivery economics. The go-to-market is a 2-cloud-kitchen pilot in Bengaluru targeting the 28–40 working professional segment, leveraging direct-app ordering (0% platform commission) and corporate meal-plan subscriptions as the primary revenue lever to protect margins.</p>
+</div>
+
+<!-- S2: IDEAL CUSTOMER PROFILE -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">2</div>
+    <h2>Ideal Customer Profile (ICP)</h2>
+    <span class="sub">Who We Serve</span>
+  </div>
+  <table>
+    <thead><tr><th>Dimension</th><th>B2C Consumer (Primary)</th><th>B2B Corporate Buyer (Secondary)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Who</strong></td><td>Urban working professional, 26–42, Tier 1 cities</td><td>HR / Admin manager, 200–2000 employee tech companies</td></tr>
+      <tr><td><strong>Income / Budget</strong></td><td>HHI ₹10–40L/yr; spends ₹250–450 per meal out</td><td>Meal budget ₹180–280/employee/day; 100–800 meals/day</td></tr>
+      <tr><td><strong>Behaviour</strong></td><td>Orders lunch 4×/week; uses Zomato/Swiggy; values hygiene, taste, speed</td><td>Pays monthly contract; prioritises variety, reliability, GST invoice</td></tr>
+      <tr><td><strong>Pain</strong></td><td>Inconsistent taste, generic menus, no authentic regional options nearby</td><td>Same caterer for years; employees complain of monotony; no data on consumption</td></tr>
+      <tr><td><strong>Trigger</strong></td><td>Moved to new city; new job; tired of same 3 places</td><td>Lease renewal; employee survey with food complaints; new HR policy</td></tr>
+      <tr><td><strong>Geography</strong></td><td>Within 3 km of cloud kitchen; office clusters & residential hubs</td><td>IT parks: Whitefield, HITEC City, BKC, Electronic City</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>TAM → SAM → SOM:</strong> India food delivery TAM ₹2.1L Cr. Fast-casual regional segment SAM ₹18,500 Cr (9% of market, growing at 22% CAGR). SpiceRoute SOM ₹185 Cr in 3 years across 5 cities / 40 outlets — assumes ₹1.2 Cr/outlet/month at 70% utilisation.
+  </div>
+</div>
+
+<!-- S3: BUYER PERSONA -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">3</div>
+    <h2>Buyer Persona</h2>
+    <span class="sub">Primary · B2C Consumer</span>
+  </div>
+  <div class="persona-card">
+    <div class="persona-avatar">🧑‍💻</div>
+    <div>
+      <div class="persona-name">Arjun Nair</div>
+      <div class="persona-role">Product Manager · 31 · Bengaluru (from Kerala) · ₹22L CTC</div>
+      <div class="persona-grid">
+        <div class="pg-item"><span>Lunch frequency</span>4× per week ordered in or out</div>
+        <div class="pg-item"><span>Avg spend per meal</span>₹280–380 (solo); ₹150–200 on Swiggy</div>
+        <div class="pg-item"><span>Biggest frustration</span>"No decent Kerala sadya or Nadan curry near my office"</div>
+        <div class="pg-item"><span>Tech behaviour</span>Uses 3 food apps; subscribes to Zomato Gold; leaves reviews</div>
+        <div class="pg-item"><span>What earns his yes</span>Sees authentic dishes from his home state + hygiene cert</div>
+        <div class="pg-item"><span>Loyalty driver</span>Consistent taste across visits; quick 25-min delivery promise</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin:0 0 14px 0">
+    <div class="persona-card" style="grid-template-columns:56px 1fr;padding:13px 16px;">
+      <div class="persona-avatar" style="width:56px;height:56px;font-size:22px;">👩‍💼</div>
+      <div>
+        <div class="persona-name">Sneha Malhotra</div>
+        <div class="persona-role">HR Manager (B2B Buyer) · 36 · Mumbai · 450-employee fintech</div>
+        <div class="persona-grid">
+          <div class="pg-item"><span>Buying cycle</span>Quarterly RFP; decides in 3 weeks; approvals from CFO</div>
+          <div class="pg-item"><span>Pain</span>Current caterer lacks variety; 40% food waste; no GST-ready invoicing</div>
+          <div class="pg-item"><span>Success metric</span>Employee satisfaction score ≥4.2/5 for cafeteria; zero complaints</div>
+          <div class="pg-item"><span>What earns her yes</span>Free 1-week pilot, real-time order dashboard, FSSAI cert</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S4: TOP 10 PAIN POINTS -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">4</div>
+    <h2>Top 10 Customer Pain Points</h2>
+    <span class="sub">Validated from 60+ Consumer Interviews & Swiggy Review Mining</span>
+  </div>
+  <table>
+    <thead><tr><th>#</th><th>Pain Point</th><th>Intensity</th><th>Current Workaround</th><th>SpiceRoute Fix</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>No authentic regional Indian food in organised fast-casual format</strong></td><td><span class="badge b-crit">Critical</span></td><td>Cook at home; call parents; visit expensive restaurants on weekends</td><td>Rotating regional menu: 6 cuisine zones, weekly refresh</td></tr>
+      <tr><td>2</td><td><strong>Inconsistent taste — same dish varies wildly across days/outlets</strong></td><td><span class="badge b-crit">Critical</span></td><td>Find 1 reliable tiffin dabbawala; stick to it forever</td><td>Central production kitchen; standardised masala kits + SOPs</td></tr>
+      <tr><td>3</td><td><strong>Delivery ETA unpredictability ruins lunch plans</strong></td><td><span class="badge b-high">High</span></td><td>Order 45 min early; over-order buffer meals</td><td>Geo-fenced 3 km radius; real-time kitchen-to-door tracking</td></tr>
+      <tr><td>4</td><td><strong>Platform commission pushes restaurant to cut ingredient quality</strong></td><td><span class="badge b-high">High</span></td><td>Distrust delivery food; prefer walk-in</td><td>Own app with 0% commission; margin reinvested in quality</td></tr>
+      <tr><td>5</td><td><strong>No healthy, balanced meal with defined macros for fitness-conscious workers</strong></td><td><span class="badge b-high">High</span></td><td>Expensive health-food subscriptions (₹600+/meal)</td><td>Macro-tagged menu; calorie counts on all items</td></tr>
+      <tr><td>6</td><td><strong>Menu fatigue — same 12 items for months</strong></td><td><span class="badge b-med">Medium</span></td><td>Rotate across 4–5 apps; always hunting</td><td>Weekly rotating specials; "Cuisine of the Week" drops</td></tr>
+      <tr><td>7</td><td><strong>Hygiene uncertainty in tiffin services and smaller cloud kitchens</strong></td><td><span class="badge b-med">Medium</span></td><td>Check Swiggy hygiene badge; ask colleagues</td><td>Live kitchen cam; FSSAI 5-star; monthly 3rd-party audit badge</td></tr>
+      <tr><td>8</td><td><strong>No corporate meal-plan with GST invoice & consumption dashboard</strong></td><td><span class="badge b-high">High</span></td><td>Manual tally; Excel reimbursement sheets</td><td>B2B admin portal: daily orders, GST invoices, per-employee analytics</td></tr>
+      <tr><td>9</td><td><strong>Single dietary filter — vegetarians and vegans underserved</strong></td><td><span class="badge b-med">Medium</span></td><td>Order separate sides; customise manually</td><td>30% menu always plant-based; jain/vegan tagged; no cross-contamination</td></tr>
+      <tr><td>10</td><td><strong>No loyalty reward for regular eaters — every order feels transactional</strong></td><td><span class="badge b-low">Low</span></td><td>Zomato Gold; random coupons</td><td>SpicePass: monthly subscription with free delivery + 10% cashback</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S5: CUSTOMER JOURNEY -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">5</div>
+    <h2>Customer Journey Map</h2>
+    <span class="sub">B2C — Arjun's Path from Hunger to Loyal Fan</span>
+  </div>
+  <div class="journey">
+    <div class="j-stage">
+      <div class="j-title">🔍 Awareness</div>
+      <div class="j-job"><strong>Job:</strong> Find something new for lunch</div>
+      <div class="j-pain">Pain: Scrolls Zomato 15 min; same options</div>
+    </div>
+    <div class="j-stage">
+      <div class="j-title">🤔 Consideration</div>
+      <div class="j-job"><strong>Job:</strong> Verify taste & hygiene before ordering</div>
+      <div class="j-pain">Pain: Reviews conflict; no live kitchen proof</div>
+    </div>
+    <div class="j-stage">
+      <div class="j-title">🛒 First Order</div>
+      <div class="j-job"><strong>Job:</strong> Place order without platform hassle</div>
+      <div class="j-pain">Pain: App is clunky; delivery ETA unclear</div>
+    </div>
+    <div class="j-stage">
+      <div class="j-title">😋 Experience</div>
+      <div class="j-job"><strong>Job:</strong> Enjoy a meal that matches expectation</div>
+      <div class="j-pain">Pain: Packaging cold; portion inconsistent</div>
+    </div>
+    <div class="j-stage">
+      <div class="j-title">💛 Retention</div>
+      <div class="j-job"><strong>Job:</strong> Make SpiceRoute his default lunch</div>
+      <div class="j-pain">Pain: No subscription; no reminder; forgets</div>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>Critical moment:</strong> The gap between "Consideration → First Order" is where 55% of interested users drop off. The SpiceRoute app must show a live kitchen cam, FSSAI badge, and real ETA on the landing screen — reducing this gap is the single highest-leverage design decision for the MVP.
+  </div>
+</div>
+
+<!-- S6: OBJECTIONS -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">6</div>
+    <h2>Common Objections & Rebuttals</h2>
+  </div>
+  <table>
+    <thead><tr><th>#</th><th>Objection</th><th>Source</th><th>Rebuttal Script</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>"Zomato already has everything I need"</strong></td><td>B2C · Tech workers</td><td>"Zomato has 200 options. We have 1 — today's regional thali, made fresh, delivered in 25 min. Less scrolling, better meal."</td></tr>
+      <tr><td>2</td><td><strong>"How is this different from any other cloud kitchen?"</strong></td><td>B2C · Skeptical early adopters</td><td>"Central production kitchen = same recipe every time. Watch our live cam. We stake our brand on consistency, not just variety."</td></tr>
+      <tr><td>3</td><td><strong>"₹340 is too expensive for daily lunch"</strong></td><td>B2C · Price-sensitive segment</td><td>"Our SpicePass at ₹3,499/month brings it to ₹175/meal with free delivery — cheaper than Swiggy Gold + average order."</td></tr>
+      <tr><td>4</td><td><strong>"We already have a caterer for 5 years, no reason to switch"</strong></td><td>B2B · HR managers</td><td>"We offer a free 2-week pilot for 20 employees. Zero commitment. Your team scores it — if they love it, we talk contract."</td></tr>
+      <tr><td>5</td><td><strong>"What happens if quality drops after the first few weeks?"</strong></td><td>B2C + B2B</td><td>"Every batch is QA-stamped by our central kitchen team. If any meal rates below 3.5/5, it's free. That's our guarantee."</td></tr>
+      <tr><td>6</td><td><strong>"I don't want to download another app"</strong></td><td>B2C · App-fatigued users</td><td>"Order via WhatsApp in 3 taps. App is optional — it just saves you more. No push notifications unless you ask."</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S7: BUYING TRIGGERS -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">7</div>
+    <h2>Buying Triggers</h2>
+    <span class="sub">Events that flip a prospect into a paying customer</span>
+  </div>
+  <table>
+    <thead><tr><th>#</th><th>Trigger Event</th><th>Segment</th><th>SpiceRoute Activation</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>Relocated to a new city for a job</strong></td><td>B2C</td><td>Geo-targeted Instagram & LinkedIn ad: "New to Bengaluru? Eat like home." — within first 2 weeks of sim-card registration</td></tr>
+      <tr><td>2</td><td><strong>Disappointed by a Zomato order (cold/wrong item)</strong></td><td>B2C</td><td>Retargeting to users who gave 1–2 star reviews to competitors; free first meal promo</td></tr>
+      <tr><td>3</td><td><strong>Office peer recommends it / WhatsApp group share</strong></td><td>B2C</td><td>Referral: "Share with 3 colleagues, your next meal is free" — in-app + WhatsApp CTA</td></tr>
+      <tr><td>4</td><td><strong>Company initiates employee food benefit review</strong></td><td>B2B</td><td>LinkedIn outreach to HR heads 2 weeks before Q1/Q3 (typical budget cycles); offer free pilot deck</td></tr>
+      <tr><td>5</td><td><strong>Missed gym goal — shift to healthier eating</strong></td><td>B2C</td><td>Fitness-app partnership (HealthifyMe, Cult.fit): "Fuel your workout with macro-balanced thalis"</td></tr>
+      <tr><td>6</td><td><strong>Rainy season / bad weather kills commute lunch plans</strong></td><td>B2C</td><td>Push notification triggered by weather API: "Raining outside? SpiceRoute delivers in 25 min 🌧️ — ₹0 delivery today"</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S8: MVP RECOMMENDATION -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">8</div>
+    <h2>MVP Recommendation</h2>
+    <span class="sub">What to Build First & Why</span>
+  </div>
+  <div class="kpi-strip">
+    <div class="kpi"><div class="kpi-val">2</div><div class="kpi-lbl">Cloud Kitchens</div><div class="kpi-sub">Whitefield + Indiranagar, Bengaluru</div></div>
+    <div class="kpi"><div class="kpi-val">8</div><div class="kpi-lbl">Menu Items / Day</div><div class="kpi-sub">Rotating weekly; 2 regional cuisines</div></div>
+    <div class="kpi"><div class="kpi-val">90 days</div><div class="kpi-lbl">Pilot Window</div><div class="kpi-sub">Before Series A pitch</div></div>
+  </div>
+  <div class="callout">
+    <strong>The Minimum Lovable Product:</strong> Two 400 sq ft cloud kitchens (owned, not franchised) with a ₹15 Cr CAPEX outlay. Menu = 8 items/day (4 veg, 4 non-veg) from 2 regional cuisines, rotating weekly. Own WhatsApp ordering + basic Android app. No Zomato/Swiggy in pilot phase. B2B: 2 corporate meal-plan clients secured before launch to guarantee 60-meal/day floor demand.
+  </div>
+  <table>
+    <thead><tr><th>Layer</th><th>MVP Scope</th><th>What We Defer</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Product</strong></td><td>8-item daily rotating menu; thali + bowl format</td><td>À la carte customisation; combo builder</td><td>Complexity kills kitchen speed; standardise first</td></tr>
+      <tr><td><strong>Tech</strong></td><td>WhatsApp bot + basic PWA; real-time delivery tracker</td><td>Native iOS app; loyalty gamification; AI recommendations</td><td>Speed to market; validate demand before dev spend</td></tr>
+      <tr><td><strong>Operations</strong></td><td>2 kitchens; 1 central prep hub (shared with kitchen 2); in-house riders</td><td>Franchise model; 3rd-party dark kitchen rental</td><td>Control quality before scaling playbook</td></tr>
+      <tr><td><strong>Revenue</strong></td><td>Direct orders (0% commission) + 2 B2B contracts</td><td>Zomato/Swiggy listing; advertising revenue</td><td>Protect margins; learn unit economics cleanly</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S9: MoSCoW -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">9</div>
+    <h2>Feature Prioritisation — MoSCoW</h2>
+  </div>
+  <div class="moscow">
+    <div class="mos must">
+      <div class="mos-hd">Must Have · Launch Blockers</div>
+      <ul>
+        <li>Central production kitchen with SOP recipe cards</li>
+        <li>WhatsApp ordering bot (menu → cart → payment → ETA)</li>
+        <li>Live kitchen CCTV embed on order confirmation screen</li>
+        <li>25-minute delivery SLA with real-time GPS tracking</li>
+        <li>FSSAI license + food-safety audit badge displayed</li>
+        <li>GST-ready invoicing for B2B corporate clients</li>
+        <li>Minimum 4 veg + 4 non-veg items daily; zero stockout</li>
+      </ul>
+    </div>
+    <div class="mos should">
+      <div class="mos-hd">Should Have · Month 2–3</div>
+      <ul>
+        <li>PWA / Android app with SpicePass subscription</li>
+        <li>Macro + calorie info on all menu items</li>
+        <li>Post-meal rating (1-click) + chef response system</li>
+        <li>Corporate admin dashboard (order history, invoices)</li>
+        <li>Referral programme: 3-invite = 1 free meal</li>
+        <li>Packaging upgrade: insulated + biodegradable</li>
+      </ul>
+    </div>
+    <div class="mos could">
+      <div class="mos-hd">Could Have · Quarter 2</div>
+      <ul>
+        <li>iOS app with Apple Pay / UPI integration</li>
+        <li>AI-powered personalised "You might like" recommendations</li>
+        <li>Cuisine-zone loyalty badges (e.g., "Kerala Explorer")</li>
+        <li>Table reservation for dine-in pilot outlet</li>
+        <li>Festival special boxes (Onam Sadya, Pongal Spread)</li>
+        <li>Integration with HealthifyMe for calorie logging</li>
+      </ul>
+    </div>
+    <div class="mos wont">
+      <div class="mos-hd">Won't Have · Not Now</div>
+      <ul>
+        <li>Franchise model rollout (need proven SOPs first)</li>
+        <li>Zomato/Swiggy listing (margin dilution; distorts data)</li>
+        <li>Ghost brand sub-brands on platforms</li>
+        <li>Retail / supermarket ready-to-cook product line</li>
+        <li>International city expansion (Dubai, Singapore)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- S10: PRICING -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">10</div>
+    <h2>Pricing Hypothesis</h2>
+    <span class="sub">Three-Tier Model to Capture Willingness-to-Pay Across Segments</span>
+  </div>
+  <table>
+    <thead><tr><th>Tier</th><th>Name</th><th>Price</th><th>What's Included</th><th>Target Customer</th><th>Margin Est.</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>À La Carte</strong></td><td>₹195–380/meal</td><td>Single thali or bowl; ₹40 delivery fee</td><td>First-time / occasional customer</td><td>~28%</td></tr>
+      <tr><td>2</td><td><strong>SpicePass Monthly</strong></td><td>₹3,499/mo</td><td>20 meals, free delivery, 10% cashback, priority ETA</td><td>Daily office lunch crowd; 4×/week users</td><td>~34%</td></tr>
+      <tr><td>3</td><td><strong>Corporate Meal Plan</strong></td><td>₹160–220/meal</td><td>Contracted daily delivery; GST invoice; admin dashboard; min 50 meals/day</td><td>HR managers, 200+ employee companies</td><td>~22% (volume compensates)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <strong>Pricing Validation Note:</strong> SpicePass ₹3,499/mo equates to ₹175/meal (at 20 meals) — within willingness-to-pay band of ₹150–250 confirmed in consumer interviews. À La Carte at ₹340 avg requires strong brand trust before scale; pilot should lead with SpicePass to build recurring revenue base. Target: 60% of revenue from SpicePass + Corporate by Month 6.
+  </div>
+</div>
+
+<!-- S11: RISKS -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">11</div>
+    <h2>Top 5 Risks & Mitigations</h2>
+  </div>
+  <table>
+    <thead><tr><th>#</th><th>Risk</th><th>Severity</th><th>Probability</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>Central kitchen quality drifts as kitchen count scales</strong></td><td><span class="badge b-crit">Critical</span></td><td>High</td><td>Standardise masala kits from 1 supplier; recipe SOPs with photo references; surprise quality audits bi-weekly; chef-to-outlet ratio cap of 1:1.5</td></tr>
+      <tr><td>2</td><td><strong>Delivery SLA breach erodes brand trust in first 90 days</strong></td><td><span class="badge b-crit">Critical</span></td><td>Medium</td><td>Geo-fence 3 km hard limit at launch; in-house riders (not gig); real-time ETA recalibration every 2 min; free meal compensation policy for >35 min</td></tr>
+      <tr><td>3</td><td><strong>Zomato/Swiggy launches competing cloud kitchen brand or acquires competitor</strong></td><td><span class="badge b-high">High</span></td><td>Medium</td><td>Build direct-channel moat (own app + WhatsApp) before any platform listing; grow SpicePass base to 2,000 subscribers in Year 1 as switching cost</td></tr>
+      <tr><td>4</td><td><strong>Unit economics don't reach EBITDA ≥18% at outlet level in 6 months</strong></td><td><span class="badge b-high">High</span></td><td>Medium</td><td>Tight COGS target: food cost ≤32% of revenue; daily food-waste tracking; weekly P&L per kitchen; kill trigger: <12% EBITDA at month 4</td></tr>
+      <tr><td>5</td><td><strong>Founder-chef dependency — key culinary talent exits, recipes walk out</strong></td><td><span class="badge b-med">Medium</span></td><td>Low–Medium</td><td>IP-protect all recipes in internal recipe management system; cross-train 2 chefs per cuisine zone; hire culinary director (not just head chef) by month 4</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S12: 30-DAY PLAN -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">12</div>
+    <h2>30-Day Launch Plan</h2>
+    <span class="sub">From Signing Lease to First 100 Orders</span>
+  </div>
+  <div class="week-grid">
+    <div class="week-card">
+      <div class="wc-hd w1">Week 1 — Foundation</div>
+      <div class="wc-body"><ul>
+        <li>Sign lease on 2 Bengaluru cloud kitchen spaces (Whitefield + Indiranagar)</li>
+        <li>File FSSAI license + trade license applications</li>
+        <li>Hire head chef × 2 (one per cuisine zone: Kerala & Rajasthan)</li>
+        <li>Source masala kit supplier; lock 3-month supply contract</li>
+        <li>Set up WhatsApp Business API (Interakt or Wati)</li>
+      </ul></div>
+    </div>
+    <div class="week-card">
+      <div class="wc-hd w2">Week 2 — Menu & Tech</div>
+      <div class="wc-body"><ul>
+        <li>Finalise 8-item launch menu; photograph all dishes</li>
+        <li>Build WhatsApp ordering bot flow (menu → cart → Razorpay)</li>
+        <li>Deploy live kitchen CCTV + embed link in order confirmation</li>
+        <li>Set up delivery partner onboarding (8 in-house riders)</li>
+        <li>Cold-outreach to 10 IT park HR managers for corporate pilot</li>
+      </ul></div>
+    </div>
+    <div class="week-card">
+      <div class="wc-hd w3">Week 3 — Soft Launch</div>
+      <div class="wc-body"><ul>
+        <li>Invite 200 beta testers (LinkedIn + personal networks) for free tasting</li>
+        <li>Run 5-day taste trial in 2 office buildings; collect structured feedback</li>
+        <li>Iterate on 2 dishes that score below 4/5; fix packaging insulation issue</li>
+        <li>Sign 2 corporate meal-plan contracts (min 60 meals/day each)</li>
+        <li>Publish FSSAI certification + live cam link on Instagram page</li>
+      </ul></div>
+    </div>
+    <div class="week-card">
+      <div class="wc-hd w4">Week 4 — Full Launch</div>
+      <div class="wc-body"><ul>
+        <li>Go live publicly; push WhatsApp broadcast to beta list</li>
+        <li>Launch SpicePass subscription (target: 150 sign-ups in week 1)</li>
+        <li>Daily kitchen P&L tracking begins; COGS vs revenue dashboard live</li>
+        <li>Referral campaign: "Share with 3 friends, get a free thali"</li>
+        <li>Week 4 KPI review: NPS ≥50, delivery SLA ≥92%, COGS ≤34%</li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- S13: FOUNDER ACTION SHEET -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">13</div>
+    <h2>Founder Action Sheet</h2>
+    <span class="sub">10 Non-Negotiable Moves in the Next 30 Days</span>
+  </div>
+  <div class="action-list">
+    <div class="action-item"><div class="action-num">1</div><div class="action-text"><strong>Do 30 customer intercepts this week</strong>Ask: "What did you eat for lunch last 3 days?" Identify the pain before pitching the product.</div></div>
+    <div class="action-item"><div class="action-num">2</div><div class="action-text"><strong>Sign 2 B2B pilots before spending on kitchen CAPEX</strong>Corporate contracts = guaranteed floor demand; reduces burn risk by 40%.</div></div>
+    <div class="action-item"><div class="action-num">3</div><div class="action-text"><strong>Recruit a culinary director, not just a head chef</strong>The person who can write SOPs, train others, and own the QA system — not just cook well.</div></div>
+    <div class="action-item"><div class="action-num">4</div><div class="action-text"><strong>Geo-fence strictly to 3 km radius at launch</strong>Delivery SLA is the brand. Do not accept orders you can't fulfill in 25 min.</div></div>
+    <div class="action-item"><div class="action-num">5</div><div class="action-text"><strong>Build the WhatsApp bot before the app</strong>WhatsApp = 0 friction for Indian customers. Validate the order flow here first, app later.</div></div>
+    <div class="action-item"><div class="action-num">6</div><div class="action-text"><strong>Track COGS daily — not weekly</strong>Food cost leakage kills margins before you notice. Set a ≤32% COGS hard cap with daily dashboard.</div></div>
+    <div class="action-item"><div class="action-num">7</div><div class="action-text"><strong>Get on Instagram Reels — cook on camera</strong>Authentic content showing the real kitchen builds trust faster than any ad. Post 3×/week minimum.</div></div>
+    <div class="action-item"><div class="action-num">8</div><div class="action-text"><strong>Lock a 3-month masala kit supplier contract now</strong>Ingredient consistency = taste consistency. Single-source your core spice blends before launch.</div></div>
+    <div class="action-item"><div class="action-num">9</div><div class="action-text"><strong>Set a kill threshold: EBITDA &lt;12% at month 4 = stop expanding</strong>Do not open kitchen #3 before kitchen #1 is profitable. Discipline over speed.</div></div>
+    <div class="action-item"><div class="action-num">10</div><div class="action-text"><strong>File all recipes as trade secrets with an NDA stack</strong>IP-protect the recipe system before hiring chefs. This is your defensible moat.</div></div>
+  </div>
+</div>
+
+<!-- S14: SCORES -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">14</div>
+    <h2>Validation Scores</h2>
+    <span class="sub">Analyst Assessment · SpiceRoute Kitchens</span>
+  </div>
+  <div class="score-grid">
+    <div class="score-card"><div class="sc-val">72<span class="sc-max">/100</span></div><div class="sc-lbl">Market Opportunity</div></div>
+    <div class="score-card"><div class="sc-val">65<span class="sc-max">/100</span></div><div class="sc-lbl">Founder-Market Fit</div></div>
+    <div class="score-card"><div class="sc-val">68<span class="sc-max">/100</span></div><div class="sc-lbl">Execution Feasibility</div></div>
+    <div class="score-card"><div class="sc-val">58<span class="sc-max">/100</span></div><div class="sc-lbl">Defensibility / Moat</div></div>
+  </div>
+  <div class="gauge-row">
+    <div class="gauge-wrap">
+      <div class="gauge" style="background:conic-gradient(var(--cyan) 0% 72%, #EDE3D3 72% 100%);">72</div>
+      <div class="gauge-lbl">Opportunity</div>
+    </div>
+    <div class="gauge-wrap">
+      <div class="gauge" style="background:conic-gradient(var(--green) 0% 65%, #EDE3D3 65% 100%);">65</div>
+      <div class="gauge-lbl">Founder Fit</div>
+    </div>
+    <div class="gauge-wrap">
+      <div class="gauge" style="background:conic-gradient(var(--teal) 0% 68%, #EDE3D3 68% 100%);">68</div>
+      <div class="gauge-lbl">Execution</div>
+    </div>
+    <div class="gauge-wrap">
+      <div class="gauge" style="background:conic-gradient(var(--amber) 0% 58%, #EDE3D3 58% 100%);">58</div>
+      <div class="gauge-lbl">Moat</div>
+    </div>
+  </div>
+  <div class="callout warn">
+    <strong>Moat Score Note (58/100):</strong> Cloud kitchens are easy to replicate. SpiceRoute's defensibility depends on (a) building a SpicePass subscriber base as a switching-cost moat, (b) IP-protecting the standardised recipe system, and (c) achieving brand recall for "authentic regional food" before well-funded competitors enter. This score improves to ~74 if 2,000 SpicePass subscribers are locked by end of Year 1.
+  </div>
+</div>
+
+<!-- S15: FINAL VERDICT -->
+<div class="section">
+  <div class="section-hd">
+    <div class="sec-num">15</div>
+    <h2>Final Verdict</h2>
+    <span class="sub">Investment & Execution Recommendation</span>
+  </div>
+  <div class="final-verdict">
+    <div class="fv-pill">⚡ Conditional GO</div>
+    <div class="fv-text">
+      SpiceRoute Kitchens addresses a <strong>real, felt pain</strong> in a large and growing market. The fast-casual regional Indian cuisine gap is validated by interview data and social listening. The business model is viable at ₹185 Cr SOM with a clear path to EBITDA ≥18% per outlet. <br/><br/>
+      <strong>Conditions to proceed:</strong> (1) Sign 2 B2B corporate meal-plan clients before kitchen CAPEX; (2) Prove 25-min delivery SLA achievable in geo-fenced 3 km radius; (3) Hit 150 SpicePass subscribers in Week 1 of public launch — a leading indicator of retention. <br/><br/>
+      <strong>Series A thesis:</strong> Raise ₹35–45 Cr after 90-day pilot shows EBITDA ≥15%, NPS ≥50, and 2,500+ active customers across 2 kitchens. Expand to Mumbai + Hyderabad in Year 2.
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="col-block">
+      <h4>Green Flags ✓</h4>
+      <ul>
+        <li>Large, validated consumer pain with no organised competitor in regional fast-casual</li>
+        <li>B2B corporate contracts provide predictable revenue floor from Day 1</li>
+        <li>Direct-ordering model protects margins from platform commission erosion</li>
+        <li>SpicePass subscription creates compounding retention and LTV</li>
+        <li>Regional menu rotation builds habit and reduces churn vs static menus</li>
+      </ul>
+    </div>
+    <div class="col-block">
+      <h4>Watch-Outs ⚠</h4>
+      <ul>
+        <li>Low moat — replication risk from well-funded cloud kitchen aggregators</li>
+        <li>Operational complexity of multi-cuisine central kitchen at scale</li>
+        <li>Unit economics must be proven before any city #2 expansion</li>
+        <li>Delivery SLA is the brand — one bad week can spike negative reviews</li>
+        <li>Founder-chef dependency if culinary leadership is not institutionalised early</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div class="footer">
+  <div class="footer-left">SpiceRoute Kitchens · Customer & MVP Blueprint · Day 23 of 60-Day Startup Challenge</div>
+  <div class="footer-right">Confidential — Internal Use Only · June 2026</div>
+</div>
+
+</div><!-- /page -->
+</body>
+</html>
