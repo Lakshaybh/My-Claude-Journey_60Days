@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Healthcare Risk Control Tower</title>
+<style>
+/* ============================================================
+   HEALTHCARE RISK CONTROL TOWER
+   Restyled to the EXL branding spec:
+   light default, one orange accent, no rainbow status,
+   Lucide icons, slim app header, Inter type.
+   ============================================================ */
+
+/* ---------- EXL Tokens ---------- */
+:root{
+  /* brand constants */
+  --brand-orange:#FF6633; --brand-orange-hover:#FF7D52; --brand-orange-dim:#E04E1F;
+  --brand-navy:#0B1B33;
+  --orange-soft:rgba(255,102,51,0.08); --orange-glow:rgba(255,102,51,0.18);
+  --danger:#E04545; --danger-soft:rgba(224,69,69,0.07);
+
+  /* light surfaces (default) */
+  --bg-base:#F7F8FA; --bg-surface:#FFFFFF; --bg-card:#FFFFFF; --bg-card-hover:#FBFAF8;
+  --border-subtle:#E7E9EE; --border-active:#D4D8E0;
+
+  /* text */
+  --text-primary:#0B1B33; --text-secondary:#5A6577; --text-muted:#9AA3B2;
+
+  /* accent */
+  --accent:#FF6633; --accent-hover:#FF7D52; --accent-dim:#E04E1F; --accent-glow:rgba(255,102,51,0.18);
+
+  --shadow-card:0 1px 2px rgba(11,27,51,.05), 0 8px 24px rgba(11,27,51,.06);
+
+  --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px; --space-8:32px;
+  --radius-sm:8px; --radius:12px; --radius-lg:20px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --font-sans:"Inter", -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
+  --mono:"SF Mono", "Consolas", "Roboto Mono", monospace;
+}
+
+/* ---------- Reset ---------- */
+*{ margin:0; padding:0; box-sizing:border-box; }
+html, body{ height:100%; }
+body{
+  font-family:var(--font-sans);
+  color:var(--text-primary);
+  background:var(--bg-base);
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{ background:var(--accent-glow); }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+svg{ display:inline-block; vertical-align:-0.15em; flex:none; }
+
+/* ---------- Layout Shell ---------- */
+.app{
+  max-width:1240px;
+  margin:0 auto;
+  padding:18px 20px 48px;
+}
+
+/* ---------- Slim App Header ---------- */
+.app-head{
+  display:flex; align-items:center; gap:10px;
+  padding:6px 2px 16px;
+  border-bottom:1px solid var(--border-subtle);
+  margin-bottom:20px;
+}
+.logo-dot{
+  width:32px; height:32px; border-radius:8px; flex:none;
+  background:var(--accent); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 3px 10px var(--accent-glow);
+}
+.app-head .titles h1{ font-size:15.5px; font-weight:700; letter-spacing:-.01em; }
+.app-head .titles .sub{ font-size:11px; color:var(--text-muted); letter-spacing:.14em; text-transform:uppercase; }
+.head-controls{ display:flex; align-items:center; gap:8px; margin-left:auto; flex-wrap:wrap; }
+
+/* ---------- Buttons ---------- */
+.btn{
+  font:inherit; font-weight:600; font-size:13px; border-radius:var(--radius-sm);
+  padding:9px 14px; border:1px solid var(--border-active); cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px;
+  background:transparent; color:var(--text-primary);
+  transition:all .18s var(--ease);
+}
+.btn:hover{ background:var(--bg-card-hover); transform:translateY(-2px); }
+.btn.primary{
+  background:var(--accent); color:#fff; border-color:transparent;
+  box-shadow:0 4px 14px var(--accent-glow); font-weight:700;
+}
+.btn.primary:hover{ background:var(--accent-hover); box-shadow:0 8px 22px var(--accent-glow); }
+.btn.lg{ font-size:15px; padding:13px 26px; }
+.btn .on-dot{ color:var(--accent); }
+.btn.muted{ color:var(--text-muted); }
+
+/* ---------- Timer Pill ---------- */
+.timer-pill{
+  display:flex; align-items:center; gap:8px;
+  padding:7px 14px; border-radius:999px;
+  background:var(--bg-surface); border:1px solid var(--border-subtle);
+  color:var(--text-secondary);
+  font-variant-numeric:tabular-nums;
+}
+.timer-pill .clock{ font-family:var(--mono); font-size:18px; font-weight:700; color:var(--text-primary); }
+.timer-pill.warn{ border-color:var(--orange-glow); }
+.timer-pill.warn .clock{ color:var(--accent-dim); }
+.timer-pill.crit{ border-color:var(--danger); background:var(--danger-soft); }
+.timer-pill.crit .clock{ color:var(--danger); animation:blink 1s steps(2) infinite; }
+@keyframes blink{ 50%{ opacity:.4; } }
+
+/* ---------- KPI Grid ---------- */
+.kpi-grid{
+  display:grid; grid-template-columns:repeat(7, 1fr); gap:12px;
+}
+.kpi{
+  position:relative; padding:14px;
+  border-radius:var(--radius);
+  background:var(--bg-card);
+  border:1px solid var(--border-subtle);
+  box-shadow:var(--shadow-card);
+  transition:.18s var(--ease);
+}
+.kpi:hover{ border-color:var(--border-active); transform:translateY(-2px); }
+.kpi .label{
+  font-size:10.5px; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--text-muted); display:flex; align-items:center; gap:6px;
+}
+.kpi .value{
+  font-size:23px; font-weight:800; margin-top:6px; letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums; color:var(--text-primary);
+}
+.kpi .bar{ height:5px; border-radius:3px; margin-top:9px; background:var(--bg-base); overflow:hidden; }
+.kpi .bar > i{ display:block; height:100%; width:50%; background:var(--accent); border-radius:3px; transition:width .5s var(--ease); }
+.kpi .delta{
+  position:absolute; top:12px; right:12px;
+  font-size:11px; font-weight:700; opacity:0; transition:opacity .3s;
+  font-variant-numeric:tabular-nums;
+}
+.kpi.flash-up .delta{ opacity:1; color:var(--accent); }
+.kpi.flash-down .delta{ opacity:1; color:var(--text-secondary); }
+.kpi.flash-up{ box-shadow:0 0 0 1px var(--orange-glow), 0 8px 24px var(--accent-glow); }
+.kpi.flash-down{ box-shadow:0 0 0 1px var(--border-active), var(--shadow-card); }
+
+/* ---------- Main Grid ---------- */
+.main{ display:grid; grid-template-columns:1fr 340px; gap:16px; margin-top:16px; }
+
+/* ---------- Panels ---------- */
+.panel{
+  background:var(--bg-card);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-card);
+  overflow:hidden;
+}
+.panel-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; border-bottom:1px solid var(--border-subtle);
+}
+.panel-head h2{ font-size:14px; font-weight:700; letter-spacing:-.01em; display:flex; align-items:center; gap:8px; }
+.panel-head h2 .hd-ic{ color:var(--accent); }
+.count-chip{
+  font-size:11px; font-weight:600; padding:4px 11px; border-radius:999px;
+  background:var(--orange-soft); color:var(--brand-orange-dim); border:1px solid var(--orange-glow);
+}
+
+.alerts{ padding:16px; display:grid; gap:14px; min-height:320px; max-height:60vh; overflow-y:auto; }
+.alerts::-webkit-scrollbar{ width:8px; }
+.alerts::-webkit-scrollbar-thumb{ background:var(--border-active); border-radius:8px; }
+
+.empty-state{ grid-column:1 / -1; text-align:center; color:var(--text-muted); padding:60px 20px; font-size:14px; }
+.empty-state .big{ color:var(--accent); margin-bottom:12px; opacity:.85; }
+.empty-state .big svg{ vertical-align:middle; }
+
+/* ---------- Alert Card ---------- */
+.alert-card{
+  position:relative; border-radius:var(--radius); padding:14px 16px;
+  background:var(--bg-card); border:1px solid var(--border-subtle);
+  border-left:3px solid var(--pcolor, var(--accent));
+  box-shadow:var(--shadow-card);
+  animation:cardIn .3s var(--ease);
+  transition:box-shadow .2s, transform .2s;
+}
+.alert-card:hover{ transform:translateY(-2px); border-color:var(--border-active); }
+@keyframes cardIn{ from{ opacity:0; transform:translateY(-8px) scale(.99); } }
+.alert-card.critical{ border-color:var(--danger); border-left-color:var(--danger); background:var(--danger-soft); animation:cardIn .3s var(--ease), pulse 1.8s var(--ease) infinite; }
+@keyframes pulse{ 0%,100%{ box-shadow:0 0 0 1px rgba(224,69,69,.25), var(--shadow-card); } 50%{ box-shadow:0 0 0 1px rgba(224,69,69,.55), 0 0 22px rgba(224,69,69,.22); } }
+.alert-card.resolving{ animation:cardOut .38s var(--ease) forwards; }
+@keyframes cardOut{ to{ opacity:0; transform:translateX(40px) scale(.96); height:0; padding:0; margin:0; } }
+
+.alert-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.alert-title{ font-size:15px; font-weight:700; letter-spacing:-.01em; display:flex; align-items:center; gap:8px; }
+.alert-title .a-ic{ color:var(--pcolor, var(--accent)); }
+.alert-desc{ font-size:12.5px; color:var(--text-secondary); margin-top:5px; line-height:1.5; }
+.priority-tag{
+  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+  padding:4px 9px; border-radius:999px; white-space:nowrap;
+  color:var(--pcolor); border:1px solid color-mix(in srgb, var(--pcolor) 40%, transparent);
+  background:color-mix(in srgb, var(--pcolor) 8%, transparent);
+}
+
+.alert-meta{ display:flex; gap:16px; margin-top:10px; flex-wrap:wrap; font-size:11.5px; color:var(--text-muted); }
+.alert-meta .impact{ display:inline-flex; align-items:center; gap:5px; color:var(--text-secondary); font-weight:600; }
+.alert-card.critical .alert-meta .impact{ color:var(--danger); }
+
+.alert-timer{ margin-top:10px; }
+.alert-timer .track{ height:6px; border-radius:4px; background:var(--bg-base); overflow:hidden; }
+.alert-timer .track > i{ display:block; height:100%; background:var(--pcolor, var(--accent)); transition:width .3s linear; }
+.alert-timer .lbl{ font-size:10.5px; color:var(--text-muted); margin-top:4px; display:flex; justify-content:space-between; }
+
+.actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.act-btn{
+  font:inherit; font-size:12px; font-weight:600; padding:8px 12px; border-radius:var(--radius-sm);
+  background:var(--bg-surface); border:1px solid var(--border-active); color:var(--text-primary);
+  cursor:pointer; transition:transform .14s var(--ease), background .14s, border-color .14s;
+}
+.act-btn:hover{ transform:translateY(-2px); background:var(--orange-soft); border-color:var(--orange-glow); color:var(--brand-orange-dim); }
+
+/* ---------- Side Column ---------- */
+.side{ display:flex; flex-direction:column; gap:16px; }
+
+.log{ padding:12px; display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto; }
+.log::-webkit-scrollbar{ width:6px; }
+.log::-webkit-scrollbar-thumb{ background:var(--border-active); border-radius:8px; }
+.log-item{
+  font-size:12px; line-height:1.45; padding:8px 11px; border-radius:var(--radius-sm);
+  background:var(--bg-base); border-left:3px solid var(--lc, var(--border-active));
+  animation:logIn .3s var(--ease); display:flex; gap:8px; align-items:flex-start;
+}
+@keyframes logIn{ from{ opacity:0; transform:translateX(12px); } }
+.log-item .t{ color:var(--text-muted); font-family:var(--mono); font-size:10.5px; white-space:nowrap; }
+.log-item .li-ic{ color:var(--lc, var(--text-muted)); margin-top:1px; }
+.log-item .m{ color:var(--text-secondary); }
+.log-item.good{ --lc:var(--accent); }
+.log-item.bad{ --lc:var(--accent-dim); }
+.log-item.warn{ --lc:var(--text-muted); }
+.log-item.info{ --lc:var(--border-active); }
+
+.stat-row{ display:flex; justify-content:space-between; padding:9px 4px; font-size:12.5px; border-bottom:1px solid var(--border-subtle); }
+.stat-row:last-child{ border-bottom:none; }
+.stat-row span:first-child{ color:var(--text-secondary); }
+.stat-row b{ font-variant-numeric:tabular-nums; color:var(--text-primary); }
+.stat-row b.accent{ color:var(--accent); }
+.stat-row b.muted{ color:var(--text-muted); }
+.stats-body{ padding:8px 16px 14px; }
+
+/* ---------- Modals ---------- */
+.overlay{
+  position:fixed; inset:0; z-index:50;
+  background:rgba(11,27,51,0.34); backdrop-filter:blur(6px);
+  display:none; align-items:center; justify-content:center; padding:20px;
+}
+.overlay.show{ display:flex; animation:fadeIn .25s var(--ease); }
+@keyframes fadeIn{ from{ opacity:0; } }
+.modal{
+  width:min(560px, 100%); max-height:88vh; overflow-y:auto;
+  background:var(--bg-surface); border:1px solid var(--border-subtle);
+  border-radius:var(--radius-lg); padding:28px;
+  box-shadow:0 20px 60px rgba(11,27,51,0.22);
+  animation:modalIn .32s var(--ease);
+}
+@keyframes modalIn{ from{ opacity:0; transform:translateY(16px) scale(.98); } }
+.modal .eyebrow{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; text-align:center; display:block; }
+.modal h2{ font-size:22px; font-weight:800; letter-spacing:-.02em; margin-bottom:6px; }
+.modal .title-lg{ font-size:26px; font-weight:800; letter-spacing:-.02em; text-align:center; margin-top:8px; color:var(--text-primary); }
+.modal .lead{ color:var(--text-secondary); font-size:14px; line-height:1.65; margin-bottom:18px; }
+.modal ul{ list-style:none; display:grid; gap:11px; margin:4px 0 20px; }
+.modal li{ display:flex; gap:10px; font-size:13px; color:var(--text-secondary); line-height:1.55; }
+.modal li .ic{ color:var(--accent); flex:none; margin-top:1px; }
+.modal-actions{ display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
+.logo-lg{
+  width:52px; height:52px; border-radius:14px; margin:0 auto 4px;
+  background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 6px 18px var(--accent-glow);
+}
+
+/* ---------- End Screen ---------- */
+.grade-badge{
+  width:112px; height:112px; margin:6px auto 14px; border-radius:50%;
+  display:grid; place-items:center; font-size:42px; font-weight:900; letter-spacing:-.02em;
+  border:3px solid var(--gcolor, var(--accent)); color:var(--gcolor, var(--accent));
+  font-variant-numeric:tabular-nums;
+}
+.final-score{ text-align:center; font-size:14px; color:var(--text-secondary); margin-bottom:4px; }
+.final-score b{ font-size:30px; color:var(--text-primary); display:block; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+.end-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:18px 0; }
+.end-cell{ background:var(--bg-base); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:11px 13px; }
+.end-cell .k{ font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; }
+.end-cell .v{ font-size:18px; font-weight:800; margin-top:3px; font-variant-numeric:tabular-nums; }
+.summary-box{
+  background:var(--orange-soft); border:1px solid var(--orange-glow);
+  border-radius:var(--radius); padding:14px 16px; font-size:13px; line-height:1.65;
+  color:var(--text-secondary); margin-bottom:18px;
+}
+
+/* ---------- Toasts ---------- */
+.toast-wrap{ position:fixed; top:18px; right:18px; z-index:60; display:flex; flex-direction:column; gap:10px; }
+.toast{
+  min-width:260px; max-width:320px; padding:12px 15px; border-radius:var(--radius);
+  background:var(--bg-surface); border:1px solid var(--border-subtle);
+  border-left:3px solid var(--tc, var(--accent));
+  box-shadow:0 10px 30px rgba(11,27,51,0.16);
+  animation:toastIn .38s var(--ease), toastOut .38s var(--ease) 4.6s forwards; font-size:12.5px;
+}
+.toast .th{ font-weight:700; margin-bottom:3px; display:flex; align-items:center; gap:7px; color:var(--tc); }
+.toast .tb{ color:var(--text-secondary); line-height:1.45; }
+@keyframes toastIn{ from{ opacity:0; transform:translateX(40px); } }
+@keyframes toastOut{ to{ opacity:0; transform:translateX(40px); } }
+.toast.good{ --tc:var(--accent); }
+.toast.bad{ --tc:var(--danger); }
+.toast.warn{ --tc:var(--text-secondary); }
+
+.paused-flag{
+  position:fixed; inset:0; z-index:40; display:none;
+  align-items:center; justify-content:center;
+  background:rgba(247,248,250,0.6); backdrop-filter:blur(3px);
+  font-size:34px; font-weight:800; letter-spacing:2px; color:var(--accent); gap:12px;
+}
+.paused-flag.show{ display:flex; animation:fadeIn .2s var(--ease); }
+
+/* ---------- Responsive ---------- */
+@media (max-width:1100px){
+  .kpi-grid{ grid-template-columns:repeat(4, 1fr); }
+  .main{ grid-template-columns:1fr; }
+}
+@media (max-width:680px){
+  .app{ padding:14px; }
+  .kpi-grid{ grid-template-columns:repeat(2, 1fr); }
+  .app-head .titles .sub{ display:none; }
+  .kpi .value{ font-size:20px; }
+}
+
+/* ---------- Reduced Motion ---------- */
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important; transition:none !important; }
+  .btn:hover, .kpi:hover, .alert-card:hover, .act-btn:hover{ transform:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ================= SLIM APP HEADER ================= -->
+  <header class="app-head">
+    <div class="logo-dot" data-ic="activity" data-sz="18"></div>
+    <div class="titles">
+      <h1>Healthcare Risk Control Tower</h1>
+      <div class="sub">Clinical Risk Command</div>
+    </div>
+    <div class="head-controls">
+      <div class="timer-pill" id="timerPill">
+        <span data-ic="timer" data-sz="15"></span><span class="clock" id="clock">3:00</span>
+      </div>
+      <button class="btn" id="pauseBtn" title="Pause / Resume"><span data-ic="pause" data-sz="15"></span> Pause</button>
+      <button class="btn" id="soundBtn" title="Sound (visual only)"><span class="on-dot" data-ic="volume2" data-sz="15"></span> Sound</button>
+      <button class="btn" id="helpBtn" title="Instructions"><span data-ic="help" data-sz="15"></span> Help</button>
+    </div>
+  </header>
+
+  <!-- ================= KPI GRID ================= -->
+  <section class="kpi-grid" id="kpiGrid"><!-- built by JS --></section>
+
+  <!-- ================= MAIN ================= -->
+  <section class="main">
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="hd-ic" data-ic="triangleAlert" data-sz="16"></span> Active clinical risk alerts</h2>
+        <span class="count-chip" id="alertCount">0 active</span>
+      </div>
+      <div class="alerts" id="alerts"></div>
+    </div>
+
+    <aside class="side">
+      <div class="panel">
+        <div class="panel-head"><h2><span class="hd-ic" data-ic="activity" data-sz="16"></span> Shift stats</h2></div>
+        <div class="stats-body" id="statsBody"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2><span class="hd-ic" data-ic="list" data-sz="16"></span> Live event log</h2></div>
+        <div class="log" id="log"></div>
+      </div>
+    </aside>
+  </section>
+</div>
+
+<!-- ================= TOASTS ================= -->
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- ================= PAUSED FLAG ================= -->
+<div class="paused-flag" id="pausedFlag"><span data-ic="pause" data-sz="30"></span> PAUSED</div>
+
+<!-- ================= START MODAL ================= -->
+<div class="overlay show" id="startOverlay">
+  <div class="modal">
+    <div class="logo-lg" data-ic="activity" data-sz="26"></div>
+    <span class="eyebrow">Clinical risk simulation</span>
+    <div class="title-lg">Healthcare Risk Control Tower</div>
+    <p class="lead" style="text-align:center; margin-top:12px;">
+      You are the Chief Medical Officer running a large hospital network.
+      Patient-risk alerts keep coming in. Read each one, pick the response that fits,
+      and hold your clinical KPIs up before the 3-minute shift ends.
+    </p>
+    <ul>
+      <li><span class="ic" data-ic="triangleAlert" data-sz="16"></span> Handle critical risks first. Ignored ones escalate and cost you patient safety.</li>
+      <li><span class="ic" data-ic="activity" data-sz="16"></span> Every response is a trade-off. The best one protects lives and lowers future risk.</li>
+      <li><span class="ic" data-ic="circleAlert" data-sz="16"></span> Some shortcuts come back to hurt you a few seconds later, so watch the toasts.</li>
+      <li><span class="ic" data-ic="clock" data-sz="16"></span> It gets busier as the clock runs: more alerts, arriving faster, stacked together.</li>
+    </ul>
+    <div class="modal-actions" style="flex-direction:column;align-items:stretch;gap:8px">
+      <button class="btn primary lg" id="startBtn" style="justify-content:center"><span data-ic="play" data-sz="16"></span> Start shift</button>
+      <button class="btn" id="demoReportBtn" style="justify-content:center;font-size:13px"><span data-ic="list" data-sz="15"></span> Preview sample report (no game needed)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= HELP MODAL ================= -->
+<div class="overlay" id="helpOverlay">
+  <div class="modal">
+    <h2>How to play</h2>
+    <p class="lead">Manage clinical risk across your hospital network in real time.</p>
+    <ul>
+      <li><span class="ic" data-ic="star" data-sz="16"></span> Goal: keep patients safe and score as high as you can in 3 minutes.</li>
+      <li><span class="ic" data-ic="triangleAlert" data-sz="16"></span> Alerts arrive with a priority and a countdown. If a timer hits zero, the risk escalates and you take a penalty.</li>
+      <li><span class="ic" data-ic="activity" data-sz="16"></span> Responses each affect your KPIs differently. Matching the right response to the risk earns the most points.</li>
+      <li><span class="ic" data-ic="shield" data-sz="16"></span> KPIs: Patient Safety, Patient Satisfaction, Bed Capacity, Care Efficiency, Operating Cost, Lives Protected.</li>
+      <li><span class="ic" data-ic="clock" data-sz="16"></span> Delayed effects: shortcuts like "Ignore" may look free now but backfire later.</li>
+      <li><span class="ic" data-ic="star" data-sz="16"></span> Grade: A+ to D based on your final score and KPI health.</li>
+    </ul>
+    <div class="modal-actions">
+      <button class="btn primary" id="helpClose">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= END MODAL ================= -->
+<div class="overlay" id="endOverlay">
+  <div class="modal" id="endModal"><!-- built by JS --></div>
+</div>
+
+<script>
+/* ============================================================
+   HEALTHCARE RISK CONTROL TOWER : GAME ENGINE
+   Vanilla JS, modular functions, no dependencies.
+   ============================================================ */
+
+/* ---------- Lucide icons (inline SVG, offline) ----------
+   Path data copied from lucide.dev so the look matches lucide-react.
+   Icons inherit currentColor from their parent.
+------------------------------------------------------------- */
+const ICON_PATHS = {
+  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/>',
+  bed: '<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
+  banknote: '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01"/><path d="M18 12h.01"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  timer: '<line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/>',
+  pause: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  volume2: '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>',
+  volumeX: '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/>',
+  help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+  droplet: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C3 11.1 2 13 2 15a7 7 0 0 0 7 7z"/>',
+  pill: '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  cross: '<path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2z"/>',
+  bug: '<path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/>',
+  rotate: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  flask: '<path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/>',
+  triangleAlert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  circleCheck: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  circleAlert: '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  list: '<line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>',
+};
+function ic(name, size = 16) {
+  const p = ICON_PATHS[name] || "";
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+}
+/* fill any static [data-ic] placeholders */
+function hydrateIcons(root = document) {
+  root.querySelectorAll("[data-ic]").forEach(node => {
+    node.innerHTML = ic(node.dataset.ic, parseInt(node.dataset.sz || "16"));
+  });
+}
+
+/* ---------- Config ---------- */
+const CONFIG = {
+  gameLength: 180,        // seconds (3 minutes)
+  tickMs: 100,            // main loop resolution
+  baseSpawnEvery: 12,     // seconds between spawns at start
+  minSpawnEvery: 4.5,     // fastest spawn interval near the end
+  maxActiveAlerts: 6,
+};
+
+/* ---------- KPI Definitions ---------- */
+const KPI_DEFS = [
+  { key: "safety",      label: "Patient Safety",  unit: "%", icon: "shield",   start: 90, max: 100 },
+  { key: "satisfaction",label: "Patient Sat.",    unit: "%", icon: "smile",    start: 86, max: 100 },
+  { key: "capacity",    label: "Bed Capacity",    unit: "%", icon: "bed",      start: 82, max: 100 },
+  { key: "care",        label: "Care Efficiency", unit: "%", icon: "activity", start: 84, max: 100 },
+  { key: "cost",        label: "Operating Cost",  unit: "K", icon: "banknote", start: 140, max: 400, cost: true },
+  { key: "lives",       label: "Lives Protected", unit: "",  icon: "heart",    start: 0, max: 2000, raw: true },
+  { key: "score",       label: "Score",           unit: "",  icon: "star",     start: 0, max: 99999, raw: true },
+];
+
+/* ---------- Alert Templates (healthcare risk factors) ---------- */
+const ALERT_TYPES = [
+  {
+    id: "sepsis", icon: "droplet", title: "Sepsis Risk Spike",
+    desc: "Ward 4B: a post-op patient's vitals match an early-sepsis pattern.",
+    impact: "Life-threatening if missed",
+    actions: [
+      { label: "Deploy Rapid Response", best: true,  fx: { safety:+6, satisfaction:+3, care:+3, cost:+16, lives:+120 }, msg: "Rapid response team started antibiotics in time." },
+      { label: "Increase Monitoring",   best: false, fx: { safety:+2, care:-1, cost:+6, lives:+30 }, msg: "Closer monitoring caught it, but later than ideal." },
+      { label: "Delay Decision",        best: false, delayed: true, fx: { safety:-9, satisfaction:-6, lives:-80 }, msg: "Delay let sepsis progress." },
+    ],
+  },
+  {
+    id: "icu", icon: "bed", title: "ICU Bed Shortage",
+    desc: "Two critical patients need ICU beds and only one is free.",
+    impact: "Critical care access at risk",
+    actions: [
+      { label: "Transfer Patient",  best: true,  fx: { capacity:+7, safety:+3, care:+2, cost:+14, lives:+70 }, msg: "Stable patient moved to step-down. Bed freed." },
+      { label: "Approve Overtime",  best: false, fx: { capacity:+3, cost:+24, satisfaction:+1 }, msg: "Opened an overflow bay at extra cost." },
+      { label: "Ignore",            best: false, delayed: true, fx: { capacity:-8, safety:-6, satisfaction:-5 }, msg: "No bed found. Patient held in the ER." },
+    ],
+  },
+  {
+    id: "mederror", icon: "pill", title: "Medication Error Risk",
+    desc: "A high-alert drug order shows a dosing conflict for one patient.",
+    impact: "Potential adverse drug event",
+    actions: [
+      { label: "Escalate to Pharmacist", best: true,  fx: { safety:+6, satisfaction:+3, care:+3, cost:+8, lives:+60 }, msg: "Pharmacist corrected the dose before it was given." },
+      { label: "Increase Monitoring",    best: false, fx: { safety:+2, care:-1, cost:+5 }, msg: "Flagged for extra checks at the bedside." },
+      { label: "Ignore",                 best: false, delayed: true, fx: { safety:-8, satisfaction:-7, lives:-50 }, msg: "Wrong dose administered. Harm event logged." },
+    ],
+  },
+  {
+    id: "er", icon: "users", title: "ER Overcrowding",
+    desc: "The emergency department is at 140% capacity with rising wait times.",
+    impact: "Care delays across the department",
+    actions: [
+      { label: "Call In Staff",     best: true,  fx: { capacity:+6, care:+4, satisfaction:+4, cost:+18, lives:+55 }, msg: "Extra staff opened fast-track lanes." },
+      { label: "Transfer Patient",  best: false, fx: { capacity:+3, cost:+12, satisfaction:+1 }, msg: "Diverted some cases to a sister site." },
+      { label: "Delay Decision",    best: false, delayed: true, fx: { care:-6, satisfaction:-6, safety:-4 }, msg: "Waits kept climbing. Some patients left." },
+    ],
+  },
+  {
+    id: "staff", icon: "cross", title: "Nursing Staff Shortage",
+    desc: "Night shift is short three nurses on the medical-surgical floor.",
+    impact: "Unsafe patient-to-nurse ratio",
+    actions: [
+      { label: "Call In Staff",    best: true,  fx: { care:+5, safety:+4, cost:+20, lives:+45 }, msg: "On-call nurses filled the gap." },
+      { label: "Approve Overtime", best: false, fx: { care:+3, cost:+26, satisfaction:-1 }, msg: "Overtime covered it, but staff are stretched." },
+      { label: "Ignore",           best: false, delayed: true, fx: { safety:-7, care:-5, satisfaction:-5 }, msg: "Thin coverage led to missed care." },
+    ],
+  },
+  {
+    id: "equipment", icon: "activity", title: "Critical Equipment Failure",
+    desc: "A ventilator alarms with a hardware fault in the ICU.",
+    impact: "Life support at risk",
+    actions: [
+      { label: "Deploy Backup Unit",    best: true,  fx: { safety:+6, care:+3, cost:+15, lives:+80 }, msg: "Backup ventilator swapped in without a gap." },
+      { label: "Escalate to Specialist",best: false, fx: { safety:+3, cost:+22, care:+1 }, msg: "Biomed patched it, but it took time." },
+      { label: "Delay Decision",        best: false, delayed: true, fx: { safety:-9, lives:-70, care:-3 }, msg: "The fault worsened before anyone acted." },
+    ],
+  },
+  {
+    id: "outbreak", icon: "bug", title: "Infection Outbreak",
+    desc: "Three new hospital-acquired infections traced to one ward.",
+    impact: "Cross-contamination spreading",
+    actions: [
+      { label: "Activate Isolation",  best: true,  fx: { safety:+6, satisfaction:+2, care:+2, cost:+16, lives:+75 }, msg: "Isolation protocol contained the spread." },
+      { label: "Increase Monitoring", best: false, fx: { safety:+2, cost:+8 }, msg: "Extra screening slowed but did not stop it." },
+      { label: "Ignore",              best: false, delayed: true, fx: { safety:-8, satisfaction:-6, lives:-60 }, msg: "Infection spread to two more wards." },
+    ],
+  },
+  {
+    id: "readmit", icon: "rotate", title: "High Readmission Risk",
+    desc: "A heart-failure patient is due for discharge with poor follow-up.",
+    impact: "Likely 30-day readmission",
+    actions: [
+      { label: "Schedule Follow-Up", best: true,  fx: { satisfaction:+5, care:+3, safety:+3, cost:+8, lives:+40 }, msg: "Follow-up and home meds arranged before discharge." },
+      { label: "Increase Monitoring",best: false, fx: { care:+2, cost:+6 }, msg: "Added a check-in call. Partial safety net." },
+      { label: "Ignore",             best: false, delayed: true, fx: { satisfaction:-7, safety:-4, cost:+10 }, msg: "Patient bounced back within a week." },
+    ],
+  },
+  {
+    id: "lab", icon: "flask", title: "Critical Lab Result Delay",
+    desc: "A critical potassium result has sat unreviewed for 40 minutes.",
+    impact: "Delayed treatment risk",
+    actions: [
+      { label: "Escalate to Specialist", best: true,  fx: { safety:+5, care:+3, cost:+6, lives:+50 }, msg: "Result flagged and acted on immediately." },
+      { label: "Increase Monitoring",    best: false, fx: { safety:+2, care:-1, cost:+4 }, msg: "Added to the review queue, still slow." },
+      { label: "Ignore",                 best: false, delayed: true, fx: { safety:-7, satisfaction:-4, lives:-45 }, msg: "Critical value missed until symptoms appeared." },
+    ],
+  },
+  {
+    id: "fall", icon: "triangleAlert", title: "High Fall-Risk Patient",
+    desc: "An elderly patient on sedatives keeps trying to get up unassisted.",
+    impact: "Injury risk without supervision",
+    actions: [
+      { label: "Increase Monitoring", best: true,  fx: { safety:+5, satisfaction:+3, care:+2, cost:+9, lives:+40 }, msg: "Bed alarm and hourly rounding put in place." },
+      { label: "Transfer Patient",    best: false, fx: { safety:+2, capacity:-3, cost:+10 }, msg: "Moved nearer the nurse station." },
+      { label: "Ignore",              best: false, delayed: true, fx: { safety:-8, satisfaction:-6, lives:-35 }, msg: "Patient fell overnight. Injury reported." },
+    ],
+  },
+];
+
+/* Priority uses one hue plus grays. Red is reserved for the critical tier only. */
+const PRIORITIES = {
+  critical: { name: "Critical", color: "var(--danger)",         life: 12, penalty: 1.6 },
+  high:     { name: "High",     color: "var(--accent)",         life: 18, penalty: 1.2 },
+  medium:   { name: "Medium",   color: "var(--text-secondary)", life: 26, penalty: 0.8 },
+};
+
+/* ---------- Game State ---------- */
+let state = null;
+
+function freshState() {
+  const kpi = {};
+  KPI_DEFS.forEach(d => kpi[d.key] = d.start);
+  return {
+    kpi, timeLeft: CONFIG.gameLength, running: false, paused: false, soundOn: true,
+    alerts: [], alertSeq: 0, spawnTimer: 0, delayedFx: [],
+    resolved: 0, correct: 0, wrong: 0, expired: 0,
+    caseLog: [],   /* full record of every handled/expired alert for the print report */
+  };
+}
+
+/* ---------- DOM refs ---------- */
+const el = (id) => document.getElementById(id);
+const kpiGrid = el("kpiGrid");
+const alertsEl = el("alerts");
+const logEl = el("log");
+const statsBody = el("statsBody");
+const clockEl = el("clock");
+const timerPill = el("timerPill");
+const alertCountEl = el("alertCount");
+
+/* ============================================================
+   KPI RENDER
+   ============================================================ */
+function buildKpiCards() {
+  kpiGrid.innerHTML = "";
+  KPI_DEFS.forEach(d => {
+    const card = document.createElement("div");
+    card.className = "kpi";
+    card.id = "kpi-" + d.key;
+    card.innerHTML = `
+      <div class="label">${ic(d.icon, 13)} ${d.label}</div>
+      <div class="value" id="val-${d.key}"></div>
+      <div class="delta" id="delta-${d.key}"></div>
+      ${d.raw ? "" : `<div class="bar"><i id="bar-${d.key}"></i></div>`}
+    `;
+    kpiGrid.appendChild(card);
+  });
+  renderKpis();
+}
+
+function formatKpi(d, v) {
+  if (d.key === "score") return Math.round(v).toLocaleString();
+  if (d.key === "lives") return Math.round(v).toLocaleString();
+  if (d.key === "cost") return "$" + Math.round(v) + "K";
+  return Math.round(v) + d.unit;
+}
+
+function renderKpis() {
+  KPI_DEFS.forEach(d => {
+    const v = state.kpi[d.key];
+    el("val-" + d.key).textContent = formatKpi(d, v);
+    if (!d.raw) {
+      const bar = el("bar-" + d.key);
+      if (bar) bar.style.width = Math.max(0, Math.min(100, (v / d.max) * 100)) + "%";
+    }
+  });
+}
+
+function applyEffects(fx, opts = {}) {
+  for (const key in fx) {
+    const d = KPI_DEFS.find(k => k.key === key);
+    if (!d) continue;
+    let after = state.kpi[key] + fx[key];
+    if (!d.raw && !d.cost) after = Math.max(0, Math.min(100, after));
+    if (d.cost) after = Math.max(0, after);
+    if (key === "lives") after = Math.max(0, after);
+    state.kpi[key] = after;
+    flashKpi(key, fx[key], d.cost);
+  }
+  if (opts.score) addScore(opts.score);
+  renderKpis();
+}
+
+function flashKpi(key, change, isCost) {
+  if (key === "score") return;
+  const card = el("kpi-" + key);
+  const delta = el("delta-" + key);
+  if (!card || !delta) return;
+  let good = change >= 0;
+  if (isCost) good = change < 0;
+  delta.textContent = (change >= 0 ? "+" : "") + Math.round(change);
+  card.classList.remove("flash-up", "flash-down");
+  void card.offsetWidth;
+  card.classList.add(good ? "flash-up" : "flash-down");
+  setTimeout(() => card.classList.remove("flash-up", "flash-down"), 900);
+}
+
+function addScore(pts) {
+  state.kpi.score += pts;
+  const card = el("kpi-score");
+  card.classList.remove("flash-up", "flash-down");
+  void card.offsetWidth;
+  card.classList.add(pts >= 0 ? "flash-up" : "flash-down");
+  setTimeout(() => card.classList.remove("flash-up", "flash-down"), 900);
+}
+
+/* ============================================================
+   ALERTS
+   ============================================================ */
+function difficultyFactor() { return 1 - state.timeLeft / CONFIG.gameLength; }
+
+function currentSpawnInterval() {
+  const f = difficultyFactor();
+  return CONFIG.baseSpawnEvery - (CONFIG.baseSpawnEvery - CONFIG.minSpawnEvery) * f;
+}
+
+function pickPriority() {
+  const f = difficultyFactor();
+  const r = Math.random();
+  const critChance = 0.18 + 0.32 * f;
+  const highChance = 0.35;
+  if (r < critChance) return "critical";
+  if (r < critChance + highChance) return "high";
+  return "medium";
+}
+
+function spawnAlert() {
+  if (state.alerts.length >= CONFIG.maxActiveAlerts) return;
+  const type = ALERT_TYPES[Math.floor(Math.random() * ALERT_TYPES.length)];
+  const prioKey = pickPriority();
+  const prio = PRIORITIES[prioKey];
+  const inst = { uid: ++state.alertSeq, type, prioKey, life: prio.life, maxLife: prio.life };
+  state.alerts.push(inst);
+  renderAlerts();
+  pushLog("triangleAlert", `${type.title} reported`, prioKey === "critical" ? "bad" : "warn");
+  if (prioKey === "critical") beep();
+}
+
+function renderAlerts() {
+  alertsEl.innerHTML = "";
+  if (state.alerts.length === 0) {
+    alertsEl.innerHTML = `<div class="empty-state"><div class="big">${ic("circleCheck", 40)}</div>All wards stable. Monitoring the network.</div>`;
+  } else {
+    const order = { critical: 0, high: 1, medium: 2 };
+    const sorted = [...state.alerts].sort((a, b) => order[a.prioKey] - order[b.prioKey]);
+    sorted.forEach(inst => alertsEl.appendChild(buildAlertCard(inst)));
+  }
+  alertCountEl.textContent = state.alerts.length + " active";
+}
+
+function buildAlertCard(inst) {
+  const prio = PRIORITIES[inst.prioKey];
+  const card = document.createElement("div");
+  card.className = "alert-card" + (inst.prioKey === "critical" ? " critical" : "");
+  card.id = "alert-" + inst.uid;
+  card.style.setProperty("--pcolor", prio.color);
+
+  const actionsHtml = inst.type.actions.map((a, i) =>
+    `<button class="act-btn" data-uid="${inst.uid}" data-idx="${i}">${a.label}</button>`
+  ).join("");
+
+  card.innerHTML = `
+    <div class="alert-top">
+      <div>
+        <div class="alert-title"><span class="a-ic">${ic(inst.type.icon, 16)}</span> ${inst.type.title}</div>
+        <div class="alert-desc">${inst.type.desc}</div>
+      </div>
+      <span class="priority-tag">${prio.name}</span>
+    </div>
+    <div class="alert-meta">
+      <span class="impact">${ic("circleAlert", 13)} ${inst.type.impact}</span>
+    </div>
+    <div class="alert-timer">
+      <div class="track"><i id="track-${inst.uid}"></i></div>
+      <div class="lbl"><span>Time to act</span><span id="tlbl-${inst.uid}">${Math.ceil(inst.life)}s</span></div>
+    </div>
+    <div class="actions">${actionsHtml}</div>
+  `;
+  card.querySelectorAll(".act-btn").forEach(btn => {
+    btn.addEventListener("click", () => resolveAlert(parseInt(btn.dataset.uid), parseInt(btn.dataset.idx)));
+  });
+  updateAlertTimerUI(inst);
+  return card;
+}
+
+function updateAlertTimerUI(inst) {
+  const track = el("track-" + inst.uid);
+  const lbl = el("tlbl-" + inst.uid);
+  if (!track) return;
+  track.style.width = Math.max(0, (inst.life / inst.maxLife) * 100) + "%";
+  if (lbl) lbl.textContent = Math.ceil(inst.life) + "s";
+}
+
+function resolveAlert(uid, actionIdx) {
+  const idx = state.alerts.findIndex(a => a.uid === uid);
+  if (idx === -1) return;
+  const inst = state.alerts[idx];
+  const action = inst.type.actions[actionIdx];
+  const prio = PRIORITIES[inst.prioKey];
+
+  applyEffects(action.fx);
+
+  let score;
+  if (action.best) {
+    score = Math.round(100 * prio.penalty + inst.life * 3);
+    state.correct++;
+    pushLog("circleCheck", `${inst.type.title}: ${action.msg}`, "good");
+  } else {
+    score = Math.round(30 * prio.penalty);
+    state.wrong++;
+    pushLog("triangleAlert", `${inst.type.title}: ${action.msg}`, "warn");
+  }
+  addScore(score);
+  state.resolved++;
+
+  /* record case for print report */
+  state.caseLog.push({
+    caseNum: state.caseLog.length + 1,
+    title: inst.type.title,
+    desc: inst.type.desc,
+    priority: PRIORITIES[inst.prioKey].name,
+    prioKey: inst.prioKey,
+    impact: inst.type.impact,
+    actionLabel: action.label,
+    actionMsg: action.msg,
+    fx: action.fx,
+    score,
+    outcome: action.best ? "optimal" : (action.delayed ? "shortcut" : "suboptimal"),
+    timeRemaining: Math.ceil(state.timeLeft),
+    lifeLeft: inst.life,
+  });
+
+  if (action.delayed) scheduleDelayed(inst.type, action);
+
+  const card = el("alert-" + uid);
+  if (card) card.classList.add("resolving");
+  state.alerts.splice(idx, 1);
+  setTimeout(() => { renderAlerts(); updateStats(); }, 350);
+  updateStats();
+  if (action.best) beep();
+}
+
+function scheduleDelayed(type, action) {
+  const delay = 4 + Math.random() * 3;
+  state.delayedFx.push({
+    at: state.timeLeft - delay,
+    fn: () => {
+      applyEffects(action.fx);
+      addScore(-40);
+      pushLog("circleAlert", `Fallout: ${type.title} shortcut backfired.`, "bad");
+      toast("bad", "Delayed consequence", `${type.title}: your earlier shortcut caught up with you.`);
+      beep();
+    }
+  });
+}
+
+function expireAlert(inst) {
+  const prio = PRIORITIES[inst.prioKey];
+  const pen = prio.penalty;
+  const expFx = { safety: -6 * pen, satisfaction: -5 * pen, lives: -50 * pen, capacity: -3 * pen, cost: +10 * pen };
+  applyEffects(expFx);
+  addScore(-Math.round(60 * pen));
+  state.expired++;
+  state.wrong++;
+
+  /* record expired case */
+  state.caseLog.push({
+    caseNum: state.caseLog.length + 1,
+    title: inst.type.title,
+    desc: inst.type.desc,
+    priority: prio.name,
+    prioKey: inst.prioKey,
+    impact: inst.type.impact,
+    actionLabel: "No action taken",
+    actionMsg: "Alert expired without response. Automatic penalty applied.",
+    fx: expFx,
+    score: -Math.round(60 * pen),
+    outcome: "expired",
+    timeRemaining: Math.ceil(state.timeLeft),
+    lifeLeft: 0,
+  });
+
+  pushLog("circleAlert", `${inst.type.title} escalated. Automatic penalty applied.`, "bad");
+  toast("bad", "Risk escalated", `${inst.type.title} went unaddressed.`);
+  const card = el("alert-" + inst.uid);
+  if (card) card.classList.add("resolving");
+  const i = state.alerts.findIndex(a => a.uid === inst.uid);
+  if (i > -1) state.alerts.splice(i, 1);
+  setTimeout(() => { renderAlerts(); updateStats(); }, 350);
+  beep();
+}
+
+/* ============================================================
+   LOG + STATS + TOASTS
+   ============================================================ */
+function pushLog(iconName, msg, kind = "info") {
+  const item = document.createElement("div");
+  item.className = "log-item " + kind;
+  item.innerHTML = `<span class="t">${formatClock(state.timeLeft)}</span><span class="li-ic">${ic(iconName, 13)}</span><span class="m">${msg}</span>`;
+  logEl.prepend(item);
+  while (logEl.children.length > 40) logEl.removeChild(logEl.lastChild);
+}
+
+function updateStats() {
+  statsBody.innerHTML = `
+    <div class="stat-row"><span>Alerts resolved</span><b>${state.resolved}</b></div>
+    <div class="stat-row"><span>Correct calls</span><b class="accent">${state.correct}</b></div>
+    <div class="stat-row"><span>Wrong / missed</span><b>${state.wrong}</b></div>
+    <div class="stat-row"><span>Escalated alerts</span><b class="muted">${state.expired}</b></div>
+    <div class="stat-row"><span>Active now</span><b>${state.alerts.length}</b></div>
+    <div class="stat-row"><span>Shift load</span><b>${Math.round(difficultyFactor()*100)}%</b></div>
+  `;
+}
+
+function toast(kind, title, body) {
+  const iconName = kind === "good" ? "circleCheck" : kind === "bad" ? "circleAlert" : "triangleAlert";
+  const t = document.createElement("div");
+  t.className = "toast " + kind;
+  t.innerHTML = `<div class="th">${ic(iconName, 15)} ${title}</div><div class="tb">${body}</div>`;
+  el("toasts").appendChild(t);
+  setTimeout(() => t.remove(), 5000);
+}
+
+/* "sound" is visual only: a quick pulse on the timer pill */
+function beep() {
+  if (!state.soundOn) return;
+  timerPill.animate(
+    [{ boxShadow: "0 0 0 0 rgba(255,102,51,0.5)" }, { boxShadow: "0 0 0 10px rgba(255,102,51,0)" }],
+    { duration: 500 }
+  );
+}
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+let loopHandle = null;
+
+function startGame() {
+  state = freshState();
+  buildKpiCards();
+  updateStats();
+  logEl.innerHTML = "";
+  renderAlerts();
+  pushLog("circleCheck", "Shift started. Monitoring all wards.", "good");
+  state.running = true;
+  state.spawnTimer = 2;
+  el("startOverlay").classList.remove("show");
+  el("endOverlay").classList.remove("show");
+  if (loopHandle) clearInterval(loopHandle);
+  loopHandle = setInterval(tick, CONFIG.tickMs);
+  updateClock();
+}
+
+function tick() {
+  if (!state.running || state.paused) return;
+  const dt = CONFIG.tickMs / 1000;
+  state.timeLeft -= dt;
+
+  state.spawnTimer -= dt;
+  if (state.spawnTimer <= 0) {
+    spawnAlert();
+    if (difficultyFactor() > 0.75 && Math.random() < 0.2) spawnAlert();
+    state.spawnTimer = currentSpawnInterval();
+  }
+
+  for (let i = state.alerts.length - 1; i >= 0; i--) {
+    const inst = state.alerts[i];
+    inst.life -= dt;
+    if (inst.life <= 0) expireAlert(inst);
+    else updateAlertTimerUI(inst);
+  }
+
+  for (let i = state.delayedFx.length - 1; i >= 0; i--) {
+    if (state.timeLeft <= state.delayedFx[i].at) {
+      state.delayedFx[i].fn();
+      state.delayedFx.splice(i, 1);
+    }
+  }
+
+  updateClock();
+  updateStats();
+  if (state.timeLeft <= 0) endGame();
+}
+
+function updateClock() {
+  clockEl.textContent = formatClock(state.timeLeft);
+  timerPill.classList.toggle("warn", state.timeLeft <= 60 && state.timeLeft > 20);
+  timerPill.classList.toggle("crit", state.timeLeft <= 20);
+}
+
+function formatClock(sec) {
+  sec = Math.max(0, Math.ceil(sec));
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m + ":" + String(s).padStart(2, "0");
+}
+
+/* ============================================================
+   END GAME
+   ============================================================ */
+function endGame() {
+  state.running = false;
+  if (loopHandle) clearInterval(loopHandle);
+  clockEl.textContent = "0:00";
+
+  const k = state.kpi;
+  const kpiHealth = (k.safety + k.satisfaction + k.capacity + k.care) / 4;
+  const composite = k.score + kpiHealth * 8 + k.lives - Math.max(0, k.cost - 140) * 2;
+
+  const grade = gradeFor(composite, kpiHealth);
+  const summary = summaryFor(grade, state, kpiHealth);
+
+  el("endModal").innerHTML = `
+    <div class="grade-badge" style="--gcolor:${grade.color}">${grade.letter}</div>
+    <div class="final-score">Final score <b>${Math.round(k.score).toLocaleString()}</b></div>
+    <div style="text-align:center;color:var(--text-muted);font-size:12px;margin-bottom:6px;">Performance grade: <b style="color:${grade.color}">${grade.label}</b></div>
+    <div class="summary-box">${summary}</div>
+    <div class="end-grid">
+      <div class="end-cell"><div class="k">Patient safety</div><div class="v">${Math.round(k.safety)}%</div></div>
+      <div class="end-cell"><div class="k">Patient sat.</div><div class="v">${Math.round(k.satisfaction)}%</div></div>
+      <div class="end-cell"><div class="k">Bed capacity</div><div class="v">${Math.round(k.capacity)}%</div></div>
+      <div class="end-cell"><div class="k">Care efficiency</div><div class="v">${Math.round(k.care)}%</div></div>
+      <div class="end-cell"><div class="k">Operating cost</div><div class="v">$${Math.round(k.cost)}K</div></div>
+      <div class="end-cell"><div class="k">Lives protected</div><div class="v">${Math.round(k.lives).toLocaleString()}</div></div>
+      <div class="end-cell"><div class="k">Alerts resolved</div><div class="v">${state.resolved}</div></div>
+      <div class="end-cell"><div class="k">Correct / wrong</div><div class="v">${state.correct} / ${state.wrong}</div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="printReportBtn">${ic("list", 16)} Print report</button>
+      <button class="btn primary" id="playAgain">${ic("rotate", 16)} Play again</button>
+    </div>
+  `;
+  el("endOverlay").classList.add("show");
+  el("playAgain").addEventListener("click", startGame);
+  el("printReportBtn").addEventListener("click", () => printReport(grade, summary, kpiHealth));
+}
+
+function gradeFor(composite, kpiHealth) {
+  if (composite >= 2600 && kpiHealth >= 80) return { letter: "A+", label: "A+ Elite", color: "var(--accent)" };
+  if (composite >= 2000) return { letter: "A", label: "A Excellent", color: "var(--accent)" };
+  if (composite >= 1400) return { letter: "B", label: "B Solid", color: "var(--accent)" };
+  if (composite >= 800)  return { letter: "C", label: "C Needs work", color: "var(--text-secondary)" };
+  return { letter: "D", label: "D Critical", color: "var(--danger)" };
+}
+
+function summaryFor(grade, s, kpiHealth) {
+  const acc = s.resolved ? Math.round((s.correct / (s.correct + s.wrong || 1)) * 100) : 0;
+  const lines = {
+    "A+": `You ran the floor about as well as it can be run. Critical risks got handled fast and patient safety stayed high the whole shift. Decision accuracy: ${acc}%.`,
+    "A":  `Strong shift. You worked through the risk stream without losing your footing, protected lives, and kept patients satisfied. Faster calls on the critical alerts would get you to the top.`,
+    "B":  `Steady work. The wards held, but a few risks slipped past you or got handled the expensive way. Hit the critical ones first and pick the right response to push your KPIs higher.`,
+    "C":  `You kept things together, but the strain showed. Escalated alerts and rushed calls pulled your safety scores down. Work on reacting faster and matching the response to the risk.`,
+    "D":  `The floor was overwhelmed. Too many risks escalated and the shortcuts backfired. Next shift, go after the critical alerts first and stop reaching for "Ignore" or "Delay" on the serious ones.`,
+  };
+  return lines[grade.letter] + `<br><br>Decision accuracy: ${acc}%. KPI health: ${Math.round(kpiHealth)}%.`;
+}
+
+/* ============================================================
+   PRINT REPORT
+   ============================================================ */
+function printReport(grade, summary, kpiHealth) {
+  const k = state.kpi;
+  const acc = state.resolved ? Math.round((state.correct / (state.correct + state.wrong || 1)) * 100) : 0;
+  const now = new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+
+  const outcomeLabel = { optimal: "Optimal", suboptimal: "Suboptimal", shortcut: "Shortcut (delayed penalty)", expired: "Expired (no action)" };
+  const outcomeColor = { optimal: "#2a7a3b", suboptimal: "#b06000", shortcut: "#d44a00", expired: "#c0392b" };
+
+  function fxRow(fx) {
+    return Object.entries(fx).map(([key, val]) => {
+      const d = KPI_DEFS.find(k => k.key === key);
+      if (!d) return "";
+      const sign = val >= 0 ? "+" : "";
+      const color = (d.cost ? val < 0 : val >= 0) ? "#2a7a3b" : "#c0392b";
+      return `<span style="color:${color};margin-right:10px">${sign}${Math.round(val)} ${d.label}</span>`;
+    }).join("");
+  }
+
+  const caseRows = state.caseLog.map((c, i) => `
+    <tr style="background:${i % 2 === 0 ? "#fff" : "#f9f9fb"}">
+      <td style="text-align:center;font-weight:700">${c.caseNum}</td>
+      <td>
+        <strong>${c.title}</strong><br>
+        <span style="color:#5a6577;font-size:11px">${c.desc}</span>
+      </td>
+      <td style="text-align:center">
+        <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;
+          background:${c.prioKey === "critical" ? "#fbe8e8" : c.prioKey === "high" ? "#fff1ec" : "#f0f0f2"};
+          color:${c.prioKey === "critical" ? "#c0392b" : c.prioKey === "high" ? "#e04e1f" : "#5a6577"}">
+          ${c.priority}
+        </span>
+      </td>
+      <td><strong>${c.actionLabel}</strong><br><span style="color:#5a6577;font-size:11px">${c.actionMsg}</span></td>
+      <td style="font-size:11px">${fxRow(c.fx)}</td>
+      <td style="text-align:center">
+        <span style="color:${outcomeColor[c.outcome]};font-weight:700">${outcomeLabel[c.outcome]}</span>
+      </td>
+      <td style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums;
+        color:${c.score >= 0 ? "#2a7a3b" : "#c0392b"}">
+        ${c.score >= 0 ? "+" : ""}${c.score}
+      </td>
+    </tr>
+  `).join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Healthcare Risk Control Tower — Shift Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:"Inter",system-ui,sans-serif; color:#0b1b33; background:#fff; font-size:13px; }
+  .page{ max-width:960px; margin:0 auto; padding:32px 28px 48px; }
+  .report-header{ display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #ff6633; padding-bottom:16px; margin-bottom:24px; }
+  .report-title h1{ font-size:22px; font-weight:800; letter-spacing:-.02em; }
+  .report-title .sub{ font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:#9aa3b2; margin-top:3px; }
+  .report-meta{ text-align:right; font-size:12px; color:#5a6577; }
+  .grade-circle{ width:64px; height:64px; border-radius:50%; border:3px solid ${grade.color}; color:${grade.color}; display:grid; place-items:center; font-size:26px; font-weight:900; float:right; margin-left:16px; }
+  .section-title{ font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#ff6633; margin:24px 0 10px; border-bottom:1px solid #e7e9ee; padding-bottom:6px; }
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .kpi-box{ background:#f7f8fa; border:1px solid #e7e9ee; border-radius:8px; padding:10px 14px; }
+  .kpi-box .k{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:#9aa3b2; }
+  .kpi-box .v{ font-size:20px; font-weight:800; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .summary-box{ background:#fff8f5; border:1px solid rgba(255,102,51,.25); border-radius:8px; padding:14px 16px; font-size:13px; line-height:1.7; color:#3c4555; margin-bottom:8px; }
+  .stat-pills{ display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 0; }
+  .stat-pill{ background:#f0f1f5; border-radius:8px; padding:8px 14px; text-align:center; }
+  .stat-pill .sv{ font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; }
+  .stat-pill .sk{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:#9aa3b2; margin-top:2px; }
+  table{ width:100%; border-collapse:collapse; margin-top:4px; }
+  th{ background:#ff6633; color:#fff; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:8px 10px; text-align:left; }
+  td{ padding:9px 10px; border-bottom:1px solid #e7e9ee; vertical-align:top; font-size:12px; line-height:1.45; }
+  .footer{ margin-top:40px; padding-top:14px; border-top:1px solid #e7e9ee; font-size:11px; color:#9aa3b2; display:flex; justify-content:space-between; }
+  @media print{ body{ -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="report-header">
+    <div class="report-title">
+      <div class="sub">EXL Healthcare Analytics</div>
+      <h1>Healthcare Risk Control Tower</h1>
+      <div class="sub" style="margin-top:6px">Shift Performance Report</div>
+    </div>
+    <div class="report-meta">
+      <div class="grade-circle">${grade.letter}</div>
+      <div style="margin-top:8px"><strong>Grade:</strong> ${grade.label}</div>
+      <div><strong>Generated:</strong> ${now}</div>
+      <div><strong>Shift duration:</strong> 3 minutes</div>
+    </div>
+  </div>
+
+  <div class="section-title">Performance summary</div>
+  <div class="summary-box">${summary}</div>
+  <div class="stat-pills">
+    <div class="stat-pill"><div class="sv">${Math.round(k.score).toLocaleString()}</div><div class="sk">Final score</div></div>
+    <div class="stat-pill"><div class="sv">${state.resolved}</div><div class="sk">Alerts resolved</div></div>
+    <div class="stat-pill"><div class="sv" style="color:#2a7a3b">${state.correct}</div><div class="sk">Correct calls</div></div>
+    <div class="stat-pill"><div class="sv" style="color:#c0392b">${state.wrong}</div><div class="sk">Wrong / missed</div></div>
+    <div class="stat-pill"><div class="sv">${state.expired}</div><div class="sk">Escalated</div></div>
+    <div class="stat-pill"><div class="sv">${acc}%</div><div class="sk">Decision accuracy</div></div>
+    <div class="stat-pill"><div class="sv">${Math.round(kpiHealth)}%</div><div class="sk">KPI health</div></div>
+  </div>
+
+  <div class="section-title">Final KPI snapshot</div>
+  <div class="kpi-grid">
+    <div class="kpi-box"><div class="k">Patient Safety</div><div class="v">${Math.round(k.safety)}%</div></div>
+    <div class="kpi-box"><div class="k">Patient Satisfaction</div><div class="v">${Math.round(k.satisfaction)}%</div></div>
+    <div class="kpi-box"><div class="k">Bed Capacity</div><div class="v">${Math.round(k.capacity)}%</div></div>
+    <div class="kpi-box"><div class="k">Care Efficiency</div><div class="v">${Math.round(k.care)}%</div></div>
+    <div class="kpi-box"><div class="k">Operating Cost</div><div class="v">$${Math.round(k.cost)}K</div></div>
+    <div class="kpi-box"><div class="k">Lives Protected</div><div class="v">${Math.round(k.lives).toLocaleString()}</div></div>
+    <div class="kpi-box"><div class="k">Score</div><div class="v">${Math.round(k.score).toLocaleString()}</div></div>
+  </div>
+
+  <div class="section-title">Case log (${state.caseLog.length} events)</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:36px">#</th>
+        <th>Risk / Description</th>
+        <th style="width:80px">Priority</th>
+        <th>Action selected</th>
+        <th>KPI impact</th>
+        <th style="width:100px">Outcome</th>
+        <th style="width:60px;text-align:right">Points</th>
+      </tr>
+    </thead>
+    <tbody>${caseRows}</tbody>
+  </table>
+
+  <div class="footer">
+    <span>Healthcare Risk Control Tower — EXL Service</span>
+    <span>Day 31 — 60-day AI challenge</span>
+  </div>
+</div>
+<script>window.onload = function(){ window.print(); }<\/script>
+</body>
+</html>`;
+
+  const w = window.open("", "_blank", "width=1020,height=800");
+  if (!w) { alert("Allow pop-ups to open the report."); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+/* ============================================================
+   DEMO REPORT
+   ============================================================ */
+function runDemoReport() {
+  /* Build a realistic completed-shift state without playing the game */
+  const demoKpi = { safety:88, satisfaction:83, capacity:79, care:85, cost:168, lives:620, score:3140 };
+  const demoCases = [
+    { caseNum:1, title:"Sepsis Risk Spike", desc:"Ward 4B: a post-op patient's vitals match an early-sepsis pattern.", priority:"Critical", prioKey:"critical", impact:"Life-threatening if missed", actionLabel:"Deploy Rapid Response", actionMsg:"Rapid response team started antibiotics in time.", fx:{safety:6,satisfaction:3,care:3,cost:16,lives:120}, score:184, outcome:"optimal", timeRemaining:172, lifeLeft:10 },
+    { caseNum:2, title:"ER Overcrowding",   desc:"The emergency department is at 140% capacity with rising wait times.", priority:"High", prioKey:"high", impact:"Care delays across the department", actionLabel:"Delay Decision", actionMsg:"Waits kept climbing. Some patients left.", fx:{care:-6,satisfaction:-6,safety:-4}, score:36, outcome:"shortcut", timeRemaining:161, lifeLeft:14 },
+    { caseNum:3, title:"Medication Error Risk", desc:"A high-alert drug order shows a dosing conflict for one patient.", priority:"Critical", prioKey:"critical", impact:"Potential adverse drug event", actionLabel:"Escalate to Pharmacist", actionMsg:"Pharmacist corrected the dose before it was given.", fx:{safety:6,satisfaction:3,care:3,cost:8,lives:60}, score:196, outcome:"optimal", timeRemaining:150, lifeLeft:8 },
+    { caseNum:4, title:"Nursing Staff Shortage", desc:"Night shift is short three nurses on the medical-surgical floor.", priority:"Medium", prioKey:"medium", impact:"Unsafe patient-to-nurse ratio", actionLabel:"Approve Overtime", actionMsg:"Overtime covered it, but staff are stretched.", fx:{care:3,cost:26,satisfaction:-1}, score:24, outcome:"suboptimal", timeRemaining:140, lifeLeft:20 },
+    { caseNum:5, title:"ICU Bed Shortage", desc:"Two critical patients need ICU beds and only one is free.", priority:"Critical", prioKey:"critical", impact:"Critical care access at risk", actionLabel:"Ignore", actionMsg:"No bed found. Patient held in the ER.", fx:{capacity:-8,safety:-6,satisfaction:-5}, score:36, outcome:"shortcut", timeRemaining:128, lifeLeft:9 },
+    { caseNum:6, title:"Critical Equipment Failure", desc:"A ventilator alarms with a hardware fault in the ICU.", priority:"Critical", prioKey:"critical", impact:"Life support at risk", actionLabel:"Deploy Backup Unit", actionMsg:"Backup ventilator swapped in without a gap.", fx:{safety:6,care:3,cost:15,lives:80}, score:202, outcome:"optimal", timeRemaining:115, lifeLeft:7 },
+    { caseNum:7, title:"Infection Outbreak", desc:"Three new hospital-acquired infections traced to one ward.", priority:"High", prioKey:"high", impact:"Cross-contamination spreading", actionLabel:"Activate Isolation", actionMsg:"Isolation protocol contained the spread.", fx:{safety:6,satisfaction:2,care:2,cost:16,lives:75}, score:148, outcome:"optimal", timeRemaining:102, lifeLeft:12 },
+    { caseNum:8, title:"High Fall-Risk Patient", desc:"An elderly patient on sedatives keeps trying to get up unassisted.", priority:"Medium", prioKey:"medium", impact:"Injury risk without supervision", actionLabel:"No action taken", actionMsg:"Alert expired without response. Automatic penalty applied.", fx:{safety:-4.8,satisfaction:-4,lives:-40,capacity:-2.4,cost:8}, score:-48, outcome:"expired", timeRemaining:95, lifeLeft:0 },
+    { caseNum:9, title:"High Readmission Risk", desc:"A heart-failure patient is due for discharge with poor follow-up.", priority:"High", prioKey:"high", impact:"Likely 30-day readmission", actionLabel:"Schedule Follow-Up", actionMsg:"Follow-up and home meds arranged before discharge.", fx:{satisfaction:5,care:3,safety:3,cost:8,lives:40}, score:156, outcome:"optimal", timeRemaining:82, lifeLeft:15 },
+    { caseNum:10, title:"Critical Lab Result Delay", desc:"A critical potassium result has sat unreviewed for 40 minutes.", priority:"Critical", prioKey:"critical", impact:"Delayed treatment risk", actionLabel:"Escalate to Specialist", actionMsg:"Result flagged and acted on immediately.", fx:{safety:5,care:3,cost:6,lives:50}, score:178, outcome:"optimal", timeRemaining:71, lifeLeft:6 },
+    { caseNum:11, title:"Sepsis Risk Spike", desc:"Ward 2A: another post-op patient flagged by the early-warning system.", priority:"High", prioKey:"high", impact:"Life-threatening if missed", actionLabel:"Increase Monitoring", actionMsg:"Closer monitoring caught it, but later than ideal.", fx:{safety:2,care:-1,cost:6,lives:30}, score:36, outcome:"suboptimal", timeRemaining:58, lifeLeft:11 },
+    { caseNum:12, title:"Nursing Staff Shortage", desc:"Day shift crossover: two nurses called in sick on a busy floor.", priority:"High", prioKey:"high", impact:"Unsafe patient-to-nurse ratio", actionLabel:"Call In Staff", actionMsg:"On-call nurses filled the gap.", fx:{care:5,safety:4,cost:20,lives:45}, score:144, outcome:"optimal", timeRemaining:40, lifeLeft:13 },
+    { caseNum:13, title:"ER Overcrowding", desc:"A second surge hit after a multi-vehicle incident.", priority:"Critical", prioKey:"critical", impact:"Care delays across the department", actionLabel:"Call In Staff", actionMsg:"Extra staff opened fast-track lanes.", fx:{capacity:6,care:4,satisfaction:4,cost:18,lives:55}, score:212, outcome:"optimal", timeRemaining:22, lifeLeft:5 },
+  ];
+
+  const demoState = {
+    kpi: demoKpi, resolved: 12, correct: 9, wrong: 4, expired: 1, caseLog: demoCases,
+  };
+
+  /* Temporarily swap state so printReport reads the demo data */
+  const realState = state;
+  state = demoState;
+  const demoKpiHealth = (demoKpi.safety + demoKpi.satisfaction + demoKpi.capacity + demoKpi.care) / 4;
+  const composite = demoKpi.score + demoKpiHealth * 8 + demoKpi.lives - Math.max(0, demoKpi.cost - 140) * 2;
+  const demoGrade = gradeFor(composite, demoKpiHealth);
+  const demoSummary = summaryFor(demoGrade, demoState, demoKpiHealth);
+  printReport(demoGrade, demoSummary, demoKpiHealth);
+  state = realState;
+}
+
+/* ============================================================
+   CONTROLS / MODALS
+   ============================================================ */
+function togglePause() {
+  if (!state || !state.running) return;
+  state.paused = !state.paused;
+  el("pausedFlag").classList.toggle("show", state.paused);
+  el("pauseBtn").innerHTML = state.paused
+    ? `${ic("play", 15)} Resume`
+    : `${ic("pause", 15)} Pause`;
+}
+
+function toggleSound() {
+  if (!state) return;
+  state.soundOn = !state.soundOn;
+  const b = el("soundBtn");
+  b.classList.toggle("muted", !state.soundOn);
+  b.innerHTML = state.soundOn
+    ? `<span class="on-dot">${ic("volume2", 15)}</span> Sound`
+    : `${ic("volumeX", 15)} Muted`;
+}
+
+function wireControls() {
+  el("startBtn").addEventListener("click", startGame);
+  el("demoReportBtn").addEventListener("click", runDemoReport);
+  el("pauseBtn").addEventListener("click", togglePause);
+  el("soundBtn").addEventListener("click", toggleSound);
+  el("helpBtn").addEventListener("click", () => el("helpOverlay").classList.add("show"));
+  el("helpClose").addEventListener("click", () => el("helpOverlay").classList.remove("show"));
+  el("helpOverlay").addEventListener("click", (e) => {
+    if (e.target === el("helpOverlay")) el("helpOverlay").classList.remove("show");
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && state && state.running) { e.preventDefault(); togglePause(); }
+    if (e.key.toLowerCase() === "h") el("helpOverlay").classList.toggle("show");
+  });
+}
+
+/* ---------- Boot ---------- */
+(function init() {
+  hydrateIcons();
+  state = freshState();
+  buildKpiCards();
+  updateStats();
+  renderAlerts();
+  wireControls();
+})();
+</script>
+</body>
+</html>
