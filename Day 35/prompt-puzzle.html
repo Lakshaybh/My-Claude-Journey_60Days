@@ -195,6 +195,19 @@
     display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--blue-700);cursor:pointer;
   }
   footer.note{text-align:center;color:var(--muted2);font-size:.78rem;margin-top:30px;}
+
+  .demo-row{display:flex;justify-content:center;margin:10px 0 4px;}
+  .btn.demo{background:linear-gradient(135deg,#0f3a63,#2f86d6);}
+
+  #printArea{display:none;}
+  @media print{
+    @page{ margin:12mm; }
+    html,body{background:#fff !important;}
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block;position:absolute;top:0;left:0;width:100%;padding:0;}
+    * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
+  }
 </style>
 </head>
 <body>
@@ -220,6 +233,9 @@
       <div class="actions-row">
         <div></div>
         <button class="btn" id="startBtn" disabled>Start Puzzle →</button>
+      </div>
+      <div class="demo-row">
+        <button class="btn demo secondary" id="demoBtn">▶️ Watch Demo (Auto-Play Inputs &amp; Answers)</button>
       </div>
     </div>
   </div>
@@ -273,12 +289,15 @@
       <div class="final-prompt" id="finalPromptBox"></div>
       <div class="actions-row">
         <button class="btn secondary" id="replayBtn">🔁 Play Again (New Scenarios)</button>
+        <button class="btn" id="printBtn">🖨️ Print PDF Report</button>
       </div>
     </div>
   </div>
 
   <footer class="note">All logic runs locally in your browser — no data leaves this page.</footer>
 </div>
+
+<div id="printArea"></div>
 
 <script>
 (function(){
@@ -548,7 +567,8 @@ let state = {
   scenarios:[], currentIndex:0,
   moves:0, wrong:0, hints:0, correctPlacements:0, totalNeeded:0,
   startTime:0, timerHandle:null, optimizationBonus:0,
-  perScenarioResults:[]
+  perScenarioResults:[], log:[], demoMode:false,
+  finalScore:0, finalRank:'', finalAccuracy:0
 };
 
 /* ============================= UTIL ============================= */
@@ -629,7 +649,21 @@ function updateStart(){
 
 document.getElementById('startBtn').addEventListener('click', ()=>{
   state.domain = selDomain; state.difficulty = selDiff;
+  state.demoMode = false;
   resetSeed();
+  startGame();
+});
+
+document.getElementById('demoBtn').addEventListener('click', ()=>{
+  const dIdx = 0, fIdx = 0;
+  selDomain = DOMAINS[dIdx].id; selDiff = DIFFICULTIES[fIdx].id;
+  document.querySelectorAll('#domainGrid .option-card').forEach((c,i)=>c.classList.toggle('selected', i===dIdx));
+  document.querySelectorAll('#diffGrid .option-card').forEach((c,i)=>c.classList.toggle('selected', i===fIdx));
+  updateStart();
+  state.domain = selDomain; state.difficulty = selDiff;
+  state.demoMode = true;
+  resetSeed();
+  toast('Demo mode: watch the auto-play flow through inputs and answers.', 'info');
   startGame();
 });
 
@@ -650,7 +684,7 @@ function startGame(){
 
   state.currentIndex = 0;
   state.moves=0; state.wrong=0; state.hints=0; state.correctPlacements=0;
-  state.optimizationBonus=0; state.perScenarioResults=[];
+  state.optimizationBonus=0; state.perScenarioResults=[]; state.log=[];
   state.totalNeeded = state.scenarios.reduce((sum,s)=> sum + (s.correctBlocks? s.correctBlocks.length : 1), 0);
   state.startTime = performance.now ? performance.now() : 0;
 
@@ -716,6 +750,40 @@ function renderScenario(){
   else renderChoose(sc);
 
   renderStats();
+
+  if(state.demoMode){
+    document.getElementById('hintBtn').style.pointerEvents='none';
+    setTimeout(()=>autoSolve(sc), 1100);
+  }
+}
+
+function autoSolve(sc){
+  if(sc.challengeType==='build'){
+    const slotList = document.getElementById('slotList');
+    const checkBtn = document.getElementById('checkBuildBtn');
+    if(!slotList || !checkBtn) return;
+    sc.correctBlocks.forEach(text=>{
+      const el = Array.from(document.querySelectorAll('#pool .block')).find(b=>b.dataset.text===text);
+      if(el) slotList.appendChild(el);
+    });
+    setTimeout(()=> checkBtn.click(), 500);
+  } else if(sc.challengeType==='clean'){
+    const checkBtn = document.getElementById('checkCleanBtn');
+    if(!checkBtn) return;
+    sc.distractorBlocks.forEach(text=>{
+      const el = Array.from(document.querySelectorAll('#cleanList .block')).find(b=>b.dataset.text===text);
+      if(el) el.click();
+    });
+    setTimeout(()=> checkBtn.click(), 500);
+  } else {
+    const bestText = (sc.choices.find(c=>c.best)||{}).text;
+    const el = Array.from(document.querySelectorAll('.choice-card')).find(c=>c.textContent.includes(bestText));
+    if(el) el.click();
+  }
+  setTimeout(()=>{
+    const nextBtn = document.getElementById('nextBtn');
+    if(nextBtn && state.demoMode) nextBtn.click();
+  }, 2600);
 }
 
 function useHint(sc){
@@ -823,6 +891,11 @@ function renderBuild(sc){
       toast('Not quite — check the explanation below.', 'error');
     }
     document.getElementById('checkBuildBtn').disabled = true;
+    state.log.push({
+      title:sc.title, type:'Build the Prompt', input:placedTexts.join(' | ') || '(nothing placed)',
+      correct: allCorrectPlaced && noExtras, weakPrompt:sc.weakPrompt, optimizedPrompt:sc.optimizedPrompt,
+      weakOutput:sc.weakOutput, optimizedOutput:sc.optimizedOutput, principle:sc.principle
+    });
     showExplain(sc, allCorrectPlaced && noExtras);
     renderStats();
   });
@@ -888,6 +961,11 @@ function renderClean(sc){
       toast('Some clutter remains or you removed something needed.', wrongRemovals>0?'error':'info');
     }
     document.getElementById('checkCleanBtn').disabled = true;
+    state.log.push({
+      title:sc.title, type:'Clean the Prompt', input:'Removed as clutter: ' + (Array.from(marked).join(' | ') || '(none marked)'),
+      correct: perfect, weakPrompt:sc.weakPrompt, optimizedPrompt:sc.optimizedPrompt,
+      weakOutput:sc.weakOutput, optimizedOutput:sc.optimizedOutput, principle:sc.principle
+    });
     showExplain(sc, perfect);
     renderStats();
   });
@@ -921,6 +999,11 @@ function renderChoose(sc){
         toast('Not the strongest choice — see why below.', 'error');
         document.querySelectorAll('.choice-card').forEach((c2,i2)=>{ if(opts[i2].best) c2.classList.add('right'); });
       }
+      state.log.push({
+        title:sc.title, type:'Choose the Best Prompt', input:'Selected: ' + c.text,
+        correct: c.best, weakPrompt:sc.weakPrompt, optimizedPrompt:sc.optimizedPrompt,
+        weakOutput:sc.weakOutput, optimizedOutput:sc.optimizedOutput, principle:sc.principle
+      });
       showExplain(sc, c.best);
       renderStats();
     });
@@ -984,10 +1067,109 @@ function finishGame(){
   const lastSc = state.scenarios[state.scenarios.length-1] || state.scenarios[0];
   document.getElementById('finalPromptBox').textContent = lastSc ? lastSc.optimizedPrompt : '';
 
+  state.finalScore = score; state.finalRank = rank + ' · ' + rating; state.finalAccuracy = accuracy;
+
   switchScreen('screen-report');
+
+  if(state.demoMode){
+    toast('Demo complete — click "Print PDF Report" to see the full summary.', 'success');
+  }
 }
 
+function trunc(s, n){ return (s && s.length > n) ? s.slice(0, n-1).trimEnd() + '…' : (s||''); }
+
+function buildPrintReport(){
+  const domainName = (DOMAINS.find(d=>d.id===state.domain)||{}).name || '—';
+  const diffName = (DIFFICULTIES.find(d=>d.id===state.difficulty)||{}).name || '—';
+  const dateStr = new Date().toDateString();
+  const F = "font-family:'Segoe UI',Arial,sans-serif;";
+
+  const rows = state.log.map((l,i)=>{
+    const good = l.correct;
+    const accent = good ? '#1fa971' : '#e5484d';
+    const chipBg = good ? '#e8f8f1' : '#fdeaea';
+    const chipText = good ? '✅ CORRECT' : '❌ REVIEW';
+    return `
+    <div style="margin-bottom:8px;border-radius:9px;overflow:hidden;border:1.5px solid ${accent}55;break-inside:avoid;${F}">
+      <div style="background:linear-gradient(135deg,#0f3a63,#1a68b0);padding:5px 10px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="color:#fff;font-weight:800;font-size:10.5px;">${i+1}. ${l.title} <span style="font-weight:600;opacity:.8;">· ${l.type}</span></div>
+        <div style="background:${chipBg};color:${accent};font-weight:800;font-size:8px;letter-spacing:.4px;padding:2px 8px;border-radius:999px;">${chipText}</div>
+      </div>
+      <div style="padding:6px 10px 7px;background:#fbfdff;">
+        <div style="font-size:9px;margin-bottom:4px;color:#274b6d;"><strong style="color:#0a2540;">✏️ Input:</strong> ${trunc(l.input,140)}</div>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="width:50%;vertical-align:top;padding:5px 7px;background:#fdeaea;border-radius:6px 0 0 6px;border:1px solid #f5c2c4;">
+              <div style="font-weight:800;font-size:8px;letter-spacing:.4px;color:#c0292f;">WEAK → "${trunc(l.weakPrompt,70)}"</div>
+              <div style="font-size:8.8px;font-style:italic;color:#5a2323;margin-top:2px;">${trunc(l.weakOutput,110)}</div>
+            </td>
+            <td style="width:50%;vertical-align:top;padding:5px 7px;background:#e8f8f1;border-radius:0 6px 6px 0;border:1px solid #b7e8cd;">
+              <div style="font-weight:800;font-size:8px;letter-spacing:.4px;color:#137a4f;">OPTIMIZED → "${trunc(l.optimizedPrompt,70)}"</div>
+              <div style="font-size:8.8px;font-style:italic;color:#0d4a30;margin-top:2px;">${trunc(l.optimizedOutput,110)}</div>
+            </td>
+          </tr>
+        </table>
+        <div style="margin-top:4px;font-size:8.8px;background:#fff8e1;border:1px solid #f0d98c;border-radius:6px;padding:3px 8px;color:#7a5c00;">
+          <strong>📘</strong> ${trunc(l.principle,140)}
+        </div>
+      </div>
+    </div>`;
+  }).join('') || '<p>No scenario log recorded.</p>';
+
+  const dna = document.getElementById('dnaRow') ? document.getElementById('dnaRow').innerText.trim() : '';
+
+  document.getElementById('printArea').innerHTML = `
+    <div style="${F}color:#0a2540;max-width:900px;margin:0 auto;font-size:10px;line-height:1.35;">
+
+      <div style="background:linear-gradient(120deg,#0a2540,#1a68b0);border-radius:14px;padding:16px 20px;margin-bottom:12px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%);"></div>
+        <div style="display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.45);color:#fff;font-weight:800;font-size:9.5px;letter-spacing:1px;padding:3px 12px;border-radius:999px;margin-bottom:8px;">#ABTALKS · DAY 35</div>
+        <h1 style="color:#fff;margin:0 0 2px;font-size:19px;font-weight:900;letter-spacing:.2px;">🧩 Prompt Puzzle — Performance Report</h1>
+        <div style="color:#cfe4fb;font-size:10px;font-weight:600;">60 Days of Claude · My Claude Journey</div>
+        <div style="margin-top:8px;color:#eaf3fc;font-size:9.5px;line-height:1.5;">
+          <strong>Date:</strong> ${dateStr} &nbsp;·&nbsp; <strong>Domain:</strong> ${domainName} &nbsp;·&nbsp; <strong>Difficulty:</strong> ${diffName}<br>
+          <strong>Today's Task:</strong> Practice AI prompt engineering through randomized ${domainName} scenarios using three challenge modes — Build, Clean, Choose the Best Prompt.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:150px;background:linear-gradient(135deg,#14508a,#2f86d6);border-radius:12px;padding:12px;text-align:center;color:#fff;">
+          <div style="font-size:8.5px;letter-spacing:1.2px;font-weight:800;opacity:.85;">PROMPT SCORE</div>
+          <div style="font-size:32px;font-weight:900;margin:2px 0;">${state.finalScore}</div>
+          <div style="font-size:10px;font-weight:800;color:#dff0ff;">${state.finalRank}</div>
+        </div>
+        <div style="flex:1.6;min-width:260px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+          ${[['🎯',state.finalAccuracy+'%','ACCURACY'],['🧮',state.moves,'MOVES'],['❌',state.wrong,'WRONG'],['💡',state.hints,'HINTS'],['⭐',state.optimizationBonus,'OPT. BONUS'],['📦',state.log.length,'SCENARIOS']]
+            .map(([icon,val,lbl])=>`
+              <div style="background:#fff;border:1.5px solid #dceafb;border-radius:9px;padding:5px 4px;text-align:center;">
+                <div style="font-size:11px;">${icon}</div>
+                <div style="font-size:13px;font-weight:900;color:#14508a;">${val}</div>
+                <div style="font-size:6.8px;font-weight:800;letter-spacing:.3px;color:#6b8299;">${lbl}</div>
+              </div>`).join('')}
+        </div>
+      </div>
+
+      ${dna ? `<div style="margin-bottom:12px;">
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">${dna.split('\n').filter(Boolean).map(d=>`<span style="background:#1a68b0;color:#fff;font-weight:700;font-size:8.5px;padding:3px 10px;border-radius:999px;">${d}</span>`).join('')}</div>
+      </div>` : ''}
+
+      <h2 style="color:#14508a;font-size:12.5px;border-bottom:2px solid #1a68b0;padding-bottom:3px;margin:0 0 8px;">📋 Scenario Log — Inputs &amp; Outputs</h2>
+      ${rows}
+
+      <div style="margin-top:10px;text-align:center;color:#6b8299;font-size:8px;border-top:1px solid #dceafb;padding-top:6px;">
+        Generated locally in-browser by 🧩 Prompt Puzzle · No data leaves this page · #abtalks Day 35
+      </div>
+    </div>
+  `;
+}
+
+document.getElementById('printBtn').addEventListener('click', ()=>{
+  buildPrintReport();
+  setTimeout(()=> window.print(), 100);
+});
+
 document.getElementById('replayBtn').addEventListener('click', ()=>{
+  state.demoMode = false;
   resetSeed();
   startGame();
 });
