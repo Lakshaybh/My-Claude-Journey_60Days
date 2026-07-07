@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Compass</title>
+<style>
+  :root{
+    --bg:#0b0f1a;
+    --panel:rgba(255,255,255,.06);
+    --panel-strong:rgba(255,255,255,.1);
+    --border:rgba(255,255,255,.12);
+    --ink:#f2f4fb;
+    --ink-soft:#9aa3bd;
+    --accent:#7c9cff;
+    --accent-2:#a78bfa;
+    --good:#4ade80;
+    --warn:#fbbf24;
+    --radius:20px;
+    --radius-sm:13px;
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .bg-anim{
+    position:fixed; inset:0; z-index:-1;
+    background:
+      radial-gradient(1000px 700px at 15% 10%, rgba(124,156,255,.25), transparent 60%),
+      radial-gradient(900px 700px at 85% 90%, rgba(167,139,250,.22), transparent 60%),
+      radial-gradient(700px 600px at 90% 10%, rgba(74,222,128,.12), transparent 60%),
+      var(--bg);
+    background-size:200% 200%;
+    animation:drift 22s ease-in-out infinite;
+  }
+  @keyframes drift{
+    0%,100%{background-position:0% 0%;}
+    50%{background-position:100% 100%;}
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:28px 18px 70px;}
+
+  header{text-align:center;margin-bottom:22px;}
+  header h1{
+    font-size:clamp(1.8rem,4vw,2.6rem);
+    margin:0 0 4px;
+    background:linear-gradient(120deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    font-weight:800;letter-spacing:-.01em;
+  }
+  header p{color:var(--ink-soft);margin:0;font-size:1rem;}
+
+  .progress-wrap{margin:22px 0 26px;}
+  .progress-track{height:8px;border-radius:999px;background:var(--panel);overflow:hidden;border:1px solid var(--border);}
+  .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .5s var(--ease);}
+  .stage-dots{display:flex;justify-content:space-between;margin-top:10px;font-size:.78rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .stage-dots span.active{color:var(--accent);font-weight:700;}
+
+  .panel{
+    background:var(--panel);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:28px;
+    box-shadow:0 20px 50px rgba(0,0,0,.35);
+    animation:enter .45s var(--ease);
+  }
+  @keyframes enter{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+  .ticket{
+    background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+    border:1px dashed var(--border);
+    border-radius:var(--radius-sm);
+    padding:20px 22px;
+    margin-bottom:22px;
+    position:relative;
+  }
+  .ticket .tag{
+    display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
+    font-weight:700;color:var(--accent);background:rgba(124,156,255,.15);
+    padding:4px 10px;border-radius:999px;margin-bottom:10px;
+  }
+  .ticket.incident .tag{color:var(--warn);background:rgba(251,191,36,.15);}
+  .ticket h3{margin:0 0 8px;font-size:1.15rem;}
+  .ticket p{margin:0;color:var(--ink-soft);line-height:1.5;font-size:.96rem;}
+
+  .slot{
+    border:2px dashed var(--border);
+    border-radius:var(--radius-sm);
+    min-height:74px;
+    display:flex;align-items:center;justify-content:center;
+    gap:10px;
+    margin-bottom:20px;
+    color:var(--ink-soft);
+    font-size:.9rem;
+    transition:border-color .25s var(--ease), background .25s var(--ease), transform .2s var(--ease);
+    flex-wrap:wrap;
+    padding:10px;
+  }
+  .slot.dragover{border-color:var(--accent);background:rgba(124,156,255,.1);}
+  .slot.filled{border-style:solid;border-color:var(--accent);}
+  .slot.snap{animation:snap .35s var(--ease);}
+  @keyframes snap{0%{transform:scale(.94);}55%{transform:scale(1.03);}100%{transform:scale(1);}}
+
+  .role-pool{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;}
+  .role-card{
+    --rc:var(--accent);
+    display:flex;align-items:center;gap:8px;
+    background:var(--panel-strong);
+    border:1px solid var(--border);
+    border-left:4px solid var(--rc);
+    border-radius:var(--radius-sm);
+    padding:10px 14px;
+    font-size:.88rem;font-weight:600;
+    cursor:grab;user-select:none;
+    transition:transform .2s var(--ease), box-shadow .2s var(--ease), opacity .2s var(--ease);
+  }
+  .role-card:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(0,0,0,.35);}
+  .role-card:active{cursor:grabbing;}
+  .role-card.dragging{opacity:.35;}
+  .role-card.placed{opacity:.3;pointer-events:none;}
+  .role-card.selected{outline:2px solid var(--rc);background:rgba(255,255,255,.14);}
+  .role-card .ic{font-size:1.1rem;}
+
+  .step-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+  .step-slot{
+    flex:1 1 140px;
+    min-height:64px;
+    border:2px dashed var(--border);
+    border-radius:var(--radius-sm);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;padding:8px;color:var(--ink-soft);font-size:.78rem;
+    transition:border-color .25s var(--ease), background .25s var(--ease);
+    position:relative;
+  }
+  .step-slot .num{position:absolute;top:6px;left:8px;font-size:.68rem;opacity:.6;}
+  .step-slot.dragover{border-color:var(--accent);background:rgba(124,156,255,.1);}
+  .step-slot.filled{border-style:solid;}
+  .flow-arrow{align-self:center;color:var(--ink-soft);font-size:1.1rem;}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    border:none;border-radius:999px;padding:12px 26px;
+    font-size:.92rem;font-weight:700;cursor:pointer;
+    background:linear-gradient(120deg,var(--accent),var(--accent-2));
+    color:#0b0f1a;
+    box-shadow:0 10px 24px rgba(124,156,255,.3);
+    transition:transform .2s var(--ease), box-shadow .2s var(--ease), opacity .2s;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+  .btn.secondary{background:transparent;color:var(--ink-soft);border:1px solid var(--border);box-shadow:none;}
+  .btn.secondary:hover{color:var(--ink);}
+  .btn-row{display:flex;justify-content:space-between;gap:12px;margin-top:8px;flex-wrap:wrap;}
+
+  .reveal{
+    margin-top:6px;padding-top:18px;border-top:1px solid var(--border);
+    animation:enter .4s var(--ease);
+  }
+  .reveal .owner-line{display:flex;align-items:center;gap:10px;font-size:1.05rem;font-weight:700;margin-bottom:10px;}
+  .reveal .owner-line .check{color:var(--good);}
+  .reveal .why{color:var(--ink-soft);line-height:1.6;font-size:.94rem;margin-bottom:12px;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .chip{
+    font-size:.78rem;font-weight:600;padding:5px 12px;border-radius:999px;
+    background:rgba(255,255,255,.08);border:1px solid var(--border);
+  }
+  .chip.correct{border-color:var(--good);color:var(--good);}
+  .chip.miss{border-color:var(--warn);color:var(--warn);}
+  .section-label{font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:14px 0 6px;font-weight:700;}
+
+  .journey-track{position:relative;height:44px;margin:16px 0 8px;}
+  .journey-line{position:absolute;top:50%;left:0;right:0;height:3px;background:var(--border);transform:translateY(-50%);border-radius:2px;overflow:hidden;}
+  .journey-line .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width 1.1s var(--ease);}
+  .journey-dot{
+    position:absolute;top:50%;width:26px;height:26px;border-radius:50%;
+    background:var(--accent);transform:translate(-50%,-50%);
+    display:flex;align-items:center;justify-content:center;font-size:.85rem;
+    box-shadow:0 4px 14px rgba(0,0,0,.4);transition:left 1.1s var(--ease);
+    left:0%;
+  }
+
+  .comm-flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px;}
+  .comm-node{
+    font-size:.8rem;font-weight:700;padding:8px 14px;border-radius:999px;
+    background:rgba(255,255,255,.08);border:1px solid var(--border);
+  }
+
+  /* final screen */
+  .bar-chart{display:grid;gap:16px;margin:22px 0;}
+  .bar-item .row{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:6px;font-weight:600;}
+  .bar-track{height:14px;border-radius:999px;background:var(--panel-strong);border:1px solid var(--border);overflow:hidden;}
+  .bar-fill{height:100%;border-radius:999px;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width 1.2s var(--ease);}
+
+  .reflect-grid{display:grid;gap:14px;margin-top:20px;}
+  @media(min-width:680px){.reflect-grid{grid-template-columns:1fr 1fr;}}
+  .reflect-card{
+    background:var(--panel-strong);border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:16px 18px;
+  }
+  .reflect-card h4{margin:0 0 8px;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);}
+  .reflect-card p{margin:0;color:var(--ink-soft);font-size:.9rem;line-height:1.6;}
+  .insight-box{
+    margin-top:18px;padding:18px 20px;border-radius:var(--radius-sm);
+    background:linear-gradient(120deg,rgba(124,156,255,.14),rgba(167,139,250,.14));
+    border:1px solid var(--border);font-size:.95rem;line-height:1.6;
+  }
+
+  .start-hero{text-align:center;padding:52px 30px;}
+  .start-icon{
+    width:84px;height:84px;margin:0 auto;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:2.1rem;
+    background:radial-gradient(circle at 30% 30%,rgba(124,156,255,.25),rgba(167,139,250,.15));
+    border:1px solid var(--border);
+    box-shadow:0 20px 50px rgba(0,0,0,.35), inset 0 2px 4px rgba(255,255,255,.08);
+    animation:float 5s ease-in-out infinite;
+  }
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+
+  .celebrate{position:relative;text-align:center;padding:14px 0 4px;font-size:2.4rem;}
+  .celebrate span{display:inline-block;animation:pop .6s var(--ease) both;}
+  .celebrate span:nth-child(2){animation-delay:.08s;}
+  .celebrate span:nth-child(3){animation-delay:.16s;}
+  .celebrate span:nth-child(4){animation-delay:.24s;}
+  @keyframes pop{0%{transform:scale(0) rotate(-20deg);opacity:0;}70%{transform:scale(1.2) rotate(8deg);opacity:1;}100%{transform:scale(1) rotate(0);}}
+
+  footer.hint{text-align:center;color:var(--ink-soft);font-size:.78rem;margin-top:34px;opacity:.7;}
+
+  @media(max-width:520px){.panel{padding:20px;}}
+
+  /* ---------------- PRINT REPORT (white, bold, attractive) ---------------- */
+  #printReport{display:none;}
+  @media print{
+    @page{ margin:14mm; }
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact; }
+    body *{ visibility:hidden; }
+    .bg-anim, header, .progress-wrap, footer.hint{ display:none !important; }
+    #printReport, #printReport *{ visibility:visible; }
+    html, body{ background:#ffffff !important; }
+    #printReport{
+      display:block;
+      position:absolute;
+      left:0; top:0; width:100%;
+      color:#1a1f2e; background:#ffffff;
+      font-family:"Segoe UI",Arial,sans-serif;
+      padding:6mm;
+    }
+    #printReport .rp-header{
+      display:flex; justify-content:space-between; align-items:flex-end;
+      border:1px solid #e2e5ee; border-bottom:4px solid #6d5ef2;
+      padding:26px 28px; margin-bottom:26px; border-radius:14px;
+      background:linear-gradient(120deg,#f5f6ff,#ffffff);
+    }
+    #printReport .rp-header .rp-brand{font-size:.8rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6d5ef2;margin-bottom:6px;}
+    #printReport .rp-header h1{font-size:2rem;margin:0;font-weight:900;letter-spacing:-.02em;color:#131722;}
+    #printReport .rp-header .rp-date{font-size:.85rem;color:#6b7185;white-space:nowrap;padding-left:20px;font-weight:600;}
+    #printReport .rp-tag{
+      display:inline-block;border:1.5px solid #6d5ef2;border-radius:999px;
+      padding:6px 16px;font-size:.78rem;font-weight:800;margin-bottom:10px;
+      letter-spacing:.04em;text-transform:uppercase;color:#6d5ef2;background:#efedff;
+    }
+    #printReport .rp-section{
+      border:1px solid #e6e8f0;
+      border-radius:14px;
+      padding:22px 26px;
+      margin-bottom:20px;
+      page-break-inside:avoid;
+      background:#fbfbfe;
+    }
+    #printReport .rp-section.rp-break{ page-break-before:always; }
+    #printReport h2{
+      font-size:1rem;margin:0 0 14px;font-weight:800;
+      text-transform:uppercase;letter-spacing:.06em;
+      color:#6d5ef2;border-bottom:2px solid #eceafd;padding-bottom:10px;
+    }
+    #printReport h3{font-size:.95rem;margin:16px 0 8px;font-weight:700;color:#131722;}
+    #printReport p{font-size:.96rem;line-height:1.75;color:#3a3f52;margin:0 0 12px;}
+    #printReport .rp-bar-item{border:1px solid #e6e8f0;border-radius:10px;padding:14px 16px;margin-bottom:14px;background:#ffffff;}
+    #printReport .rp-bar-row{display:flex;justify-content:space-between;font-size:.94rem;margin-bottom:8px;font-weight:700;color:#131722;}
+    #printReport .rp-bar-track{height:12px;background:#eef0f7;border-radius:999px;overflow:hidden;border:1px solid #e6e8f0;}
+    #printReport .rp-bar-fill{height:100%;background:linear-gradient(90deg,#6d5ef2,#ff6fae);}
+    #printReport .rp-owner-line{font-weight:800;font-size:1rem;margin-bottom:8px;color:#131722;}
+    #printReport .rp-owner-line .rp-check{color:#16a34a;margin-right:6px;}
+    #printReport .rp-chip-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;}
+    #printReport .rp-chip{
+      font-size:.78rem;font-weight:700;padding:5px 12px;border-radius:999px;
+      background:#f1f3fb;border:1px solid #e2e5ee;color:#3a3f52;
+    }
+    #printReport .rp-chip.rp-correct{border-color:#16a34a;color:#16a34a;background:#eafaf0;}
+    #printReport .rp-chip.rp-miss{border-color:#d97706;color:#d97706;background:#fef6e8;}
+    #printReport .rp-task-item{border:1px solid #e6e8f0;border-radius:10px;padding:16px 18px;margin-bottom:14px;page-break-inside:avoid;background:#ffffff;}
+    #printReport .rp-task-item .rp-t-num{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:24px;height:24px;border-radius:50%;background:#6d5ef2;color:#fff;
+      font-weight:800;font-size:.78rem;margin-right:8px;
+    }
+    #printReport .rp-task-item .rp-t-title{font-weight:800;font-size:.98rem;margin-bottom:8px;color:#131722;}
+    #printReport .rp-flow-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;}
+    #printReport .rp-flow-node{font-size:.8rem;font-weight:700;padding:6px 12px;border-radius:999px;background:#f1f3fb;border:1px solid #e2e5ee;color:#131722;}
+    #printReport .rp-flow-arrow{color:#9aa0b4;font-weight:700;}
+    #printReport .rp-insight-box{
+      margin-top:6px;padding:18px 20px;border-radius:12px;
+      background:linear-gradient(120deg,#eef0ff,#fdeef5);
+      border:1px solid #e6e8f0;font-size:.96rem;line-height:1.7;color:#26293a;font-weight:600;
+    }
+    #printReport .rp-footer{margin-top:26px;font-size:.76rem;color:#6b7185;border-top:1px solid #e6e8f0;padding-top:14px;text-align:center;font-weight:600;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-anim" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header>
+    <h1>🧭 Task Compass</h1>
+    <p>Learn how work flows through real organizations.</p>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="stage-dots">
+      <span data-stage="0">Who Owns This?</span>
+      <span data-stage="1">Task Routing</span>
+      <span data-stage="2">Collaboration</span>
+      <span data-stage="3">Reflection</span>
+    </div>
+  </div>
+
+  <main id="main"></main>
+
+  <footer class="hint">A management simulation about ownership, delegation, collaboration &amp; workflow — not a job-title quiz.</footer>
+</div>
+
+<!-- Printable report (populated by JS, only visible when printing) -->
+<div id="printReport" aria-hidden="true">
+  <div class="rp-header">
+    <div>
+      <div class="rp-brand">Task Compass</div>
+      <h1>Organizational Thinking Report</h1>
+    </div>
+    <div class="rp-date" id="rpDate"></div>
+  </div>
+
+  <div class="rp-section">
+    <div class="rp-tag">Corporate Office Simulation</div>
+    <p>This report summarizes how you reasoned through ownership, delegation, collaboration, and workflow decisions across three stages of realistic corporate-office scenarios. Percentages reflect <i>tendencies</i> observed in this session, not fixed traits or a performance grade.</p>
+  </div>
+
+  <div class="rp-section">
+    <h2>Understanding Breakdown</h2>
+    <div id="rpBarChart"></div>
+  </div>
+
+  <div class="rp-section">
+    <h2>Reflection</h2>
+    <h3>What you understood well</h3>
+    <p id="rpStrong"></p>
+    <h3>Where you tended to over-assign responsibility</h3>
+    <p id="rpOverAssign"></p>
+    <h3>Where you underestimated collaboration</h3>
+    <p id="rpUnderCollab"></p>
+    <div class="rp-insight-box" id="rpInsight"></div>
+  </div>
+
+  <div class="rp-section rp-break">
+    <h2>Stage 1 — Who Owns This?</h2>
+    <p style="color:#6b7185;">Your ownership call for each ticket, the correct primary owner, and who else may assist.</p>
+    <div id="rpStage1"></div>
+  </div>
+
+  <div class="rp-section">
+    <h2>Stage 2 — Task Routing</h2>
+    <p style="color:#6b7185;">The workflow order you built for each ticket compared with the common routing path.</p>
+    <div id="rpStage2"></div>
+  </div>
+
+  <div class="rp-section rp-break">
+    <h2>Stage 3 — Collaboration Challenge</h2>
+    <p style="color:#6b7185;">The teams you pulled in for each incident, plus the primary owner and communication flow.</p>
+    <div id="rpStage3"></div>
+  </div>
+
+  <div class="rp-footer">Generated by Task Compass · A management simulation, not a performance evaluation.</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- ROLE DEFINITIONS (Corporate Office) ---------------- */
+const ROLES = {
+  hr:        { label:"HR",                 icon:"🧑‍💼", color:"#2dd4bf" },
+  finance:   { label:"Finance",             icon:"💰", color:"#eab308" },
+  legal:     { label:"Legal",               icon:"⚖️", color:"#a78bfa" },
+  it:        { label:"IT / Systems",        icon:"💻", color:"#38bdf8" },
+  marketing: { label:"Marketing",           icon:"📣", color:"#f472b6" },
+  operations:{ label:"Operations",          icon:"⚙️", color:"#fb923c" },
+  sales:     { label:"Sales",               icon:"📈", color:"#4ade80" },
+  executive: { label:"Executive",           icon:"🧭", color:"#f87171" },
+  customer:  { label:"Customer Relations",  icon:"🤝", color:"#22d3ee" }
+};
+const ROLE_ORDER = ["hr","finance","legal","it","marketing","operations","sales","executive","customer"];
+
+/* ---------------- STAGE 1 DATA: Who Owns This? ---------------- */
+const STAGE1_TASKS = [
+  { id:"s1a", title:"An employee files a harassment complaint against a manager.",
+    owner:"hr", why:"HR owns employee conduct and workplace investigations — they're trained to handle complaints fairly and confidentially.",
+    assist:["legal","executive"], assistWhy:"Legal ensures the process is compliant; Executive is informed because it involves a manager." },
+  { id:"s1b", title:"A vendor invoice was accidentally paid twice.",
+    owner:"finance", why:"Finance owns payments and reconciliation — they can identify the duplicate and recover the funds.",
+    assist:["operations","it"], assistWhy:"Operations may have approved the invoice; IT can help trace the payment system error." },
+  { id:"s1c", title:"A new contract with a client needs review before signing.",
+    owner:"legal", why:"Legal owns contract risk and language — they check terms, liability, and compliance before anyone signs.",
+    assist:["finance","sales"], assistWhy:"Finance checks the pricing terms; Sales provides context on the client relationship." },
+  { id:"s1d", title:"The office Wi-Fi has been down for two hours.",
+    owner:"it", why:"IT owns infrastructure and systems — they diagnose and restore connectivity.",
+    assist:["operations"], assistWhy:"Operations coordinates communication to affected staff while the issue is fixed." },
+  { id:"s1e", title:"A press release contains a factual error about the company.",
+    owner:"marketing", why:"Marketing owns public communications — they issue the correction and manage the narrative.",
+    assist:["legal","executive"], assistWhy:"Legal checks liability exposure; Executive signs off on the public correction." },
+  { id:"s1f", title:"A client complains that their shipment is a week late.",
+    owner:"operations", why:"Operations owns fulfillment and logistics — they can trace where the shipment stalled.",
+    assist:["customer","sales"], assistWhy:"Customer Relations keeps the client updated; Sales protects the relationship." },
+  { id:"s1g", title:"A major client wants a discount to renew their annual contract.",
+    owner:"sales", why:"Sales owns the client relationship and renewal terms — they negotiate the deal.",
+    assist:["finance","executive"], assistWhy:"Finance checks margin impact; Executive approves discounts beyond standard limits." },
+  { id:"s1h", title:"Quarterly financial results need to be presented to the board.",
+    owner:"executive", why:"Executive leadership owns board communication and company-wide accountability.",
+    assist:["finance","marketing"], assistWhy:"Finance prepares the numbers; Marketing frames the growth story." },
+  { id:"s1i", title:"An unhappy customer posted a scathing review online.",
+    owner:"customer", why:"Customer Relations owns the direct relationship and response to individual customer concerns.",
+    assist:["marketing","operations"], assistWhy:"Marketing monitors brand reputation; Operations investigates if the complaint points to a real process gap." },
+  { id:"s1j", title:"A new employee needs onboarding paperwork and system access.",
+    owner:"hr", why:"HR owns the onboarding process from offer to first day.",
+    assist:["it","operations"], assistWhy:"IT sets up accounts and equipment; Operations preps the workspace." }
+];
+
+/* ---------------- STAGE 2 DATA: Task Routing ---------------- */
+const STAGE2_TASKS = [
+  { id:"r1", title:"A customer requests a refund for a defective product.",
+    steps:["customer","operations","finance"],
+    reasoning:"Customer Relations logs the request, Operations verifies the defect is real, then Finance processes the actual refund." },
+  { id:"r2", title:"A new enterprise client needs a custom contract with special pricing.",
+    steps:["sales","legal","finance","executive"],
+    reasoning:"Sales negotiates terms with the client, Legal drafts safe contract language, Finance checks the pricing math, and Executive gives final sign-off." },
+  { id:"r3", title:"A new employee is starting next week and needs full setup.",
+    steps:["hr","it","operations"],
+    reasoning:"HR triggers onboarding, IT provisions accounts and equipment, and Operations preps the physical workspace." },
+  { id:"r4", title:"A critical system outage is affecting every office.",
+    steps:["it","operations","executive"],
+    reasoning:"IT diagnoses and fixes the outage, Operations manages business continuity, and Executive is briefed given the scale of impact." },
+  { id:"r5", title:"The company needs a public statement after a controversy.",
+    steps:["marketing","legal","executive"],
+    reasoning:"Marketing drafts the message, Legal reviews it for risk, and Executive approves it before release." },
+  { id:"r6", title:"A large order needs to be fulfilled and invoiced.",
+    steps:["sales","operations","finance","customer"],
+    reasoning:"Sales confirms the order, Operations fulfills it, Finance issues the invoice, and Customer Relations confirms delivery satisfaction." },
+  { id:"r7", title:"A formal misconduct investigation is needed for a senior employee.",
+    steps:["hr","legal","executive"],
+    reasoning:"HR leads the investigation process, Legal ensures it's compliant and defensible, and Executive is informed given the seniority involved." },
+  { id:"r8", title:"The company needs to announce a price increase to customers.",
+    steps:["finance","executive","marketing"],
+    reasoning:"Finance models the impact, Executive approves the change, and Marketing communicates it to customers clearly." }
+];
+
+/* ---------------- STAGE 3 DATA: Collaboration Challenge ---------------- */
+const STAGE3_TASKS = [
+  { id:"c1", title:"Customer satisfaction suddenly drops across the board.",
+    primary:"customer", supporting:["operations","marketing","executive"],
+    reasoning:"Customer Relations feels it first, but the root cause is often operational. Marketing tracks sentiment, and Executive weighs in if it's company-wide.",
+    flow:["Customer Relations","Operations","Marketing","Executive"] },
+  { id:"c2", title:"Sales increase dramatically and demand outpaces supply.",
+    primary:"operations", supporting:["sales","finance","hr"],
+    reasoning:"Operations must scale fulfillment fast. Sales manages client expectations, Finance checks cash flow, and HR may need to staff up.",
+    flow:["Sales","Operations","Finance","HR"] },
+  { id:"c3", title:"Negative reviews about the company appear online.",
+    primary:"marketing", supporting:["customer","operations","executive"],
+    reasoning:"Marketing manages public reputation, Customer Relations addresses individual cases, Operations checks if the complaints reveal a real issue, and Executive is looped in if it's serious.",
+    flow:["Marketing","Customer Relations","Operations","Executive"] },
+  { id:"c4", title:"A major company project is running significantly behind schedule.",
+    primary:"operations", supporting:["executive","finance","sales"],
+    reasoning:"Operations owns delivery, but Executive needs visibility, Finance tracks budget impact, and Sales manages client-facing timeline expectations.",
+    flow:["Operations","Executive","Finance","Sales"] },
+  { id:"c5", title:"The company suffers a data breach affecting customer information.",
+    primary:"it", supporting:["legal","executive","marketing"],
+    reasoning:"IT contains and fixes the breach, Legal manages compliance and disclosure obligations, Executive takes accountability, and Marketing manages public communication.",
+    flow:["IT","Legal","Executive","Marketing"] },
+  { id:"c6", title:"Employee turnover rate spikes noticeably in one quarter.",
+    primary:"hr", supporting:["executive","finance","operations"],
+    reasoning:"HR investigates the root cause, Executive is briefed on culture/leadership factors, Finance tracks the cost of turnover, and Operations feels the staffing gap.",
+    flow:["HR","Executive","Finance","Operations"] },
+  { id:"c7", title:"A competitor launches a similar product at a much lower price.",
+    primary:"sales", supporting:["marketing","finance","executive"],
+    reasoning:"Sales feels the pressure directly, Marketing repositions the value story, Finance checks if pricing can flex, and Executive sets overall strategy.",
+    flow:["Sales","Marketing","Finance","Executive"] },
+  { id:"c8", title:"An internal audit reveals financial discrepancies.",
+    primary:"finance", supporting:["legal","executive","hr"],
+    reasoning:"Finance investigates and corrects the numbers, Legal assesses compliance risk, Executive is accountable to the board, and HR gets involved if misconduct is found.",
+    flow:["Finance","Legal","Executive","HR"] }
+];
+
+/* ---------------- STATE ---------------- */
+const state = {
+  started: false,
+  stage: 0,
+  step: 0,           // question index within current stage (0-2)
+  picks: { s1:[], s2:[], s3:[] },
+  scores: { ownership:0, delegation:0, collaboration:0, workflow:0 },
+  maxScores: { ownership:3, delegation:3, collaboration:3, workflow:3 },
+  flags: { overAssign:0, underCollab:0, s1AssistPicks:0 },
+  s1Selected: null,
+  s2Order: [],
+  s3Selected: [],
+  log: { s1:[], s2:[], s3:[] }
+};
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function initPicks(){
+  state.picks.s1 = shuffle(STAGE1_TASKS).slice(0,3);
+  state.picks.s2 = shuffle(STAGE2_TASKS).slice(0,3);
+  state.picks.s3 = shuffle(STAGE3_TASKS).slice(0,3);
+}
+
+const main = document.getElementById("main");
+const progressFill = document.getElementById("progressFill");
+const dots = document.querySelectorAll(".stage-dots span");
+
+function updateProgress(){
+  if(!state.started){
+    progressFill.style.width = "0%";
+    dots.forEach(d=> d.classList.remove("active"));
+    return;
+  }
+  const totalSteps = 9; // 3 stages x 3 steps
+  const doneSteps = state.stage*3 + state.step;
+  const pct = state.stage>=3 ? 100 : (doneSteps/totalSteps)*100;
+  progressFill.style.width = pct+"%";
+  dots.forEach(d=> d.classList.toggle("active", Number(d.dataset.stage)===state.stage));
+}
+
+/* ============ START SCREEN ============ */
+function renderStart(){
+  main.innerHTML = `
+    <div class="panel start-hero">
+      <div class="start-icon">🧭</div>
+      <h2 style="margin:14px 0 8px;font-size:clamp(1.5rem,3.4vw,2.1rem);">Ready to route some work?</h2>
+      <p style="color:var(--ink-soft);max-width:56ch;margin:0 auto 26px;line-height:1.6;">
+        You'll step through a Corporate Office — deciding who owns a task, how it should travel through the org, and who needs to collaborate when things get messy. This is a reflective simulation, not a quiz with right answers to memorize.
+      </p>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" id="beginBtn">Begin the simulation</button>
+        <button class="btn secondary" id="demoBtn" title="Instantly preview the full experience with sample answers">▶ Try quick demo</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("beginBtn").addEventListener("click", ()=>{
+    state.started = true;
+    state.stage = 0; state.step = 0;
+    initPicks();
+    render();
+  });
+  document.getElementById("demoBtn").addEventListener("click", playDemo);
+}
+
+function playDemo(){
+  state.started = true;
+  state.scores = { ownership:0, delegation:0, collaboration:0, workflow:0 };
+  state.flags = { overAssign:0, underCollab:0, s1AssistPicks:0 };
+  state.log = { s1:[], s2:[], s3:[] };
+  initPicks();
+
+  state.picks.s1.forEach(task=>{
+    state.scores.ownership += 1;
+    state.log.s1.push({ task, chosenId: task.owner, correct: true });
+  });
+  state.picks.s2.forEach(task=>{
+    state.scores.workflow += 1;
+    state.log.s2.push({ task, order: task.steps.slice(), correctCount: task.steps.length });
+  });
+  state.picks.s3.forEach(task=>{
+    const idealSet = [task.primary, ...task.supporting];
+    const selected = idealSet.slice(0,4);
+    state.scores.collaboration += Math.min(selected.filter(r=>idealSet.includes(r)).length/idealSet.length,1);
+    state.scores.delegation += Math.min(selected.length,4)/4;
+    state.log.s3.push({ task, selected });
+  });
+
+  state.stage = 3;
+  render();
+}
+
+function roleCardHTML(id, extraClass){
+  const r = ROLES[id];
+  return `<div class="role-card ${extraClass||""}" draggable="true" data-role="${id}" style="--rc:${r.color}">
+    <span class="ic">${r.icon}</span><span>${r.label}</span>
+  </div>`;
+}
+
+/* ============ STAGE 1: Who Owns This? ============ */
+function renderStage1(){
+  const task = state.picks.s1[state.step];
+  state.s1Selected = null;
+  main.innerHTML = `
+    <div class="panel">
+      <div class="ticket">
+        <span class="tag">Ticket · Ownership Question ${state.step+1}/3</span>
+        <h3>${task.title}</h3>
+        <p>Who should be the primary owner of this task?</p>
+      </div>
+      <div class="slot" id="ownerSlot" data-empty-text="Drag or click a role here">
+        <span>Drag or click a role card here to assign ownership</span>
+      </div>
+      <div class="role-pool" id="rolePool">
+        ${shuffle(ROLE_ORDER).map(id=>roleCardHTML(id)).join("")}
+      </div>
+      <div class="btn-row">
+        <button class="btn secondary" id="backBtn" ${(state.stage===0&&state.step===0)?"disabled":""}>Back</button>
+        <button class="btn" id="submitBtn" disabled>Submit ownership</button>
+      </div>
+      <div id="revealZone"></div>
+    </div>
+  `;
+  setupOwnerSlotDnD();
+  document.getElementById("submitBtn").addEventListener("click", ()=>revealStage1(task));
+  document.getElementById("backBtn").addEventListener("click", goBack);
+}
+
+function setupOwnerSlotDnD(){
+  const slot = document.getElementById("ownerSlot");
+  const pool = document.getElementById("rolePool");
+
+  function placeRole(cardEl){
+    if(state.s1Selected) return;
+    const roleId = cardEl.dataset.role;
+    state.s1Selected = roleId;
+    const r = ROLES[roleId];
+    slot.innerHTML = `<div class="role-card" style="--rc:${r.color}"><span class="ic">${r.icon}</span><span>${r.label}</span></div>`;
+    slot.classList.add("filled","snap");
+    cardEl.classList.add("placed");
+    document.getElementById("submitBtn").disabled = false;
+  }
+
+  pool.querySelectorAll(".role-card").forEach(card=>{
+    card.addEventListener("dragstart", e=>{
+      e.dataTransfer.setData("text/plain", card.dataset.role);
+      card.classList.add("dragging");
+    });
+    card.addEventListener("dragend", ()=> card.classList.remove("dragging"));
+    card.addEventListener("click", ()=> placeRole(card));
+  });
+
+  slot.addEventListener("dragover", e=>{ e.preventDefault(); slot.classList.add("dragover"); });
+  slot.addEventListener("dragleave", ()=> slot.classList.remove("dragover"));
+  slot.addEventListener("drop", e=>{
+    e.preventDefault();
+    slot.classList.remove("dragover");
+    const roleId = e.dataTransfer.getData("text/plain");
+    const card = pool.querySelector(`.role-card[data-role="${roleId}"]`);
+    if(card) placeRole(card);
+  });
+}
+
+function revealStage1(task){
+  const correct = state.s1Selected === task.owner;
+  if(correct){
+    state.scores.ownership += 1;
+  } else {
+    state.flags.s1AssistPicks += 1;
+  }
+  const chosen = ROLES[state.s1Selected];
+  const owner = ROLES[task.owner];
+  state.log.s1.push({ task, chosenId: state.s1Selected, correct });
+
+  document.getElementById("submitBtn").remove();
+  document.getElementById("ownerSlot").classList.remove("snap");
+
+  document.getElementById("revealZone").innerHTML = `
+    <div class="reveal">
+      <div class="owner-line">
+        <span class="check">✓</span> Primary Owner: ${owner.icon} ${owner.label}
+        ${correct ? "" : ` <span style="color:var(--ink-soft);font-weight:400;font-size:.85rem;">(you chose ${chosen.icon} ${chosen.label})</span>`}
+      </div>
+      <p class="why">${task.why}</p>
+      <div class="section-label">Roles who may assist</div>
+      <div class="chip-row">
+        ${task.assist.map(id=>`<span class="chip correct">${ROLES[id].icon} ${ROLES[id].label}</span>`).join("")}
+      </div>
+      <p class="why">${task.assistWhy}</p>
+      <div class="btn-row">
+        <div></div>
+        <button class="btn" id="nextBtn">Next</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("nextBtn").addEventListener("click", advance);
+}
+
+/* ============ STAGE 2: Task Routing ============ */
+function renderStage2(){
+  const task = state.picks.s2[state.step];
+  const n = task.steps.length;
+  state.s2Order = new Array(n).fill(null);
+
+  main.innerHTML = `
+    <div class="panel">
+      <div class="ticket">
+        <span class="tag">Ticket · Routing Question ${state.step+1}/3</span>
+        <h3>${task.title}</h3>
+        <p>Build the workflow — drag roles into the order this task should travel through the organization.</p>
+      </div>
+      <div class="step-row" id="stepRow">
+        ${task.steps.map((_,i)=>`<div class="step-slot" data-idx="${i}"><span class="num">Step ${i+1}</span><span class="placeholder">empty</span></div>`).join('<span class="flow-arrow">→</span>')}
+      </div>
+      <div class="role-pool" id="rolePool2">
+        ${shuffle(ROLE_ORDER).map(id=>roleCardHTML(id)).join("")}
+      </div>
+      <div class="btn-row">
+        <button class="btn secondary" id="backBtn">Back</button>
+        <button class="btn" id="submitBtn2" disabled>Submit route</button>
+      </div>
+      <div id="revealZone2"></div>
+    </div>
+  `;
+  setupRoutingDnD(task);
+  document.getElementById("backBtn").addEventListener("click", goBack);
+  document.getElementById("submitBtn2").addEventListener("click", ()=>revealStage2(task));
+}
+
+function setupRoutingDnD(task){
+  const pool = document.getElementById("rolePool2");
+  const slots = document.querySelectorAll("#stepRow .step-slot");
+
+  function placeInSlot(slotEl, roleId, cardEl){
+    const idx = Number(slotEl.dataset.idx);
+    if(state.s2Order[idx]) return;
+    state.s2Order[idx] = roleId;
+    const r = ROLES[roleId];
+    slotEl.innerHTML = `<span class="num">Step ${idx+1}</span><div class="role-card" style="--rc:${r.color};cursor:default;">${r.icon} ${r.label}</div>`;
+    slotEl.classList.add("filled","snap");
+    cardEl.classList.add("placed");
+    document.getElementById("submitBtn2").disabled = state.s2Order.includes(null);
+  }
+
+  function firstEmptySlot(){
+    return Array.from(slots).find(s=>!state.s2Order[Number(s.dataset.idx)]);
+  }
+
+  pool.querySelectorAll(".role-card").forEach(card=>{
+    card.addEventListener("dragstart", e=>{
+      e.dataTransfer.setData("text/plain", card.dataset.role);
+      card.classList.add("dragging");
+    });
+    card.addEventListener("dragend", ()=> card.classList.remove("dragging"));
+    card.addEventListener("click", ()=>{
+      const target = firstEmptySlot();
+      if(target) placeInSlot(target, card.dataset.role, card);
+    });
+  });
+
+  slots.forEach(slot=>{
+    slot.addEventListener("dragover", e=>{ e.preventDefault(); slot.classList.add("dragover"); });
+    slot.addEventListener("dragleave", ()=> slot.classList.remove("dragover"));
+    slot.addEventListener("drop", e=>{
+      e.preventDefault();
+      slot.classList.remove("dragover");
+      const idx = Number(slot.dataset.idx);
+      if(state.s2Order[idx]) return;
+      const roleId = e.dataTransfer.getData("text/plain");
+      const card = pool.querySelector(`.role-card[data-role="${roleId}"]`);
+      if(card) placeInSlot(slot, roleId, card);
+    });
+  });
+}
+
+function revealStage2(task){
+  let correctCount = 0;
+  task.steps.forEach((r,i)=>{ if(state.s2Order[i]===r) correctCount++; });
+  const fraction = correctCount / task.steps.length;
+  state.scores.workflow += fraction;
+  state.log.s2.push({ task, order: state.s2Order.slice(), correctCount });
+
+  document.getElementById("submitBtn2").remove();
+
+  document.getElementById("revealZone2").innerHTML = `
+    <div class="reveal">
+      <div class="owner-line"><span class="check">✓</span> ${correctCount}/${task.steps.length} steps matched the common workflow</div>
+      <div class="journey-track">
+        <div class="journey-line"><div class="fill" id="journeyFill"></div></div>
+        <div class="journey-dot" id="journeyDot">📄</div>
+      </div>
+      <div class="chip-row">
+        ${task.steps.map(id=>`<span class="chip correct">${ROLES[id].icon} ${ROLES[id].label}</span>`).join("")}
+      </div>
+      <p class="why">${task.reasoning}</p>
+      <div class="btn-row">
+        <div></div>
+        <button class="btn" id="nextBtn2">Next</button>
+      </div>
+    </div>
+  `;
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      document.getElementById("journeyFill").style.width = "100%";
+      document.getElementById("journeyDot").style.left = "100%";
+    });
+  });
+  document.getElementById("nextBtn2").addEventListener("click", advance);
+}
+
+/* ============ STAGE 3: Collaboration Challenge ============ */
+function renderStage3(){
+  const task = state.picks.s3[state.step];
+  state.s3Selected = [];
+
+  main.innerHTML = `
+    <div class="panel">
+      <div class="ticket incident">
+        <span class="tag">Incident · Collaboration Question ${state.step+1}/3</span>
+        <h3>${task.title}</h3>
+        <p>This is bigger than one person. Select up to <strong>4</strong> roles that should be involved.</p>
+      </div>
+      <div class="role-pool" id="rolePool3">
+        ${shuffle(ROLE_ORDER).map(id=>roleCardHTML(id)).join("")}
+      </div>
+      <p style="color:var(--ink-soft);font-size:.85rem;" id="selCount">0/4 selected</p>
+      <div class="btn-row">
+        <button class="btn secondary" id="backBtn">Back</button>
+        <button class="btn" id="submitBtn3" disabled>Submit response</button>
+      </div>
+      <div id="revealZone3"></div>
+    </div>
+  `;
+  const pool = document.getElementById("rolePool3");
+  const selCount = document.getElementById("selCount");
+  const submitBtn3 = document.getElementById("submitBtn3");
+
+  pool.querySelectorAll(".role-card").forEach(card=>{
+    card.setAttribute("draggable","false");
+    card.addEventListener("click", ()=>{
+      const roleId = card.dataset.role;
+      const idx = state.s3Selected.indexOf(roleId);
+      if(idx>-1){
+        state.s3Selected.splice(idx,1);
+        card.classList.remove("selected");
+      } else {
+        if(state.s3Selected.length>=4) return;
+        state.s3Selected.push(roleId);
+        card.classList.add("selected");
+      }
+      selCount.textContent = `${state.s3Selected.length}/4 selected`;
+      submitBtn3.disabled = state.s3Selected.length===0;
+    });
+  });
+
+  document.getElementById("backBtn").addEventListener("click", goBack);
+  submitBtn3.addEventListener("click", ()=>revealStage3(task));
+}
+
+function revealStage3(task){
+  const idealSet = [task.primary, ...task.supporting];
+  const correctPicks = state.s3Selected.filter(r=>idealSet.includes(r));
+  const collabFraction = Math.min(correctPicks.length / idealSet.length, 1);
+  state.scores.collaboration += collabFraction;
+
+  if(state.s3Selected.length<=1){
+    state.flags.overAssign += 1;
+    state.scores.delegation += 0.2;
+  } else {
+    state.scores.delegation += Math.min(state.s3Selected.length,4)/4;
+  }
+  if(state.s3Selected.length < idealSet.length){
+    state.flags.underCollab += 1;
+  }
+  state.log.s3.push({ task, selected: state.s3Selected.slice() });
+
+  document.getElementById("submitBtn3").remove();
+  const primaryHit = state.s3Selected.includes(task.primary);
+
+  document.getElementById("revealZone3").innerHTML = `
+    <div class="reveal">
+      <div class="owner-line"><span class="check">✓</span> Primary Owner: ${ROLES[task.primary].icon} ${ROLES[task.primary].label}
+        ${primaryHit ? "" : `<span style="color:var(--ink-soft);font-weight:400;font-size:.85rem;"> (you didn't include them)</span>`}
+      </div>
+      <div class="section-label">Supporting teams</div>
+      <div class="chip-row">
+        ${task.supporting.map(id=>{
+          const hit = state.s3Selected.includes(id);
+          return `<span class="chip ${hit?'correct':'miss'}">${ROLES[id].icon} ${ROLES[id].label}${hit? '' : ' (missed)'}</span>`;
+        }).join("")}
+      </div>
+      <p class="why">${task.reasoning}</p>
+      <div class="section-label">Possible communication flow</div>
+      <div class="comm-flow">
+        ${task.flow.map((name,i)=> (i>0?'<span class="flow-arrow">→</span>':'') + `<span class="comm-node">${name}</span>`).join("")}
+      </div>
+      <div class="btn-row">
+        <div></div>
+        <button class="btn" id="nextBtn3">Next</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("nextBtn3").addEventListener("click", advance);
+}
+
+/* ============ FINAL ============ */
+function renderFinal(){
+  const pct = k => Math.round((state.scores[k]/state.maxScores[k])*100);
+  const cats = [
+    {k:"ownership", label:"Ownership"},
+    {k:"delegation", label:"Delegation"},
+    {k:"collaboration", label:"Collaboration"},
+    {k:"workflow", label:"Workflow Thinking"}
+  ];
+  const percents = cats.map(c=>({...c, pct: Math.max(0,Math.min(100,pct(c.k)))}));
+  const strongest = percents.slice().sort((a,b)=>b.pct-a.pct)[0];
+
+  const overAssignText = state.flags.overAssign >= 2
+    ? "In more than one collaboration challenge, you assigned responsibility to a single role. Complex problems in a corporate office usually cross department lines."
+    : "You generally avoided pinning big problems on a single department — a good instinct for organizational thinking.";
+
+  const underCollabText = state.flags.underCollab >= 2
+    ? "You sometimes selected fewer teams than the situation likely needed, which can leave gaps in communication or follow-through."
+    : "You consistently pulled in a reasonable number of teams when situations called for it.";
+
+  main.innerHTML = `
+    <div class="panel">
+      <div class="celebrate"><span>🎉</span><span>🧭</span><span>✨</span><span>🏁</span></div>
+      <h2 style="text-align:center;margin-top:0;">Your Task Compass Reading</h2>
+      <p style="text-align:center;color:var(--ink-soft);">Understanding &mdash; not a score. Here's how you tend to think about work.</p>
+
+      <div class="bar-chart">
+        ${percents.map(c=>`
+          <div class="bar-item">
+            <div class="row"><span>${c.label}</span><span>${c.pct}%</span></div>
+            <div class="bar-track"><div class="bar-fill" data-pct="${c.pct}"></div></div>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="reflect-grid">
+        <div class="reflect-card">
+          <h4>What you understood well</h4>
+          <p>You showed the strongest instincts around <strong>${strongest.label}</strong> — recognizing patterns in how that dimension of work plays out.</p>
+        </div>
+        <div class="reflect-card">
+          <h4>Where you tended to over-assign responsibility</h4>
+          <p>${overAssignText}</p>
+        </div>
+        <div class="reflect-card">
+          <h4>Where you underestimated collaboration</h4>
+          <p>${underCollabText}</p>
+        </div>
+        <div class="reflect-card">
+          <h4>One insight about organizations</h4>
+          <p>Many real workplace problems are solved by teams rather than individuals — even when one department is ultimately accountable for the outcome.</p>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        Ownership tells you who is accountable. Collaboration tells you who else needs to be in the room. Most real work in a corporate office needs both — and the balance shifts with every situation.
+      </div>
+
+      <div class="btn-row">
+        <button class="btn secondary" id="printBtn">🖨 Print report</button>
+        <button class="btn" id="restartBtn">Play again</button>
+      </div>
+    </div>
+  `;
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      document.querySelectorAll(".bar-fill").forEach(el=>{
+        el.style.width = el.dataset.pct + "%";
+      });
+    });
+  });
+  buildPrintReport(percents, strongest, overAssignText, underCollabText);
+  document.getElementById("printBtn").addEventListener("click", ()=> window.print());
+  document.getElementById("restartBtn").addEventListener("click", ()=>{
+    state.started = false;
+    state.stage=0; state.step=0;
+    state.scores = { ownership:0, delegation:0, collaboration:0, workflow:0 };
+    state.flags = { overAssign:0, underCollab:0, s1AssistPicks:0 };
+    state.log = { s1:[], s2:[], s3:[] };
+    render();
+  });
+}
+
+function buildPrintReport(percents, strongest, overAssignText, underCollabText){
+  document.getElementById("rpDate").textContent = new Date().toDateString();
+
+  document.getElementById("rpBarChart").innerHTML = percents.map(c=>`
+    <div class="rp-bar-item">
+      <div class="rp-bar-row"><span>${c.label}</span><span>${c.pct}%</span></div>
+      <div class="rp-bar-track"><div class="rp-bar-fill" style="width:${c.pct}%"></div></div>
+    </div>
+  `).join("");
+
+  document.getElementById("rpStrong").textContent = `You showed the strongest instincts around ${strongest.label} — recognizing patterns in how that dimension of work plays out.`;
+  document.getElementById("rpOverAssign").textContent = overAssignText;
+  document.getElementById("rpUnderCollab").textContent = underCollabText;
+  document.getElementById("rpInsight").textContent = "Many real workplace problems are solved by teams rather than individuals — even when one department is ultimately accountable for the outcome.";
+
+  document.getElementById("rpStage1").innerHTML = state.log.s1.map((entry,i)=>{
+    const owner = ROLES[entry.task.owner];
+    const chosen = ROLES[entry.chosenId];
+    return `
+      <div class="rp-task-item">
+        <div class="rp-t-title"><span class="rp-t-num">${i+1}</span>${entry.task.title}</div>
+        <div class="rp-owner-line"><span class="rp-check">✓</span>Correct owner: ${owner.icon} ${owner.label}</div>
+        <p>Your pick: <strong>${chosen.icon} ${chosen.label}</strong> ${entry.correct ? "— matched the correct owner." : "— did not match; see reasoning below."}</p>
+        <p>${entry.task.why}</p>
+        <div class="rp-chip-row">
+          ${entry.task.assist.map(id=>`<span class="rp-chip rp-correct">${ROLES[id].icon} ${ROLES[id].label} (assists)</span>`).join("")}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("rpStage2").innerHTML = state.log.s2.map((entry,i)=>{
+    const yourOrder = entry.order.map(id=> id ? `${ROLES[id].icon} ${ROLES[id].label}` : "—").join(" → ");
+    const correctOrder = entry.task.steps.map(id=> `${ROLES[id].icon} ${ROLES[id].label}`).join(" → ");
+    return `
+      <div class="rp-task-item">
+        <div class="rp-t-title"><span class="rp-t-num">${i+1}</span>${entry.task.title}</div>
+        <p><strong>${entry.correctCount}/${entry.task.steps.length}</strong> steps matched the common workflow.</p>
+        <p>Your route: ${yourOrder}</p>
+        <p>Common route: ${correctOrder}</p>
+        <p>${entry.task.reasoning}</p>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("rpStage3").innerHTML = state.log.s3.map((entry,i)=>{
+    const primaryHit = entry.selected.includes(entry.task.primary);
+    return `
+      <div class="rp-task-item">
+        <div class="rp-t-title"><span class="rp-t-num">${i+1}</span>${entry.task.title}</div>
+        <div class="rp-owner-line"><span class="rp-check">✓</span>Primary owner: ${ROLES[entry.task.primary].icon} ${ROLES[entry.task.primary].label} ${primaryHit ? "" : "(not selected)"}</div>
+        <p>Your selected teams: ${entry.selected.map(id=>`${ROLES[id].icon} ${ROLES[id].label}`).join(", ") || "none"}</p>
+        <div class="rp-chip-row">
+          ${entry.task.supporting.map(id=>{
+            const hit = entry.selected.includes(id);
+            return `<span class="rp-chip ${hit?'rp-correct':'rp-miss'}">${ROLES[id].icon} ${ROLES[id].label}${hit?'':' (missed)'}</span>`;
+          }).join("")}
+        </div>
+        <p>${entry.task.reasoning}</p>
+        <div class="rp-flow-row">
+          ${entry.task.flow.map((name,j)=> (j>0? '<span class="rp-flow-arrow">→</span>':'') + `<span class="rp-flow-node">${name}</span>`).join("")}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ============ FLOW CONTROL ============ */
+function advance(){
+  if(state.step < 2){
+    state.step += 1;
+  } else if(state.stage < 2){
+    state.stage += 1;
+    state.step = 0;
+  } else {
+    state.stage = 3;
+  }
+  render();
+}
+
+function goBack(){
+  if(state.step > 0){
+    state.step -= 1;
+  } else if(state.stage > 0){
+    state.stage -= 1;
+    state.step = 2;
+  }
+  render();
+}
+
+function render(){
+  updateProgress();
+  if(!state.started) renderStart();
+  else if(state.stage===0) renderStage1();
+  else if(state.stage===1) renderStage2();
+  else if(state.stage===2) renderStage3();
+  else renderFinal();
+  window.scrollTo({top:0, behavior:"auto"});
+}
+
+render();
+
+})();
+</script>
+</body>
+</html>
