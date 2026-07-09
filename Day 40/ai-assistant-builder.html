@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brandline — Personal Brand Content Strategist</title>
+<meta name="description" content="An AI content strategist that turns your niche and ideas into ready-to-post content with strategic reasoning.">
+<style>
+/* ============================================================================
+   DESIGN TOKENS — Premium Professional Light Theme
+   ============================================================================ */
+:root{
+  --bg:#f7f7fb;
+  --bg-soft:#eef0f7;
+  --surface:#ffffff;
+  --surface-2:#fbfbfe;
+  --border:#e4e6f0;
+  --border-strong:#d3d6e6;
+  --text:#181a29;
+  --text-dim:#5b5f75;
+  --text-faint:#8b8fa3;
+  --accent:#4f46e5;
+  --accent-2:#0ea5a0;
+  --accent-grad:linear-gradient(135deg,#4f46e5 0%,#7c3aed 55%,#0ea5a0 100%);
+  --accent-grad-soft:linear-gradient(135deg,rgba(79,70,229,.10),rgba(14,165,160,.10));
+  --danger:#dc2626;
+  --danger-bg:rgba(220,38,38,.08);
+  --warn:#d97706;
+  --ok:#16a34a;
+  --shadow-sm:0 1px 2px rgba(24,26,41,.05);
+  --shadow-md:0 8px 24px rgba(24,26,41,.08);
+  --shadow-lg:0 24px 60px rgba(24,26,41,.14);
+  --shadow-glow:0 0 0 4px rgba(79,70,229,.14);
+  --radius-sm:10px;
+  --radius-md:16px;
+  --radius-lg:24px;
+  --ff:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:var(--ff);
+  color:var(--text);
+  background:
+    radial-gradient(1100px 500px at 8% -8%, rgba(79,70,229,.07), transparent 55%),
+    radial-gradient(900px 480px at 105% 8%, rgba(14,165,160,.08), transparent 55%),
+    var(--bg);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--accent);color:#fff;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text-faint);}
+a{color:var(--accent);}
+button{font-family:inherit;}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{
+  outline:none;box-shadow:var(--shadow-glow);border-radius:8px;
+}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+/* ============================================================================
+   LAYOUT
+   ============================================================================ */
+.shell{max-width:1180px;margin:0 auto;padding:0 24px 80px;}
+
+/* Top bar */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(16px) saturate(160%);
+  background:rgba(247,247,251,.78);
+  border-bottom:1px solid var(--border);
+}
+.topbar-inner{max-width:1180px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;}
+.brand-mark{
+  width:42px;height:42px;border-radius:13px;background:var(--accent-grad);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;
+  box-shadow:var(--shadow-md);flex-shrink:0;
+}
+.brand-text strong{display:block;font-size:16px;letter-spacing:-.02em;}
+.brand-text span{display:block;font-size:11.5px;color:var(--text-faint);font-weight:600;margin-top:1px;}
+
+.key-status{
+  display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--border);font-size:12.5px;font-weight:700;color:var(--text-dim);
+  cursor:pointer;transition:all .25s var(--ease);box-shadow:var(--shadow-sm);
+}
+.key-status:hover{border-color:var(--border-strong);transform:translateY(-1px);}
+.key-status .dot{width:8px;height:8px;border-radius:50%;background:var(--danger);flex-shrink:0;transition:background .25s;}
+.key-status.connected .dot{background:var(--ok);box-shadow:0 0 0 3px rgba(22,163,74,.18);}
+
+/* Hero */
+.hero{padding:56px 0 8px;text-align:center;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--border);font-size:12.5px;font-weight:700;color:var(--text-dim);
+  margin-bottom:22px;box-shadow:var(--shadow-sm);animation:fadeUp .6s var(--ease) both;
+}
+.hero-badge svg{width:14px;height:14px;color:var(--accent);}
+.hero h1{
+  font-size:clamp(32px,4.6vw,50px);font-weight:800;letter-spacing:-.03em;line-height:1.08;margin:0 0 16px;
+  animation:fadeUp .65s var(--ease) both;animation-delay:.05s;
+}
+.hero h1 span{
+  background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p{
+  max-width:600px;margin:0 auto;color:var(--text-dim);font-size:16.5px;line-height:1.6;
+  animation:fadeUp .65s var(--ease) both;animation-delay:.1s;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* Grid layout: form | output */
+.workspace{
+  display:grid;grid-template-columns:420px 1fr;gap:26px;margin-top:40px;align-items:start;
+}
+@media (max-width:980px){.workspace{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm);padding:28px;
+}
+.card-sticky{position:sticky;top:96px;}
+@media (max-width:980px){.card-sticky{position:static;}}
+
+.card-title{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;margin:0 0 4px;}
+.card-title .num{
+  width:26px;height:26px;border-radius:8px;background:var(--accent-grad);color:#fff;font-size:12px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.card-sub{font-size:13px;color:var(--text-faint);margin:0 0 22px;}
+
+/* Form fields */
+.field{margin-bottom:18px;}
+.field label{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--text-dim);margin-bottom:7px;}
+.field .optional{font-weight:600;color:var(--text-faint);font-size:11px;text-transform:uppercase;letter-spacing:.03em;}
+.field input[type="text"],.field textarea,.field select{
+  width:100%;padding:11px 14px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface-2);
+  color:var(--text);font-size:14px;font-family:inherit;transition:border-color .2s var(--ease),box-shadow .2s var(--ease);
+}
+.field textarea{resize:vertical;min-height:84px;line-height:1.5;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:var(--shadow-glow);outline:none;}
+.field .char-count{font-size:11px;color:var(--text-faint);text-align:right;margin-top:4px;}
+
+.chip-group{display:flex;flex-wrap:wrap;gap:8px;}
+.chip-option{
+  padding:9px 15px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface-2);
+  font-size:13px;font-weight:700;color:var(--text-dim);cursor:pointer;transition:all .22s var(--ease);
+  display:flex;align-items:center;gap:6px;
+}
+.chip-option:hover{border-color:var(--accent);color:var(--text);}
+.chip-option.active{background:var(--accent-grad);color:#fff;border-color:transparent;box-shadow:var(--shadow-sm);}
+.chip-option svg{width:14px;height:14px;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 22px;border-radius:13px;
+  font-weight:800;font-size:14.5px;cursor:pointer;border:1.5px solid transparent;position:relative;overflow:hidden;
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),background .22s var(--ease),border-color .22s var(--ease);
+}
+.btn svg{width:17px;height:17px;flex-shrink:0;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--accent-grad);color:#fff;box-shadow:var(--shadow-md);width:100%;}
+.btn-primary:hover:not(:disabled){box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+.btn-secondary{background:var(--surface-2);color:var(--text);border-color:var(--border);}
+.btn-secondary:hover{border-color:var(--border-strong);transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--text-dim);border-color:transparent;}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-sm{padding:8px 14px;font-size:12.5px;border-radius:10px;}
+
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);transform:scale(0);animation:rippleAnim .6s var(--ease) forwards;pointer-events:none;}
+@keyframes rippleAnim{to{transform:scale(3);opacity:0;}}
+
+.form-footer-hint{font-size:11.5px;color:var(--text-faint);text-align:center;margin-top:12px;line-height:1.5;}
+.form-footer-hint kbd{background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-family:inherit;font-size:10.5px;}
+
+.btn-row{display:flex;gap:10px;}
+.btn-row .btn-primary{flex:2;}
+.btn-row .btn-secondary{flex:1;}
+
+/* Output panel */
+.output-panel{min-height:520px;display:flex;flex-direction:column;}
+.output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.output-header h2{margin:0;font-size:17px;font-weight:800;}
+.output-actions{display:flex;gap:8px;}
+
+/* Empty state */
+.empty-state{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:60px 24px;color:var(--text-faint);
+}
+.empty-state .icon-wrap{
+  width:72px;height:72px;border-radius:20px;background:var(--accent-grad-soft);display:flex;align-items:center;
+  justify-content:center;margin-bottom:20px;
+}
+.empty-state .icon-wrap svg{width:32px;height:32px;color:var(--accent);}
+.empty-state h3{margin:0 0 8px;font-size:16px;font-weight:800;color:var(--text-dim);}
+.empty-state p{margin:0;font-size:13.5px;max-width:340px;line-height:1.6;}
+
+/* Loading state */
+.loading-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;gap:22px;}
+.pulse-orb{
+  width:64px;height:64px;border-radius:50%;background:var(--accent-grad);position:relative;
+  box-shadow:var(--shadow-lg);
+}
+.pulse-orb::before,.pulse-orb::after{
+  content:"";position:absolute;inset:0;border-radius:50%;background:var(--accent-grad);opacity:.5;
+  animation:pulseRing 1.8s var(--ease) infinite;
+}
+.pulse-orb::after{animation-delay:.6s;}
+@keyframes pulseRing{0%{transform:scale(1);opacity:.5;}100%{transform:scale(2.1);opacity:0;}}
+.loading-text{font-size:14px;font-weight:700;color:var(--text-dim);text-align:center;}
+.loading-sub{font-size:12.5px;color:var(--text-faint);text-align:center;max-width:280px;}
+.skeleton-block{width:100%;max-width:520px;display:flex;flex-direction:column;gap:10px;}
+.skeleton-line{height:14px;border-radius:7px;background:linear-gradient(100deg,var(--border) 25%,var(--bg-soft) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
+.skeleton-line.w60{width:60%;} .skeleton-line.w80{width:80%;} .skeleton-line.w100{width:100%;} .skeleton-line.w40{width:40%;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* Error state */
+.error-banner{
+  display:flex;gap:14px;align-items:flex-start;background:var(--danger-bg);border:1px solid rgba(220,38,38,.25);
+  color:var(--danger);padding:16px 18px;border-radius:var(--radius-md);animation:fadeUp .3s var(--ease) both;
+}
+.error-banner svg{width:20px;height:20px;flex-shrink:0;margin-top:1px;}
+.error-banner strong{display:block;margin-bottom:3px;font-size:14px;}
+.error-banner p{margin:0;font-size:13px;line-height:1.5;color:#a91d1d;}
+.error-banner .btn{margin-top:10px;}
+
+/* Result content */
+.result-content{flex:1;animation:fadeUp .45s var(--ease) both;}
+.result-meta{
+  display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border);
+}
+.meta-pill{
+  display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--surface-2);
+  border:1px solid var(--border);font-size:11.5px;font-weight:700;color:var(--text-dim);
+}
+.meta-pill svg{width:13px;height:13px;color:var(--accent);}
+
+.markdown-body{font-size:14.5px;line-height:1.75;color:var(--text);}
+.markdown-body h1,.markdown-body h2,.markdown-body h3{
+  font-weight:800;letter-spacing:-.01em;margin:26px 0 12px;color:var(--text);
+}
+.markdown-body h1:first-child,.markdown-body h2:first-child,.markdown-body h3:first-child{margin-top:0;}
+.markdown-body h1{font-size:21px;} .markdown-body h2{font-size:18px;} .markdown-body h3{font-size:15.5px;}
+.markdown-body p{margin:0 0 14px;}
+.markdown-body ul,.markdown-body ol{margin:0 0 14px;padding-left:22px;}
+.markdown-body li{margin-bottom:6px;}
+.markdown-body strong{font-weight:800;}
+.markdown-body code{
+  background:var(--surface-2);border:1px solid var(--border);padding:2px 6px;border-radius:5px;font-size:13px;
+}
+.markdown-body blockquote{
+  border-left:3px solid var(--accent);padding:4px 0 4px 16px;margin:0 0 14px;color:var(--text-dim);font-style:italic;
+}
+.markdown-body hr{border:none;border-top:1px solid var(--border);margin:24px 0;}
+.markdown-body table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13.5px;}
+.markdown-body th,.markdown-body td{border:1px solid var(--border);padding:8px 12px;text-align:left;}
+.markdown-body th{background:var(--surface-2);font-weight:700;}
+
+/* Copy toast */
+.toast-region{position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:10px;max-width:340px;}
+.toast{
+  display:flex;gap:12px;align-items:center;padding:13px 16px;border-radius:13px;background:var(--surface);
+  border:1px solid var(--border);box-shadow:var(--shadow-lg);animation:toastIn .35s var(--ease) both;font-size:13px;font-weight:700;
+}
+.toast.hide{animation:toastOut .3s var(--ease) forwards;}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes toastOut{to{opacity:0;transform:translateY(14px) scale(.96);}}
+.toast .t-icon{width:20px;height:20px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.toast .t-icon svg{width:11px;height:11px;}
+
+/* API key modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(20,20,35,.45);backdrop-filter:blur(5px);z-index:1500;
+  display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s var(--ease);
+}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal-box{
+  background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);max-width:480px;width:100%;
+  padding:30px;transform:scale(.94) translateY(8px);transition:transform .35s var(--ease);border:1px solid var(--border);
+}
+.modal-overlay.open .modal-box{transform:scale(1) translateY(0);}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.modal-header h3{margin:0;font-size:18px;font-weight:800;}
+.modal-close{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);flex-shrink:0;}
+.modal-close:hover{color:var(--danger);border-color:var(--danger);}
+.modal-box p.desc{font-size:13px;color:var(--text-faint);margin:0 0 20px;line-height:1.55;}
+.modal-box .field{margin-bottom:14px;}
+.modal-note{
+  display:flex;gap:10px;padding:12px 14px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border);
+  font-size:12px;color:var(--text-dim);line-height:1.5;margin-top:16px;
+}
+.modal-note svg{width:16px;height:16px;color:var(--accent);flex-shrink:0;margin-top:1px;}
+
+/* Documentation panel (collapsible) */
+.docs-panel{margin-top:44px;}
+.docs-toggle{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 26px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;
+  transition:all .25s var(--ease);box-shadow:var(--shadow-sm);
+}
+.docs-toggle:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);}
+.docs-toggle-left{display:flex;align-items:center;gap:14px;}
+.docs-toggle-left .icon{
+  width:42px;height:42px;border-radius:12px;background:var(--accent-grad-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.docs-toggle-left .icon svg{width:20px;height:20px;color:var(--accent);}
+.docs-toggle-left strong{display:block;font-size:15px;font-weight:800;}
+.docs-toggle-left span{display:block;font-size:12.5px;color:var(--text-faint);margin-top:2px;}
+.docs-chevron{width:20px;height:20px;color:var(--text-faint);transition:transform .35s var(--ease);flex-shrink:0;}
+.docs-panel.open .docs-chevron{transform:rotate(180deg);}
+
+.docs-content{
+  max-height:0;overflow:hidden;transition:max-height .5s var(--ease);
+}
+.docs-panel.open .docs-content{max-height:4000px;}
+.docs-inner{
+  background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);
+  padding:8px 26px 30px;margin-top:-1px;
+}
+.docs-section{margin-top:26px;}
+.docs-section h4{font-size:14.5px;font-weight:800;margin:0 0 10px;display:flex;align-items:center;gap:8px;}
+.docs-section h4::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent-grad);flex-shrink:0;}
+.docs-section p,.docs-section li{font-size:13.5px;color:var(--text-dim);line-height:1.7;}
+.docs-section ul{margin:0;padding-left:20px;}
+.docs-section li{margin-bottom:6px;}
+.system-prompt-box{
+  background:#12131e;color:#e4e6f5;border-radius:13px;padding:18px 20px;font-size:12.5px;line-height:1.65;
+  font-family:'Consolas','Monaco',monospace;white-space:pre-wrap;max-height:340px;overflow-y:auto;margin-top:10px;
+  border:1px solid #23243a;
+}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.tag{padding:5px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);font-size:11.5px;font-weight:700;color:var(--text-dim);}
+
+footer{text-align:center;margin-top:50px;color:var(--text-faint);font-size:12px;}
+footer strong{color:var(--text-dim);}
+
+@media (max-width:640px){
+  .shell{padding:0 16px 60px;}
+  .card{padding:20px;}
+  .hero{padding:36px 0 4px;}
+  .workspace{gap:18px;margin-top:28px;}
+  .btn-row{flex-direction:column;}
+  .btn-row .btn-primary,.btn-row .btn-secondary{flex:1;width:100%;}
+}
+
+/* ============================================================================
+   PRINT-ONLY DOCUMENT — bold, colorful report layout
+   ============================================================================ */
+.print-area{
+  display:none;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;
+  font-family:var(--ff);color:#181a29;
+}
+
+/* Banner header */
+.pdoc-banner{
+  background:linear-gradient(120deg,#4f46e5 0%,#7c3aed 55%,#0ea5a0 100%);
+  border-radius:18px;padding:26px 30px;margin-bottom:24px;color:#fff;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.pdoc-banner-left{display:flex;align-items:center;gap:14px;}
+.pdoc-banner .mark{
+  width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;
+}
+.pdoc-banner h1{margin:0;font-size:21px;font-weight:800;letter-spacing:-.01em;}
+.pdoc-banner .sub{margin:3px 0 0;font-size:11.5px;color:rgba(255,255,255,.85);font-weight:600;}
+.pdoc-banner-right{text-align:right;font-size:10.5px;color:rgba(255,255,255,.9);}
+.pdoc-banner-right .badge{
+  display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);
+  border-radius:999px;padding:4px 12px;font-weight:700;font-size:10.5px;
+}
+
+/* Section label with colored accent bar */
+.pdoc-section{margin-bottom:20px;break-inside:avoid;}
+.pdoc-section-label{
+  display:flex;align-items:center;gap:8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;
+  font-weight:800;margin:0 0 12px;color:#fff;background:#181a29;padding:7px 14px;border-radius:8px;width:fit-content;
+}
+.pdoc-section-label.c-indigo{background:#4f46e5;}
+.pdoc-section-label.c-violet{background:#7c3aed;}
+.pdoc-section-label.c-teal{background:#0ea5a0;}
+.pdoc-section-label.c-amber{background:#d97706;}
+.pdoc-section-label.c-green{background:#16a34a;}
+.pdoc-section-label .num{
+  width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.25);display:inline-flex;
+  align-items:center;justify-content:center;font-size:10px;
+}
+
+/* Brief info cards */
+.pdoc-brief-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.pdoc-brief-card{
+  background:#f7f7fb;border:1px solid #e4e6f0;border-left:4px solid #4f46e5;border-radius:10px;
+  padding:10px 14px;
+}
+.pdoc-brief-card:nth-child(2){border-left-color:#7c3aed;}
+.pdoc-brief-card:nth-child(3){border-left-color:#0ea5a0;}
+.pdoc-brief-card:nth-child(4){border-left-color:#d97706;}
+.pdoc-brief-card:nth-child(5){border-left-color:#16a34a;grid-column:1 / -1;}
+.pdoc-brief-card .pb-label{font-weight:800;color:#5b5f75;text-transform:uppercase;font-size:9.5px;letter-spacing:.05em;display:block;margin-bottom:3px;}
+.pdoc-brief-card .pb-value{font-size:13px;color:#181a29;font-weight:700;}
+
+/* Topic quote box */
+.pdoc-topic-box{
+  font-size:12.5px;line-height:1.65;background:#f0f0fb;border:1px solid #dcdcf5;border-radius:12px;
+  padding:16px 18px;white-space:pre-wrap;position:relative;font-style:italic;color:#2b2d42;
+}
+
+/* Note / interpretation callout */
+.pdoc-note{
+  background:#fff7ed;border:1px solid #fde3c8;border-radius:10px;padding:10px 14px;font-size:11.5px;
+  color:#9a5b0a;margin-bottom:18px;font-style:italic;
+}
+
+/* Strategic angle card */
+.pdoc-angle-card{
+  background:#eef0ff;border:1px solid #d7daf9;border-radius:12px;padding:16px 18px;font-size:12.5px;
+  line-height:1.65;color:#2b2d42;
+}
+
+/* Hooks as numbered chips */
+.pdoc-hooks{display:flex;flex-direction:column;gap:10px;}
+.pdoc-hook{
+  display:flex;align-items:flex-start;gap:12px;background:#f5f0ff;border:1px solid #e5d9fb;border-radius:10px;
+  padding:10px 14px;font-size:12.5px;line-height:1.5;
+}
+.pdoc-hook .hnum{
+  width:22px;height:22px;border-radius:50%;background:#7c3aed;color:#fff;font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+
+/* Ready-to-post draft — styled like a social post mockup */
+.pdoc-draft-card{
+  background:#f0fbfa;border:2px solid #0ea5a0;border-radius:14px;padding:18px 20px;font-size:12.5px;
+  line-height:1.7;white-space:pre-wrap;color:#0f2e2b;
+}
+
+/* Why this works — bullet card */
+.pdoc-why-card{
+  background:#fffaf0;border:1px solid #fbe4bb;border-radius:12px;padding:16px 18px;font-size:12.5px;line-height:1.7;
+}
+.pdoc-why-card ul{margin:0;padding-left:18px;}
+.pdoc-why-card li{margin-bottom:6px;}
+
+/* Next steps — checklist card */
+.pdoc-next-card{
+  background:#f0fbf2;border:1px solid #c9edd0;border-radius:12px;padding:16px 18px;font-size:12.5px;line-height:1.7;
+}
+.pdoc-next-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+.pdoc-next-list li{display:flex;align-items:flex-start;gap:10px;}
+.pdoc-next-list .check{
+  width:18px;height:18px;border-radius:5px;background:#16a34a;color:#fff;display:flex;align-items:center;
+  justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px;
+}
+
+.pdoc-footer{
+  margin-top:26px;padding:14px 18px;border-radius:10px;background:#181a29;color:#c7c9d9;
+  font-size:10.5px;text-align:center;font-weight:600;
+}
+.pdoc-footer strong{color:#fff;}
+
+@media print{
+  body *{visibility:hidden;}
+  .print-area, .print-area *{visibility:visible;}
+  .print-area{display:block;position:absolute;inset:0;margin:0;padding:20px 26px;background:#fff;}
+  @page{margin:14mm;}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#" class="brand" aria-label="Brandline home">
+      <span class="brand-mark" aria-hidden="true">BL</span>
+      <span class="brand-text"><strong>Brandline</strong><span>Personal Brand Content Strategist</span></span>
+    </a>
+    <span class="key-status connected" aria-hidden="true">
+      <span class="dot"></span>
+      <span>Runs 100% offline</span>
+    </span>
+  </div>
+</header>
+
+<main class="shell">
+
+  <section class="hero">
+    <span class="hero-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-4Z"/></svg>
+      Works instantly — no API key, no sign-up
+    </span>
+    <h1>Turn your niche into <span>content that lands.</span></h1>
+    <p>Tell Brandline about your audience and your idea — get strategic hooks, ready-to-post drafts, and the reasoning behind every choice, in one session.</p>
+  </section>
+
+  <div class="workspace">
+
+    <!-- ===================== INPUT FORM ===================== -->
+    <section class="card card-sticky" aria-label="Content brief form">
+      <h2 class="card-title"><span class="num">1</span> Build your brief</h2>
+      <p class="card-sub">The more specific, the sharper your content.</p>
+
+      <form id="briefForm">
+        <div class="field">
+          <label for="nicheInput">Your niche / industry <span class="optional">Required</span></label>
+          <input type="text" id="nicheInput" placeholder="e.g. Personal finance for freelancers" required maxlength="120">
+        </div>
+
+        <div class="field">
+          <label>Platform <span class="optional">Required</span></label>
+          <div class="chip-group" id="platformGroup" role="radiogroup" aria-label="Choose a platform">
+            <button type="button" class="chip-option active" data-value="LinkedIn" role="radio" aria-checked="true">LinkedIn</button>
+            <button type="button" class="chip-option" data-value="Instagram" role="radio" aria-checked="false">Instagram</button>
+            <button type="button" class="chip-option" data-value="X / Twitter" role="radio" aria-checked="false">X / Twitter</button>
+            <button type="button" class="chip-option" data-value="TikTok / Reels" role="radio" aria-checked="false">TikTok / Reels</button>
+            <button type="button" class="chip-option" data-value="YouTube" role="radio" aria-checked="false">YouTube</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Content goal <span class="optional">Required</span></label>
+          <div class="chip-group" id="goalGroup" role="radiogroup" aria-label="Choose a content goal">
+            <button type="button" class="chip-option active" data-value="Build authority" role="radio" aria-checked="true">Build authority</button>
+            <button type="button" class="chip-option" data-value="Grow audience" role="radio" aria-checked="false">Grow audience</button>
+            <button type="button" class="chip-option" data-value="Drive engagement" role="radio" aria-checked="false">Drive engagement</button>
+            <button type="button" class="chip-option" data-value="Generate leads/sales" role="radio" aria-checked="false">Generate leads/sales</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="audienceInput">Who's your audience? <span class="optional">Optional</span></label>
+          <input type="text" id="audienceInput" placeholder="e.g. Early-career designers, 24-32, career switchers" maxlength="160">
+        </div>
+
+        <div class="field">
+          <label>Tone of voice <span class="optional">Optional</span></label>
+          <div class="chip-group" id="toneGroup" role="radiogroup" aria-label="Choose a tone">
+            <button type="button" class="chip-option active" data-value="Confident & expert" role="radio" aria-checked="true">Confident & expert</button>
+            <button type="button" class="chip-option" data-value="Warm & relatable" role="radio" aria-checked="false">Warm & relatable</button>
+            <button type="button" class="chip-option" data-value="Bold & contrarian" role="radio" aria-checked="false">Bold & contrarian</button>
+            <button type="button" class="chip-option" data-value="Playful & witty" role="radio" aria-checked="false">Playful & witty</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="topicInput">Your idea, topic, or raw thoughts <span class="optional">Required</span></label>
+          <textarea id="topicInput" placeholder="Paste rough notes, a story, a lesson learned, or just describe what you want to talk about..." maxlength="2000" required></textarea>
+          <div class="char-count"><span id="charCount">0</span>/2000</div>
+        </div>
+
+        <div class="btn-row">
+          <button type="submit" class="btn btn-primary" id="generateBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-4Z"/><path d="m9.5 12 1.8 1.8L15 10"/></svg>
+            Generate strategy
+          </button>
+          <button type="button" class="btn btn-secondary" id="demoBtn" title="Fill the brief with sample data and generate an example strategy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l2.3 5.7L21 11l-5.7 2.3L13 19l-2.3-5.7L5 11l5.7-2.3L13 3Z"/></svg>
+            Try a demo
+          </button>
+        </div>
+        <p class="form-footer-hint">Press <kbd>Ctrl/⌘+Enter</kbd> to generate · Nothing is stored on any server</p>
+      </form>
+    </section>
+
+    <!-- ===================== OUTPUT PANEL ===================== -->
+    <section class="card output-panel" aria-label="Generated content strategy" aria-live="polite">
+      <div class="output-header">
+        <h2>Your content strategy</h2>
+        <div class="output-actions" id="outputActions" style="display:none;">
+          <button class="btn btn-secondary btn-sm" id="copyBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V4a2 2 0 0 1 2-2h10"/></svg>
+            Copy
+          </button>
+          <button class="btn btn-secondary btn-sm" id="printBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6v-7Z"/></svg>
+            Print / Save PDF
+          </button>
+          <button class="btn btn-secondary btn-sm" id="regenBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg>
+            Regenerate
+          </button>
+        </div>
+      </div>
+
+      <div id="outputBody">
+        <div class="empty-state" id="emptyState">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-4Z"/></svg></div>
+          <h3>Nothing here yet</h3>
+          <p>Fill out your brief on the left and hit "Generate strategy" — Brandline will craft hooks, a ready-to-post draft, and strategic reasoning tailored to your niche.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== DOCUMENTATION PANEL ===================== -->
+  <section class="docs-panel" id="docsPanel">
+    <button class="docs-toggle" id="docsToggle" type="button" aria-expanded="false" aria-controls="docsContent">
+      <span class="docs-toggle-left">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></span>
+        <span><strong>How this was built</strong><span>System prompt design, UI decisions, and what's next</span></span>
+      </span>
+      <svg class="docs-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="docs-content" id="docsContent">
+      <div class="docs-inner">
+
+        <div class="docs-section">
+          <h4>Assistant brief</h4>
+          <p>Built for <strong>personal brand builders</strong> — solo professionals turning expertise into an audience. The single most important outcome per session: leave with content they can post today, plus the strategic "why" so they can replicate it themselves next time.</p>
+        </div>
+
+        <div class="docs-section">
+          <h4>Assistant "brain" design</h4>
+          <p>Brandline's behavior is still specified as a formal system prompt — the same document you'd hand to an LLM — structured in five parts: <strong>role</strong> (a senior content strategist persona, not a generic writer), <strong>scope</strong> (personal brand content only — it declines unrelated requests), <strong>constraints</strong> (platform-native formatting, no generic advice, no fabricated stats/claims about the user), <strong>output format</strong> (a fixed Markdown structure: Strategic Angle → Hooks → Ready-to-Post Draft → Why This Works → Next Steps), and <strong>edge-case handling</strong> (vague briefs, off-topic requests, harmful/manipulative content requests, and empty topics). Instead of sending this prompt to a hosted model, this build encodes the same rules directly as a deterministic JavaScript template engine — so the app needs no API key, no network call, and no cost to run.</p>
+          <div class="system-prompt-box" id="systemPromptDisplay"></div>
+        </div>
+
+        <div class="docs-section">
+          <h4>UI decisions</h4>
+          <ul>
+            <li><strong>Chip selectors over dropdowns</strong> for platform/goal/tone — faster to scan, and the active state doubles as a visual summary of the brief.</li>
+            <li><strong>Sticky form panel</strong> so the brief stays visible while scrolling a long generated strategy.</li>
+            <li><strong>Skeleton + pulse-orb loading state</strong> instead of a spinner — even though generation is instant, a brief simulated "thinking" beat sets the expectation that a structured document is being composed.</li>
+            <li><strong>Light, editorial-grade theme</strong> (indigo → violet → teal accent gradient) to feel like a premium creative tool rather than a raw form.</li>
+            <li><strong>Zero external dependencies</strong> — no API key modal, no network calls, no backend. Everything (including the markdown renderer) is hand-written so the file works fully offline, double-clicked from disk.</li>
+          </ul>
+        </div>
+
+        <div class="docs-section">
+          <h4>Future extensions</h4>
+          <ul>
+            <li><strong>Tools:</strong> connect a real LLM API (Claude, etc.) behind a backend proxy for genuinely generative, non-templated output; add a "trend lookup" tool to ground hooks in current platform trends; add a brand-voice analyzer that ingests past posts to extract vocabulary and rhythm patterns automatically.</li>
+            <li><strong>Memory:</strong> persist the user's niche, audience, and tone in <code>localStorage</code> across sessions so the brief pre-fills and the strategist references what's worked before ("Your last post about pricing got strong saves — want a follow-up?").</li>
+            <li><strong>Multi-step workflows:</strong> chain this into a content calendar mode — generate a week of interlinked posts building one narrative arc, or a repurposing workflow that turns one long-form idea into platform-native variants automatically.</li>
+          </ul>
+          <div class="tag-row">
+            <span class="tag">Hosted LLM upgrade path</span>
+            <span class="tag">Memory / personalization</span>
+            <span class="tag">Multi-step planning</span>
+            <span class="tag">Trend-aware tool use</span>
+            <span class="tag">Brand voice fine-tuning</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer>Brandline runs entirely in your browser using a built-in strategy engine. Built with <strong>HTML · CSS · JavaScript</strong> — no frameworks, no backend, no API key required.</footer>
+</main>
+
+<!-- Toast region -->
+<div class="toast-region" id="toastRegion" aria-live="assertive"></div>
+
+<!-- Print-only document: populated at print time, hidden on screen -->
+<div id="printArea" class="print-area" aria-hidden="true"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ============================================================================
+   SYSTEM PROMPT — Brandline's brain
+   ============================================================================ */
+const SYSTEM_PROMPT = `You are Brandline, a senior personal-brand content strategist. You help individual professionals — not companies or agencies — turn their expertise, experiences, and raw ideas into content that builds their personal brand.
+
+ROLE
+You think like a strategist first, writer second. Every piece of content you produce should have a clear strategic reason for existing: why this angle, why this hook, why this format, for this specific person's audience and goal.
+
+SCOPE
+You only help with personal-brand content strategy and creation: post ideas, hooks, captions, scripts, content angles, and the reasoning behind them, across platforms like LinkedIn, Instagram, X/Twitter, TikTok/Reels, and YouTube.
+If a request falls outside this scope (e.g. unrelated coding help, medical/legal/financial advice unrelated to content, or general chit-chat), politely redirect the user back to content strategy in one sentence, and do not attempt the out-of-scope task.
+
+INPUTS YOU RECEIVE
+A structured brief containing: niche/industry, platform, content goal, target audience (optional), tone of voice (optional), and a topic or raw idea from the user. Treat the topic/idea as ground truth — do not invent facts, achievements, credentials, statistics, or personal stories on the user's behalf. If the idea is thin, work with what's given and be transparent that they should adapt placeholder specifics (like exact numbers or personal anecdotes) to their real experience.
+
+OUTPUT FORMAT
+Always respond in this exact Markdown structure, in this order:
+
+## Strategic Angle
+2-3 sentences on the specific positioning angle for this post and why it fits the stated goal and audience.
+
+## Hooks
+3 distinct opening lines/hooks the user could use, each on its own line as a numbered list. Make them platform-native (e.g. punchy first line for LinkedIn/X, visual-first framing for Instagram/TikTok, curiosity-driven titles for YouTube).
+
+## Ready-to-Post Draft
+One complete, platform-formatted piece of content using the strongest hook from above. Match real conventions of the chosen platform (line breaks and spacing for LinkedIn, concise punchy copy for X, caption + hashtag block for Instagram, short script beats for TikTok/Reels, title + description outline for YouTube). Mark any placeholder specifics the user must personalize using [brackets like this].
+
+## Why This Works
+A short bulleted list (3-5 bullets) explaining the strategic reasoning: psychological/attention principles used, why this fits the stated goal and audience, and any platform-specific mechanics leveraged (e.g. dwell time, saves, shares, comments).
+
+## Next Steps
+2-3 concrete suggestions for what to do after posting (e.g. a follow-up post idea, an engagement tactic, or a repurposing idea for another platform).
+
+CONSTRAINTS
+- Never fabricate specific claims, statistics, client results, or personal stories the user did not provide — use bracketed placeholders instead.
+- Never write content that is misleading, manipulative in a harmful way, defamatory, or that impersonates real people or brands without disclosure.
+- Do not give generic, interchangeable advice ("be authentic," "post consistently") without tying it directly to the user's specific brief.
+- Keep tone matched to the user's selected tone of voice preference; default to confident-and-expert if none given.
+- Keep the full response focused and scannable — avoid filler paragraphs.
+
+EDGE CASES
+- If the topic/idea field is empty or nonsensical: ask one clarifying question instead of guessing, and briefly explain what detail would help most.
+- If the brief is very vague (e.g. just "help me post something"): make one reasonable interpretation based on the niche/platform/goal given, proceed with the full output format, and note your interpretation at the top in one italic sentence.
+- If the user asks for engagement-bait, deceptive hooks, or content designed to manipulate or harm (fear-mongering, fake urgency, impersonation): decline that specific tactic, briefly explain why, and offer an ethical alternative that still achieves their underlying goal.
+- If asked to write about a sensitive personal topic (health, grief, financial hardship): keep language respectful and non-exploitative, and avoid dramatizing details beyond what the user shared.`;
+
+/* ============================================================================
+   STATE
+   ============================================================================ */
+const state = {
+  platform: 'LinkedIn',
+  goal: 'Build authority',
+  tone: 'Confident & expert'
+};
+
+/* ============================================================================
+   DOM SHORTCUTS
+   ============================================================================ */
+const $ = (sel, ctx = document) => ctx.querySelector(sel);
+const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+
+/* ============================================================================
+   RIPPLE MICRO-INTERACTION
+   ============================================================================ */
+function ripple(el, evt) {
+  const rect = el.getBoundingClientRect();
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  const size = Math.max(rect.width, rect.height);
+  r.style.width = r.style.height = size + 'px';
+  const x = (evt.clientX ?? rect.left + rect.width / 2) - rect.left - size / 2;
+  const y = (evt.clientY ?? rect.top + rect.height / 2) - rect.top - size / 2;
+  r.style.left = x + 'px'; r.style.top = y + 'px';
+  el.style.position = el.style.position || 'relative';
+  el.style.overflow = 'hidden';
+  el.appendChild(r);
+  setTimeout(() => r.remove(), 650);
+}
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.btn, .chip-option, .docs-toggle');
+  if (btn) ripple(btn, e);
+});
+
+/* ============================================================================
+   TOASTS
+   ============================================================================ */
+const toastRegion = $('#toastRegion');
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span class="t-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span><span>${message}</span>`;
+  toastRegion.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('hide');
+    setTimeout(() => toast.remove(), 300);
+  }, 2600);
+}
+
+/* ============================================================================
+   CHIP GROUP HANDLING
+   ============================================================================ */
+function bindChipGroup(groupId, stateKey) {
+  const group = $('#' + groupId);
+  $$('.chip-option', group).forEach(chip => {
+    chip.addEventListener('click', () => {
+      $$('.chip-option', group).forEach(c => { c.classList.remove('active'); c.setAttribute('aria-checked', 'false'); });
+      chip.classList.add('active');
+      chip.setAttribute('aria-checked', 'true');
+      state[stateKey] = chip.dataset.value;
+    });
+  });
+}
+bindChipGroup('platformGroup', 'platform');
+bindChipGroup('goalGroup', 'goal');
+bindChipGroup('toneGroup', 'tone');
+
+/* ============================================================================
+   CHAR COUNTER
+   ============================================================================ */
+const topicInput = $('#topicInput');
+const charCount = $('#charCount');
+topicInput.addEventListener('input', () => { charCount.textContent = topicInput.value.length; });
+
+/* ============================================================================
+   MARKDOWN → HTML (lightweight, dependency-free renderer)
+   ============================================================================ */
+function renderMarkdown(md) {
+  let html = md
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  // Headings
+  html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>')
+             .replace(/^## (.*)$/gm, '<h2>$1</h2>')
+             .replace(/^# (.*)$/gm, '<h1>$1</h1>');
+
+  // Bold / italic / code
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+             .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>')
+             .replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Blockquotes
+  html = html.replace(/^&gt; (.*)$/gm, '<blockquote>$1</blockquote>');
+
+  // Horizontal rule
+  html = html.replace(/^---$/gm, '<hr>');
+
+  // Lists (numbered and bulleted) — process line by line into groups
+  const lines = html.split('\n');
+  let out = [];
+  let listBuffer = [];
+  let listType = null;
+
+  function flushList() {
+    if (listBuffer.length) {
+      const tag = listType === 'ol' ? 'ol' : 'ul';
+      out.push(`<${tag}>${listBuffer.map(li => `<li>${li}</li>`).join('')}</${tag}>`);
+      listBuffer = [];
+      listType = null;
+    }
+  }
+
+  for (const line of lines) {
+    const numbered = line.match(/^\d+\.\s+(.*)$/);
+    const bulleted = line.match(/^[-*]\s+(.*)$/);
+    if (numbered) {
+      if (listType !== 'ol') flushList();
+      listType = 'ol';
+      listBuffer.push(numbered[1]);
+    } else if (bulleted) {
+      if (listType !== 'ul') flushList();
+      listType = 'ul';
+      listBuffer.push(bulleted[1]);
+    } else {
+      flushList();
+      out.push(line);
+    }
+  }
+  flushList();
+  html = out.join('\n');
+
+  // Paragraphs: wrap remaining plain-text blocks
+  const blocks = html.split(/\n{2,}/);
+  html = blocks.map(block => {
+    const trimmed = block.trim();
+    if (!trimmed) return '';
+    if (/^<(h1|h2|h3|ul|ol|blockquote|hr)/.test(trimmed)) return trimmed;
+    return `<p>${trimmed.replace(/\n/g, '<br>')}</p>`;
+  }).join('\n');
+
+  return html;
+}
+
+/* ============================================================================
+   OUTPUT STATES
+   ============================================================================ */
+const outputBody = $('#outputBody');
+const outputActions = $('#outputActions');
+let lastResultText = '';
+
+function showEmptyState() {
+  outputActions.style.display = 'none';
+  outputBody.innerHTML = `
+    <div class="empty-state" id="emptyState">
+      <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-4Z"/></svg></div>
+      <h3>Nothing here yet</h3>
+      <p>Fill out your brief on the left and hit "Generate strategy" — Brandline will craft hooks, a ready-to-post draft, and strategic reasoning tailored to your niche.</p>
+    </div>`;
+}
+
+function showLoadingState() {
+  outputActions.style.display = 'none';
+  outputBody.innerHTML = `
+    <div class="loading-state">
+      <div class="pulse-orb"></div>
+      <div>
+        <div class="loading-text">Brandline is thinking strategically…</div>
+        <div class="loading-sub">Crafting hooks, drafting your post, and building the reasoning behind it.</div>
+      </div>
+      <div class="skeleton-block">
+        <div class="skeleton-line w40"></div>
+        <div class="skeleton-line w100"></div>
+        <div class="skeleton-line w80"></div>
+        <div class="skeleton-line w60"></div>
+      </div>
+    </div>`;
+}
+
+function showErrorState(message) {
+  outputActions.style.display = 'none';
+  outputBody.innerHTML = `
+    <div class="error-banner" role="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 8v5M12 16h.01M12 2 2 20h20L12 2Z"/></svg>
+      <div>
+        <strong>Generation failed</strong>
+        <p>${message}</p>
+        <button class="btn btn-secondary btn-sm" id="retryBtn" type="button">Try again</button>
+      </div>
+    </div>`;
+  $('#retryBtn')?.addEventListener('click', () => generateStrategy());
+}
+
+function showResultState(markdown) {
+  lastResultText = markdown;
+  outputActions.style.display = 'flex';
+  outputBody.innerHTML = `
+    <div class="result-content">
+      <div class="result-meta">
+        <span class="meta-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>${state.platform}</span>
+        <span class="meta-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 12 4-4 4 4 4-8 6 12"/></svg>${state.goal}</span>
+        <span class="meta-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>${state.tone}</span>
+      </div>
+      <div class="markdown-body">${renderMarkdown(markdown)}</div>
+    </div>`;
+}
+
+/* ============================================================================
+   LOCAL STRATEGY ENGINE — a deterministic, offline stand-in for the LLM call.
+   Implements the same rules laid out in SYSTEM_PROMPT (role/scope/constraints/
+   output format/edge cases) as plain JavaScript, so no network or API key is
+   ever required.
+   ============================================================================ */
+function pick(seedStr, arr) {
+  // Deterministic-but-varied pick based on a hash of the input, so the same
+  // brief tends to produce the same strategy, and different briefs vary.
+  let hash = 0;
+  for (let i = 0; i < seedStr.length; i++) hash = (hash * 31 + seedStr.charCodeAt(i)) >>> 0;
+  return arr[hash % arr.length];
+}
+
+function firstSentence(text) {
+  const m = text.match(/^[^.!?\n]+[.!?]?/);
+  return (m ? m[0] : text).trim();
+}
+
+function buildStrategy({ niche, platform, goal, audience, tone, topic }) {
+  const seed = niche + '|' + platform + '|' + goal + '|' + tone + '|' + topic;
+  const audienceText = audience || `people actively interested in ${niche.toLowerCase()}`;
+  const gist = firstSentence(topic).replace(/\s+/g, ' ');
+  const gistLower = gist.charAt(0).toLowerCase() + gist.slice(1);
+
+  const vagueTopic = topic.trim().split(/\s+/).length < 4;
+  const flaggedTerms = /\b(fake|scam|lie|deceive|trick people|clickbait lie|impersonat)\b/i;
+  const isRiskyRequest = flaggedTerms.test(topic);
+
+  // ---- Edge case: risky/manipulative request ----
+  if (isRiskyRequest) {
+    return `*Note: your brief mentioned tactics that lean deceptive or manipulative (e.g. fake claims or impersonation) — Brandline won't draft that specific tactic, but here's an ethical angle that still serves your underlying goal of "${goal.toLowerCase()}."*
+
+## Strategic Angle
+Instead of a deceptive hook, we'll use **radical honesty as the differentiator** — in a feed full of exaggerated claims, a transparent, specific post about "${gistLower}" stands out precisely because it doesn't oversell.
+
+## Hooks
+1. "I'm not going to promise you [big outcome] — here's what actually happened with ${gistLower}."
+2. "Most people in ${niche} won't tell you this part."
+3. "No hack, no shortcut — just what I learned about ${gistLower}."
+
+## Ready-to-Post Draft
+${platformDraftHeader(platform)}
+[Open with the honest hook above.]
+
+${gist}
+
+[Add 2-3 real specifics — a number, a timeframe, or a concrete result you actually have. Don't round up.]
+
+[Close with a direct, non-manipulative call to action, e.g. a genuine question for your ${audienceText}.]
+${platformDraftFooter(platform, niche)}
+
+## Why This Works
+- Transparency builds durable trust with ${audienceText}, which compounds over time far more than a one-off engagement spike.
+- Avoiding manipulative framing protects your credibility — the asset that actually drives "${goal.toLowerCase()}" long-term.
+- Specific, checkable details are inherently more persuasive than vague or inflated claims.
+
+## Next Steps
+1. Reply personally to the first few comments — honesty invites real conversation, so use it.
+2. Save any specific numbers or details you shared for future proof-based posts.
+3. If this resonates, follow up with a deeper post unpacking the one part people ask about most.`;
+  }
+
+  // ---- Strategic angle templates ----
+  const angleTemplates = [
+    `Position this as an insider lesson from inside ${niche} — the goal is to make ${audienceText} feel like they're getting something they can't get from a generic search. This fits "${goal}" because specific, lived experience is what earns attention and trust in a crowded feed.`,
+    `Frame "${gistLower}" as a contrarian take within ${niche} — most content in this space plays it safe, so a clearly-stated point of view stands out and directly serves "${goal}" by giving people a reason to remember and share your perspective.`,
+    `Turn "${gistLower}" into a before/after transformation story. Personal narrative outperforms generic advice for ${audienceText} because it's concrete and emotionally anchored, which is exactly what "${goal}" needs on ${platform}.`
+  ];
+  const strategicAngle = pick(seed + 'angle', angleTemplates);
+
+  // ---- Hooks (platform-aware) ----
+  const hookSets = {
+    'LinkedIn': [
+      `I used to think [common belief in ${niche}] — then ${gistLower} changed my mind.`,
+      `Unpopular opinion in ${niche}: most advice about this is backwards.`,
+      `Here's what nobody tells you about ${gistLower}.`
+    ],
+    'Instagram': [
+      `The ${niche} lesson I wish I'd learned sooner 👇`,
+      `POV: you're finally figuring out ${gistLower}`,
+      `3 things about ${gistLower} that changed everything for me`
+    ],
+    'X / Twitter': [
+      `${niche} take nobody asked for:`,
+      `I was wrong about ${gistLower}. Here's what changed.`,
+      `A short thread on ${gistLower} 🧵`
+    ],
+    'TikTok / Reels': [
+      `Nobody in ${niche} is talking about this...`,
+      `Wait for the part about ${gistLower}`,
+      `POV: you just realized ${gistLower}`
+    ],
+    'YouTube': [
+      `Why Everyone in ${niche} Gets This Wrong`,
+      `The Truth About ${gist}`,
+      `${gist} — What I Wish I Knew Sooner`
+    ]
+  };
+  const hooks = hookSets[platform] || hookSets['LinkedIn'];
+
+  // ---- Ready-to-post draft ----
+  const draft = `${platformDraftHeader(platform)}
+${hooks[0]}
+
+${gist}
+
+[Personalize this line with your specific experience, numbers, or example — don't leave it generic.]
+
+[Add one concrete detail: what changed, what you tried, or what surprised you.]
+
+${ctaLine(goal, audienceText)}
+${platformDraftFooter(platform, niche)}`;
+
+  // ---- Why this works ----
+  const toneMechanic = {
+    'Confident & expert': 'a declarative, no-hedging voice that signals authority without sounding arrogant',
+    'Warm & relatable': 'first-person vulnerability that lowers the guard of a scrolling audience',
+    'Bold & contrarian': 'pattern interrupt — contradicting a common belief forces a re-read',
+    'Playful & witty': 'light humor that increases dwell time and makes the post more shareable'
+  }[tone] || 'a clear, specific voice tailored to your brief';
+
+  const goalMechanic = {
+    'Build authority': 'demonstrating first-hand expertise rather than repeating generic advice, which is what actually earns trust',
+    'Grow audience': 'a hook designed for high scroll-stopping power, since reach depends on the first 1-2 lines',
+    'Drive engagement': 'ending on a direct, low-friction question that invites comments rather than passive likes',
+    'Generate leads/sales': 'proving competence through a specific story before any ask, which builds the credibility leads require'
+  }[goal] || 'directly serving your stated goal';
+
+  const whyThisWorks = `- Uses ${toneMechanic}, matching your selected tone of voice.
+- The opening hook is built for ${platform}'s attention pattern — the first line has to earn the rest of the read.
+- Strategically supports "${goal}" by ${goalMechanic}.
+- Speaks directly to ${audienceText} instead of a generic audience, which increases relevance and relatability.`;
+
+  // ---- Next steps ----
+  const nextStepsPool = [
+    `Repost the strongest line from this piece as a standalone quote graphic within the next few days.`,
+    `Reply to every comment in the first hour — early engagement significantly affects how far ${platform} distributes this.`,
+    `Turn the "why this works" reasoning into a follow-up post — teaching the strategy behind your content builds authority on its own.`,
+    `Repurpose this into a shorter format for a second platform (e.g. a thread or short-form video) within the week.`,
+    `DM or personally thank anyone who shares meaningful commentary — it turns a one-time interaction into a relationship.`
+  ];
+  const step1 = pick(seed + 's1', nextStepsPool);
+  let step2 = pick(seed + 's2', nextStepsPool);
+  while (step2 === step1) step2 = pick(seed + 's2b', nextStepsPool);
+
+  const interpretationNote = vagueTopic
+    ? `*Your topic was fairly brief, so Brandline made one reasonable interpretation: treating "${gist}" as a personal lesson or observation worth sharing. Adjust the draft below with your real specifics.*\n\n`
+    : '';
+
+  return `${interpretationNote}## Strategic Angle
+${strategicAngle}
+
+## Hooks
+1. ${hooks[0]}
+2. ${hooks[1]}
+3. ${hooks[2]}
+
+## Ready-to-Post Draft
+${draft}
+
+## Why This Works
+${whyThisWorks}
+
+## Next Steps
+1. ${step1}
+2. ${step2}
+3. Track which line got the most replies or saves, and reuse that exact structure in your next post about ${niche.toLowerCase()}.`;
+}
+
+function platformDraftHeader(platform) {
+  if (platform === 'TikTok / Reels' || platform === 'YouTube') return '[SCRIPT / ON-SCREEN TEXT]';
+  return '[POST DRAFT]';
+}
+function platformDraftFooter(platform, niche) {
+  const tag = niche.replace(/[^a-zA-Z0-9]+/g, '');
+  if (platform === 'Instagram') return `\n\n.\n.\n.\n#${tag} #PersonalBrand #ContentStrategy`;
+  if (platform === 'X / Twitter') return '';
+  if (platform === 'TikTok / Reels') return `\n\n[Caption]: One lesson from ${niche} 👆 #${tag} #contentstrategy`;
+  if (platform === 'YouTube') return `\n\n[Description]: In this video, I break down ${niche.toLowerCase()} lessons that actually matter. Subscribe for more.`;
+  return '';
+}
+function ctaLine(goal, audienceText) {
+  const map = {
+    'Build authority': `What's your experience with this? I'd genuinely like to know how ${audienceText} see it.`,
+    'Grow audience': `If this resonated, follow along — I share lessons like this regularly.`,
+    'Drive engagement': `Agree or disagree? Curious where ${audienceText} land on this.`,
+    'Generate leads/sales': `If you're working through something similar, my [offer/link] is in [bio/comments] — happy to help.`
+  };
+  return map[goal] || `Curious to hear your take — drop a comment below.`;
+}
+
+/* ============================================================================
+   GENERATE STRATEGY — runs fully offline via the local engine
+   ============================================================================ */
+const form = $('#briefForm');
+const generateBtn = $('#generateBtn');
+let lastBrief = null; // full input snapshot, used by the Print/PDF export
+
+function generateStrategy() {
+  const niche = $('#nicheInput').value.trim();
+  const audience = $('#audienceInput').value.trim();
+  const topic = topicInput.value.trim();
+
+  if (!niche) { showToast('Please add your niche or industry'); $('#nicheInput').focus(); return; }
+  if (!topic) { showToast('Please add your topic or idea'); topicInput.focus(); return; }
+
+  generateBtn.disabled = true;
+  showLoadingState();
+
+  const brief = {
+    niche, audience, topic,
+    platform: state.platform,
+    goal: state.goal,
+    tone: state.tone
+  };
+
+  // Simulate a brief "thinking" beat for a premium feel — generation itself is instant and fully local.
+  setTimeout(() => {
+    try {
+      const markdown = buildStrategy(brief);
+      if (!markdown || !markdown.trim()) throw new Error('Could not generate a strategy from this brief. Try adding more detail.');
+      lastBrief = brief;
+      showResultState(markdown);
+    } catch (err) {
+      console.error(err);
+      showErrorState(err.message || 'Something went wrong while generating your strategy. Please try again.');
+    } finally {
+      generateBtn.disabled = false;
+    }
+  }, 900 + Math.random() * 500);
+}
+
+form.addEventListener('submit', e => { e.preventDefault(); generateStrategy(); });
+$('#regenBtn').addEventListener('click', () => generateStrategy());
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); generateStrategy(); }
+});
+
+/* ============================================================================
+   DEMO BUTTON — fills the brief with sample data and generates an example
+   ============================================================================ */
+const DEMO_BRIEF = {
+  niche: 'UX design for early-career product designers',
+  platform: 'LinkedIn',
+  goal: 'Build authority',
+  audience: 'Junior-to-mid product designers, 23-30, navigating their first design job',
+  tone: 'Confident & expert',
+  topic: 'For my first two years as a designer I thought a polished Figma file was the job. It wasn’t until a redesign I shipped got quietly reverted post-launch that I realized the real job is defending decisions with reasoning, not pixels.'
+};
+
+function setChipGroupValue(groupId, value) {
+  const group = $('#' + groupId);
+  $$('.chip-option', group).forEach(chip => {
+    const match = chip.dataset.value === value;
+    chip.classList.toggle('active', match);
+    chip.setAttribute('aria-checked', match);
+  });
+}
+
+$('#demoBtn').addEventListener('click', () => {
+  $('#nicheInput').value = DEMO_BRIEF.niche;
+  $('#audienceInput').value = DEMO_BRIEF.audience;
+  topicInput.value = DEMO_BRIEF.topic;
+  charCount.textContent = DEMO_BRIEF.topic.length;
+
+  setChipGroupValue('platformGroup', DEMO_BRIEF.platform);
+  setChipGroupValue('goalGroup', DEMO_BRIEF.goal);
+  setChipGroupValue('toneGroup', DEMO_BRIEF.tone);
+  state.platform = DEMO_BRIEF.platform;
+  state.goal = DEMO_BRIEF.goal;
+  state.tone = DEMO_BRIEF.tone;
+
+  showToast('Demo brief loaded');
+  generateStrategy();
+});
+
+/* ============================================================================
+   PRINT / SAVE AS PDF — builds a full printable document containing every
+   input field plus the full generated strategy, then triggers the browser
+   print dialog (users choose "Save as PDF" as the destination).
+   ============================================================================ */
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* Split the generated markdown into its known ## sections, plus any leading
+   italic interpretation note, so the PDF can style each part distinctly. */
+function parseStrategySections(markdown) {
+  let note = '';
+  let body = markdown;
+  const noteMatch = body.match(/^\*(.+?)\*\s*\n+/);
+  if (noteMatch) { note = noteMatch[1]; body = body.slice(noteMatch[0].length); }
+
+  const sections = {};
+  const parts = body.split(/^## (.+)$/m).slice(1); // [heading, content, heading, content, ...]
+  for (let i = 0; i < parts.length; i += 2) {
+    sections[parts[i].trim()] = (parts[i + 1] || '').trim();
+  }
+  return { note, sections };
+}
+
+function extractHooks(text) {
+  return text.split('\n').map(l => l.replace(/^\d+\.\s*/, '').trim()).filter(Boolean);
+}
+function extractSteps(text) {
+  return text.split('\n').map(l => l.replace(/^\d+\.\s*/, '').trim()).filter(Boolean);
+}
+
+function buildPrintDocument(brief, resultMarkdown) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const { note, sections } = parseStrategySections(resultMarkdown);
+
+  const briefCards = [
+    ['Niche / Industry', brief.niche],
+    ['Platform', brief.platform],
+    ['Content Goal', brief.goal],
+    ['Tone of Voice', brief.tone],
+    ['Target Audience', brief.audience || 'Not specified — inferred from niche & platform'],
+  ].map(([label, value]) => `
+    <div class="pdoc-brief-card">
+      <span class="pb-label">${escapeHtml(label)}</span>
+      <span class="pb-value">${escapeHtml(value)}</span>
+    </div>`).join('');
+
+  const hooksHtml = sections['Hooks']
+    ? extractHooks(sections['Hooks']).map((h, i) => `
+      <div class="pdoc-hook"><span class="hnum">${i + 1}</span><span>${escapeHtml(h)}</span></div>`).join('')
+    : '';
+
+  const whyHtml = sections['Why This Works']
+    ? `<ul>${sections['Why This Works'].split('\n').map(l => l.replace(/^-\s*/, '').trim()).filter(Boolean)
+        .map(l => `<li>${escapeHtml(l)}</li>`).join('')}</ul>`
+    : '';
+
+  const nextHtml = sections['Next Steps']
+    ? `<ul class="pdoc-next-list">${extractSteps(sections['Next Steps'])
+        .map(l => `<li><span class="check">&#10003;</span><span>${escapeHtml(l)}</span></li>`).join('')}</ul>`
+    : '';
+
+  return `
+    <div class="pdoc-banner">
+      <div class="pdoc-banner-left">
+        <span class="mark">BL</span>
+        <div>
+          <h1>Brandline — Content Strategy Report</h1>
+          <p class="sub">A ready-to-post content plan crafted from your brief</p>
+        </div>
+      </div>
+      <div class="pdoc-banner-right">
+        <div class="badge">${escapeHtml(brief.platform)}</div>
+        <div style="margin-top:6px;">${dateStr} · ${timeStr}</div>
+      </div>
+    </div>
+
+    <div class="pdoc-section">
+      <div class="pdoc-section-label c-indigo"><span class="num">1</span> Content Brief — Your Inputs</div>
+      <div class="pdoc-brief-grid">${briefCards}</div>
+    </div>
+
+    <div class="pdoc-section">
+      <div class="pdoc-section-label c-indigo"><span class="num">2</span> Topic / Raw Idea — As Entered</div>
+      <div class="pdoc-topic-box">&ldquo;${escapeHtml(brief.topic)}&rdquo;</div>
+    </div>
+
+    ${note ? `<div class="pdoc-note">${escapeHtml(note)}</div>` : ''}
+
+    ${sections['Strategic Angle'] ? `
+    <div class="pdoc-section">
+      <div class="pdoc-section-label c-indigo"><span class="num">3</span> Strategic Angle</div>
+      <div class="pdoc-angle-card">${escapeHtml(sections['Strategic Angle'])}</div>
+    </div>` : ''}
+
+    ${hooksHtml ? `
+    <div class="pdoc-section">
+      <div class="pdoc-section-label c-violet"><span class="num">4</span> Hooks</div>
+      <div class="pdoc-hooks">${hooksHtml}</div>
+    </div>` : ''}
+
+    ${sections['Ready-to-Post Draft'] ? `
+    <div class="pdoc-section">
+      <div class="pdoc-section-label c-teal"><span class="num">5</span> Ready-to-Post Draft</div>
+      <div class="pdoc-draft-card">${escapeHtml(sections['Ready-to-Post Draft'])}</div>
+    </div>` : ''}
+
+    ${whyHtml ? `
+    <div class="pdoc-section">
+      <div class="pdoc-section-label c-amber"><span class="num">6</span> Why This Works</div>
+      <div class="pdoc-why-card">${whyHtml}</div>
+    </div>` : ''}
+
+    ${nextHtml ? `
+    <div class="pdoc-section">
+      <div class="pdoc-section-label c-green"><span class="num">7</span> Next Steps</div>
+      <div class="pdoc-next-card">${nextHtml}</div>
+    </div>` : ''}
+
+    <div class="pdoc-footer">Generated locally in your browser by <strong>Brandline</strong> — no data was uploaded or stored on any server.</div>
+  `;
+}
+
+$('#printBtn').addEventListener('click', () => {
+  if (!lastBrief || !lastResultText) {
+    showToast('Generate a strategy first');
+    return;
+  }
+  $('#printArea').innerHTML = buildPrintDocument(lastBrief, lastResultText);
+  window.print();
+});
+
+/* ============================================================================
+   COPY BUTTON
+   ============================================================================ */
+$('#copyBtn').addEventListener('click', async () => {
+  if (!lastResultText) return;
+  try {
+    await navigator.clipboard.writeText(lastResultText);
+    showToast('Copied to clipboard');
+  } catch {
+    showToast('Copy failed — please select and copy manually');
+  }
+});
+
+/* ============================================================================
+   DOCUMENTATION PANEL (collapsible)
+   ============================================================================ */
+const docsPanel = $('#docsPanel');
+const docsToggle = $('#docsToggle');
+docsToggle.addEventListener('click', () => {
+  const isOpen = docsPanel.classList.toggle('open');
+  docsToggle.setAttribute('aria-expanded', isOpen);
+});
+$('#systemPromptDisplay').textContent = SYSTEM_PROMPT;
+
+/* ============================================================================
+   INIT
+   ============================================================================ */
+showEmptyState();
+
+})();
+</script>
+</body>
+</html>
