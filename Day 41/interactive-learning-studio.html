@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Learning Studio — Python Data Structures</title>
+<style>
+:root{
+  --bg:#f7f8fc; --surface:#ffffff; --surface2:#f0f2fa; --text:#1a1d2b; --muted:#5b6178;
+  --border:#e3e6f0; --primary:#5b3df6; --primary2:#8b5cf6; --accent:#00c2a8; --warn:#ff9f1c;
+  --danger:#ff4d6d; --success:#12b76a; --shadow:0 10px 30px rgba(30,20,80,.08);
+  --grad1:linear-gradient(135deg,#5b3df6,#8b5cf6); --grad2:linear-gradient(135deg,#00c2a8,#5b3df6);
+  --grad3:linear-gradient(135deg,#ff9f1c,#ff4d6d); --radius:18px;
+}
+[data-theme="dark"]{
+  --bg:#0f1120; --surface:#171a2e; --surface2:#1f2338; --text:#eef0fb; --muted:#a4a9c4;
+  --border:#2a2e48; --shadow:0 10px 30px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif; background:var(--bg); color:var(--text); transition:background .3s,color .3s; line-height:1.65;}
+::selection{background:var(--primary); color:#fff;}
+a{color:var(--primary);}
+code, pre{font-family:'Consolas','Fira Code',monospace;}
+code{background:var(--surface2); padding:2px 7px; border-radius:6px; font-size:.9em; color:var(--primary2);}
+pre{background:#161829; color:#e9ecff; padding:18px; border-radius:12px; overflow-x:auto; font-size:.92em; box-shadow:var(--shadow);}
+pre code{background:none; color:inherit; padding:0;}
+h1,h2,h3,h4{font-weight:800; letter-spacing:-.02em;}
+.container{max-width:1080px; margin:0 auto; padding:0 24px;}
+
+/* ===== Topbar ===== */
+.topbar{position:sticky; top:0; z-index:100; background:var(--surface); border-bottom:1px solid var(--border); backdrop-filter:blur(10px);}
+.topbar-inner{max-width:1080px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+.brand{display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.1rem;}
+.brand .logo{width:34px;height:34px;border-radius:10px;background:var(--grad1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;}
+.top-actions{display:flex; gap:10px; align-items:center;}
+.btn{border:none; cursor:pointer; padding:10px 16px; border-radius:12px; font-weight:700; font-size:.88rem; transition:transform .15s,box-shadow .15s; display:inline-flex; align-items:center; gap:8px;}
+.btn:active{transform:scale(.96);}
+.btn-primary{background:var(--grad1); color:#fff; box-shadow:0 6px 18px rgba(91,61,246,.35);}
+.btn-primary:hover{box-shadow:0 8px 22px rgba(91,61,246,.5); transform:translateY(-1px);}
+.btn-ghost{background:var(--surface2); color:var(--text);}
+.btn-ghost:hover{background:var(--border);}
+.progress-pill{display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted); font-weight:600;}
+.progress-track{width:110px; height:8px; border-radius:6px; background:var(--surface2); overflow:hidden;}
+.progress-fill{height:100%; background:var(--grad2); width:0%; transition:width .5s ease;}
+
+/* ===== Hero / Intro ===== */
+.hero{padding:56px 0 30px;}
+.badge{display:inline-block; background:var(--surface2); color:var(--primary); font-weight:700; font-size:.78rem; padding:6px 14px; border-radius:20px; margin-bottom:16px; letter-spacing:.03em;}
+.hero h1{font-size:2.6rem; margin-bottom:14px; background:var(--grad1); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.hero p.lead{color:var(--muted); font-size:1.12rem; max-width:720px;}
+.info-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin:32px 0;}
+.info-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow);}
+.info-card .ic-icon{font-size:1.6rem; margin-bottom:8px;}
+.info-card h4{font-size:.95rem; margin-bottom:6px;}
+.info-card p, .info-card ul{color:var(--muted); font-size:.88rem;}
+.info-card ul{padding-left:18px;}
+.reward-box{background:var(--grad3); border-radius:var(--radius); padding:22px; color:#fff; display:flex; align-items:center; gap:18px; box-shadow:var(--shadow); margin-bottom:10px;}
+.reward-box .re-icon{font-size:2.2rem;}
+.reward-box h4{margin-bottom:4px;}
+.reward-box p{font-size:.88rem; opacity:.95;}
+.start-row{text-align:center; margin-top:36px;}
+.btn-lg{padding:16px 34px; font-size:1rem; border-radius:14px;}
+
+/* ===== Module Nav (map) ===== */
+.module-map{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:30px 0 50px;}
+.map-card{background:var(--surface); border:2px solid var(--border); border-radius:16px; padding:16px; text-align:center; cursor:pointer; transition:.2s; position:relative;}
+.map-card.locked{opacity:.5; cursor:not-allowed;}
+.map-card.active{border-color:var(--primary); box-shadow:0 0 0 4px rgba(91,61,246,.12);}
+.map-card.done{border-color:var(--success);}
+.map-card .mnum{font-size:1.5rem; font-weight:800; color:var(--primary);}
+.map-card .mtitle{font-size:.8rem; font-weight:700; margin-top:4px;}
+.map-card .mstatus{font-size:.7rem; color:var(--muted); margin-top:4px;}
+@media(max-width:720px){.module-map{grid-template-columns:repeat(2,1fr);}}
+
+/* ===== Modules ===== */
+.module{display:none; padding:20px 0 70px; animation:fadeIn .5s ease;}
+.module.visible{display:block;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+.module-head{display:flex; align-items:center; gap:14px; margin-bottom:8px;}
+.module-head .mchip{background:var(--grad1); color:#fff; font-weight:800; padding:8px 14px; border-radius:10px; font-size:.85rem;}
+.module h2{font-size:1.9rem;}
+.module-sub{color:var(--muted); margin:8px 0 28px; font-size:1.02rem;}
+
+.section-block{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:26px; margin-bottom:22px; box-shadow:var(--shadow);}
+.section-block h3{font-size:1.15rem; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+.section-block p{margin-bottom:12px; color:var(--text);}
+.section-block p.muted{color:var(--muted);}
+
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+@media(max-width:760px){.two-col{grid-template-columns:1fr;}}
+
+.analogy{background:linear-gradient(135deg,rgba(91,61,246,.08),rgba(0,194,168,.08)); border-left:4px solid var(--primary); border-radius:10px; padding:16px 18px; font-size:.94rem;}
+.analogy b{color:var(--primary);}
+
+.misconception{background:rgba(255,77,109,.08); border-left:4px solid var(--danger); border-radius:10px; padding:14px 18px; margin-bottom:10px; font-size:.92rem;}
+.misconception b{color:var(--danger);}
+
+.takeaways{list-style:none;}
+.takeaways li{padding:10px 0 10px 32px; position:relative; border-bottom:1px dashed var(--border); font-size:.94rem;}
+.takeaways li:last-child{border:none;}
+.takeaways li::before{content:"✓"; position:absolute; left:0; top:9px; background:var(--success); color:#fff; width:20px; height:20px; border-radius:6px; font-size:.75rem; display:flex; align-items:center; justify-content:center;}
+
+.exercise{background:var(--surface2); border-radius:12px; padding:18px; margin-top:12px;}
+.exercise-title{font-weight:700; margin-bottom:8px; color:var(--primary);}
+.exercise textarea{width:100%; min-height:90px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px; color:var(--text); font-family:'Consolas',monospace; font-size:.88rem; resize:vertical;}
+.exercise .btn{margin-top:10px;}
+.exercise-feedback{margin-top:10px; padding:10px 14px; border-radius:8px; font-size:.88rem; display:none;}
+.exercise-feedback.show{display:block;}
+.exercise-feedback.ok{background:rgba(18,183,106,.12); color:var(--success);}
+.exercise-feedback.warn{background:rgba(255,159,28,.12); color:var(--warn);}
+
+.diagram{background:var(--surface2); border-radius:14px; padding:20px; display:flex; justify-content:center; align-items:center; margin:14px 0; overflow-x:auto;}
+.box{border:2px solid var(--primary); border-radius:8px; padding:10px 14px; font-family:'Consolas',monospace; font-size:.85rem; background:var(--surface); margin:3px; display:inline-block;}
+.arrow{color:var(--muted); font-size:1.2rem; margin:0 4px;}
+
+table.cmp{width:100%; border-collapse:collapse; font-size:.88rem;}
+table.cmp th, table.cmp td{border:1px solid var(--border); padding:10px 12px; text-align:left;}
+table.cmp th{background:var(--surface2); font-weight:700;}
+table.cmp tr:nth-child(even){background:var(--surface2);}
+
+.interactive-demo{background:var(--surface2); border-radius:12px; padding:18px; margin-top:14px;}
+.interactive-demo .demo-controls{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+.interactive-demo .demo-out{background:#161829; color:#a5f3d9; padding:12px 16px; border-radius:10px; font-family:'Consolas',monospace; font-size:.88rem; min-height:40px;}
+.chip-btn{background:var(--surface); border:1px solid var(--border); padding:6px 12px; border-radius:20px; font-size:.8rem; cursor:pointer; font-weight:600;}
+.chip-btn:hover{background:var(--primary); color:#fff; border-color:var(--primary);}
+
+/* ===== Quiz ===== */
+.quiz-block{background:var(--surface); border:2px solid var(--primary); border-radius:var(--radius); padding:28px; margin-top:10px; box-shadow:var(--shadow);}
+.quiz-block h3{margin-bottom:4px;}
+.quiz-block .quiz-meta{color:var(--muted); font-size:.85rem; margin-bottom:20px;}
+.q-item{margin-bottom:26px; padding-bottom:20px; border-bottom:1px solid var(--border);}
+.q-item:last-of-type{border-bottom:none;}
+.q-text{font-weight:700; margin-bottom:12px;}
+.q-options{display:grid; gap:10px;}
+.q-option{border:1px solid var(--border); background:var(--surface2); padding:12px 14px; border-radius:10px; cursor:pointer; font-size:.9rem; transition:.15s;}
+.q-option:hover{border-color:var(--primary);}
+.q-option.selected{border-color:var(--primary); background:rgba(91,61,246,.1);}
+.q-option.correct{border-color:var(--success); background:rgba(18,183,106,.15);}
+.q-option.incorrect{border-color:var(--danger); background:rgba(255,77,109,.15);}
+.q-explain{display:none; margin-top:10px; font-size:.85rem; background:var(--surface); border-left:3px solid var(--primary); padding:10px 14px; border-radius:8px; color:var(--muted);}
+.q-explain.show{display:block;}
+.quiz-result{display:none; text-align:center; padding:24px; margin-top:10px;}
+.quiz-result.show{display:block;}
+.score-circle{width:120px; height:120px; border-radius:50%; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:800; color:#fff; background:var(--grad2);}
+.quiz-result h4{font-size:1.3rem; margin-bottom:6px;}
+
+/* ===== Cheat sheet / final ===== */
+.cheat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px;}
+.cheat-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; box-shadow:var(--shadow);}
+.cheat-card h4{color:var(--primary); margin-bottom:10px; font-size:.95rem;}
+.cheat-card pre{font-size:.78rem; padding:12px;}
+
+.resource-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px;}
+.resource-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; box-shadow:var(--shadow);}
+.resource-card h4{font-size:.95rem; margin-bottom:10px; color:var(--primary); display:flex; gap:8px; align-items:center;}
+.resource-card ul{padding-left:18px; font-size:.85rem; color:var(--muted);}
+.resource-card ul li{margin-bottom:6px;}
+.kw-tags{display:flex; flex-wrap:wrap; gap:8px;}
+.kw-tag{background:var(--surface2); padding:6px 12px; border-radius:20px; font-size:.78rem; font-weight:600;}
+
+.certificate{background:var(--grad1); color:#fff; border-radius:var(--radius); padding:40px; text-align:center; margin:30px 0; box-shadow:var(--shadow);}
+.certificate h2{font-size:1.8rem; margin-bottom:10px;}
+.certificate p{opacity:.95; margin-bottom:6px;}
+
+footer{text-align:center; padding:40px 0; color:var(--muted); font-size:.85rem;}
+
+/* Print styles */
+@media print{
+  .topbar, .btn, .module-map, .demo-controls, .exercise .btn, .q-option{display:none !important;}
+  body{background:#fff; color:#000;}
+  .module{display:block !important;}
+  .section-block, .quiz-block, .cheat-card, .resource-card{box-shadow:none; border:1px solid #ccc; break-inside:avoid;}
+  .hero h1{color:#5b3df6; -webkit-text-fill-color:#5b3df6;}
+}
+.print-report{display:none;}
+.print-report.active{display:block;}
+
+@media(max-width:600px){
+  .hero h1{font-size:1.9rem;}
+  .topbar-inner{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body data-theme="light">
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><div class="logo">🐍</div> Interactive Learning Studio</div>
+    <div class="top-actions">
+      <div class="progress-pill">
+        <span id="progressLabel">0% complete</span>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <button class="btn btn-ghost" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+      <button class="btn btn-ghost" onclick="runDemo()" id="demoBtn">🎬 Demo</button>
+      <button class="btn btn-primary" onclick="printReport()">🖨️ Print Report</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- HERO / INTRO -->
+  <section class="hero" id="intro">
+    <span class="badge">PYTHON · DATA STRUCTURES</span>
+    <h1>Master Python Data Structures</h1>
+    <p class="lead">A complete, hands-on tutorial covering lists, tuples, dictionaries, sets, and comprehensions — from foundational mechanics to real-world mastery. Everything you need in one sitting, no roadmap, just deep learning.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon">🎯</div>
+        <h4>Learning Objectives</h4>
+        <ul>
+          <li>Master lists & tuples: creation, indexing, slicing, mutability</li>
+          <li>Understand dicts & sets: hashing, key operations, use cases</li>
+          <li>Write list/dict/set/generator comprehensions confidently</li>
+          <li>Choose the right structure & optimize for performance</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon">⏱️</div>
+        <h4>Estimated Time</h4>
+        <p>60–75 minutes across 4 modules, including quizzes and exercises.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon">📋</div>
+        <h4>Prerequisites</h4>
+        <p>Basic Python syntax: variables, loops, conditionals, and functions.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon">🚀</div>
+        <h4>Expected Outcomes</h4>
+        <p>Confidently pick, build, and manipulate the right data structure for any real-world Python problem — and write Pythonic, efficient code.</p>
+      </div>
+    </div>
+
+    <div class="reward-box">
+      <div class="re-icon">🏆</div>
+      <div>
+        <h4>Reward System</h4>
+        <p>Earn <b>XP</b> for each quiz, unlock module badges, and receive a printable <b>Certificate of Completion</b> after finishing the Final Challenge. Track your score live in the top bar.</p>
+      </div>
+    </div>
+
+    <div class="module-map" id="moduleMap"></div>
+
+    <div class="start-row">
+      <button class="btn btn-primary btn-lg" onclick="goToModule(1)">Start Module 1 →</button>
+    </div>
+  </section>
+
+  <!-- MODULE 1: Lists & Tuples -->
+  <section class="module" id="module-1" data-module="1">
+    <div class="module-head"><span class="mchip">MODULE 1</span><h2>Foundations — Lists & Tuples</h2></div>
+    <p class="module-sub">The building blocks of Python sequences: ordered, indexable collections — one mutable, one not.</p>
+
+    <div class="section-block">
+      <h3>📖 What Are Lists and Tuples?</h3>
+      <p>A <b>list</b> is an <b>ordered, mutable</b> collection: <code>fruits = ["apple", "banana", "cherry"]</code>. You can add, remove, or change items after creation.</p>
+      <p>A <b>tuple</b> is an <b>ordered, immutable</b> collection: <code>coords = (10, 20)</code>. Once created, its contents can never change.</p>
+      <div class="analogy">🧩 <b>Analogy:</b> A list is like a <b>whiteboard to-do list</b> — you erase, add, and reorder items freely. A tuple is like a <b>engraved plaque</b> — once carved, the words are permanent. Use a plaque for facts that shouldn't change (like coordinates or a date of birth); use a whiteboard for things in flux (like a shopping cart).</div>
+    </div>
+
+    <div class="section-block">
+      <h3>💻 Indexing & Slicing</h3>
+      <p>Both support zero-based indexing and slicing:</p>
+      <pre><code>fruits = ["apple", "banana", "cherry", "date"]
+fruits[0]      # "apple"
+fruits[-1]     # "date"  (negative index = from the end)
+fruits[1:3]    # ["banana", "cherry"]  (slice: start inclusive, end exclusive)
+fruits[::-1]   # ["date", "cherry", "banana", "apple"]  (reversed)</code></pre>
+      <div class="diagram">
+        <div>
+          <div style="display:flex;">
+            <div class="box">apple</div><div class="box">banana</div><div class="box">cherry</div><div class="box">date</div>
+          </div>
+          <div style="display:flex; font-size:.75rem; color:var(--muted); justify-content:space-around; margin-top:4px;">
+            <span>0 / -4</span><span>1 / -3</span><span>2 / -2</span><span>3 / -1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>⚡ Mutability in Action — Try It</h3>
+      <div class="interactive-demo">
+        <p class="muted">Click an operation to see how a list mutates vs. why a tuple can't:</p>
+        <div class="demo-controls">
+          <button class="chip-btn" onclick="listDemo('append')">list.append('mango')</button>
+          <button class="chip-btn" onclick="listDemo('remove')">list.remove('banana')</button>
+          <button class="chip-btn" onclick="listDemo('sort')">list.sort()</button>
+          <button class="chip-btn" onclick="listDemo('tuple')">tuple[0] = 'x'</button>
+          <button class="chip-btn" onclick="listDemo('reset')">reset</button>
+        </div>
+        <div class="demo-out" id="listDemoOut">>>> fruits = ["banana", "apple", "cherry"]</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="section-block">
+        <h3>📊 Lists vs Tuples</h3>
+        <table class="cmp">
+          <tr><th>Feature</th><th>List</th><th>Tuple</th></tr>
+          <tr><td>Syntax</td><td><code>[1,2,3]</code></td><td><code>(1,2,3)</code></td></tr>
+          <tr><td>Mutable?</td><td>✅ Yes</td><td>❌ No</td></tr>
+          <tr><td>Hashable?</td><td>❌ No</td><td>✅ Yes (if contents are)</td></tr>
+          <tr><td>Performance</td><td>Slightly slower</td><td>Slightly faster</td></tr>
+          <tr><td>Use case</td><td>Dynamic collections</td><td>Fixed records, dict keys</td></tr>
+        </table>
+      </div>
+      <div class="section-block">
+        <h3>🚫 Common Misconceptions</h3>
+        <div class="misconception"><b>Myth:</b> "Tuples can't contain mutable data." <br><b>Truth:</b> A tuple can hold a list — the tuple itself is fixed, but a mutable element inside it can still change.</div>
+        <div class="misconception"><b>Myth:</b> "Slicing a list creates a reference to the original." <br><b>Truth:</b> Slicing creates a new list (a shallow copy); it doesn't share memory with the original list object.</div>
+        <div class="misconception"><b>Myth:</b> "<code>(1)</code> is a tuple." <br><b>Truth:</b> That's just an integer in parentheses. A single-item tuple needs a trailing comma: <code>(1,)</code>.</div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>🏋️ Practical Exercise</h3>
+      <div class="exercise">
+        <div class="exercise-title">Write a line of code that returns the last 2 items of <code>scores = [88, 92, 79, 95, 60]</code> using slicing.</div>
+        <textarea id="ex1" placeholder="Type your answer here, e.g. scores[-2:]"></textarea>
+        <button class="btn btn-primary" onclick="checkEx('ex1','ex1fb', ['scores[-2:]','scores[3:]','scores[3:5]'])">Check Answer</button>
+        <div class="exercise-feedback" id="ex1fb"></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>✅ Key Takeaways</h3>
+      <ul class="takeaways">
+        <li>Lists are ordered & mutable; tuples are ordered & immutable.</li>
+        <li>Negative indices count from the end; slicing returns a new object.</li>
+        <li>Tuples are hashable (when their contents are) so they can be dict keys or set members — lists cannot.</li>
+        <li>Choose tuples for fixed, "record-like" data; lists for collections that grow/shrink/change.</li>
+      </ul>
+    </div>
+
+    <div id="quiz-1"></div>
+  </section>
+
+  <!-- MODULE 2: Dicts & Sets -->
+  <section class="module" id="module-2" data-module="2">
+    <div class="module-head"><span class="mchip">MODULE 2</span><h2>Practical Application — Dictionaries & Sets</h2></div>
+    <p class="module-sub">Key-value mappings and unique unordered collections, both powered by hashing under the hood.</p>
+
+    <div class="section-block">
+      <h3>📖 Dictionaries: Key → Value Mapping</h3>
+      <p>A <b>dict</b> stores data as key-value pairs: <code>user = {"name": "Ava", "age": 29}</code>. Lookups by key are extremely fast — O(1) on average — because Python uses a hash table internally.</p>
+      <div class="analogy">🧩 <b>Analogy:</b> A dictionary is like a real <b>phone book</b> — you look up a name (key) to instantly get a phone number (value), instead of scanning every entry one by one like you would with a list.</div>
+      <pre><code>user = {"name": "Ava", "age": 29}
+user["age"]            # 29
+user["email"] = "ava@mail.com"   # add new key
+user.get("phone", "N/A")         # safe lookup with default
+for key, value in user.items():
+    print(key, value)</code></pre>
+    </div>
+
+    <div class="section-block">
+      <h3>📖 Sets: Unique, Unordered Collections</h3>
+      <p>A <b>set</b> stores unique, unordered items: <code>tags = {"python", "web", "python"}</code> → <code>{"python", "web"}</code>. Great for membership tests and eliminating duplicates.</p>
+      <div class="analogy">🧩 <b>Analogy:</b> A set is like a <b>guest list at a private club</b> — either your name is on it or it isn't, there are no duplicates, and the club doesn't care about the order names were added.</div>
+      <div class="diagram">
+        <svg width="360" height="180" viewBox="0 0 360 180">
+          <circle cx="140" cy="90" r="75" fill="rgba(91,61,246,.18)" stroke="#5b3df6" stroke-width="2"/>
+          <circle cx="220" cy="90" r="75" fill="rgba(0,194,168,.18)" stroke="#00c2a8" stroke-width="2"/>
+          <text x="95" y="60" font-size="13" fill="currentColor">A = {1,2,3}</text>
+          <text x="235" y="60" font-size="13" fill="currentColor">B = {3,4,5}</text>
+          <text x="105" y="95" font-size="14" fill="currentColor">1, 2</text>
+          <text x="175" y="95" font-size="14" fill="currentColor" font-weight="700">3</text>
+          <text x="235" y="95" font-size="14" fill="currentColor">4, 5</text>
+          <text x="130" y="150" font-size="11" fill="currentColor">A ∩ B = {3}  ·  A ∪ B = {1,2,3,4,5}  ·  A - B = {1,2}</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>⚡ Set Operations — Try It</h3>
+      <div class="interactive-demo">
+        <p class="muted">A = {1,2,3,4} &nbsp; B = {3,4,5,6}</p>
+        <div class="demo-controls">
+          <button class="chip-btn" onclick="setDemo('union')">A | B (union)</button>
+          <button class="chip-btn" onclick="setDemo('inter')">A & B (intersection)</button>
+          <button class="chip-btn" onclick="setDemo('diff')">A - B (difference)</button>
+          <button class="chip-btn" onclick="setDemo('sym')">A ^ B (symmetric diff)</button>
+        </div>
+        <div class="demo-out" id="setDemoOut">>>> choose an operation</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="section-block">
+        <h3>📊 Dict vs Set vs List for Lookup</h3>
+        <table class="cmp">
+          <tr><th>Structure</th><th>Lookup</th><th>Ordered?</th><th>Duplicates?</th></tr>
+          <tr><td>List</td><td>O(n)</td><td>Yes</td><td>Allowed</td></tr>
+          <tr><td>Set</td><td>O(1) avg</td><td>No*</td><td>Not allowed</td></tr>
+          <tr><td>Dict</td><td>O(1) avg (by key)</td><td>Yes (insertion order, 3.7+)</td><td>Keys unique</td></tr>
+        </table>
+        <p class="muted" style="margin-top:8px; font-size:.8rem;">*Sets have no guaranteed order, unlike dicts which preserve insertion order.</p>
+      </div>
+      <div class="section-block">
+        <h3>🚫 Common Misconceptions</h3>
+        <div class="misconception"><b>Myth:</b> "Dicts are unordered." <br><b>Truth:</b> Since Python 3.7, dicts preserve insertion order as a language guarantee.</div>
+        <div class="misconception"><b>Myth:</b> "You can use a list as a dict key." <br><b>Truth:</b> Dict keys must be hashable; lists are mutable and unhashable, so only tuples, strings, and numbers work as keys.</div>
+        <div class="misconception"><b>Myth:</b> "Sets can hold any items, like lists." <br><b>Truth:</b> Set elements must be hashable too — no lists or dicts inside a set.</div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>🏋️ Practical Exercise</h3>
+      <div class="exercise">
+        <div class="exercise-title">Given <code>inventory = {"apples": 10, "pears": 5}</code>, write code to safely get the count of "bananas" and default to 0 if missing.</div>
+        <textarea id="ex2" placeholder="e.g. inventory.get('bananas', 0)"></textarea>
+        <button class="btn btn-primary" onclick="checkEx('ex2','ex2fb', [\"inventory.get('bananas', 0)\",'inventory.get(\"bananas\", 0)'])">Check Answer</button>
+        <div class="exercise-feedback" id="ex2fb"></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>✅ Key Takeaways</h3>
+      <ul class="takeaways">
+        <li>Dicts map unique keys to values with O(1) average lookup via hashing.</li>
+        <li>Sets guarantee uniqueness and support fast membership tests & math-style operations.</li>
+        <li>Only hashable (immutable) types can be dict keys or set members.</li>
+        <li>Dicts preserve insertion order since Python 3.7; sets do not guarantee order.</li>
+      </ul>
+    </div>
+
+    <div id="quiz-2"></div>
+  </section>
+
+  <!-- MODULE 3: Comprehensions -->
+  <section class="module" id="module-3" data-module="3">
+    <div class="module-head"><span class="mchip">MODULE 3</span><h2>Application — Comprehensions</h2></div>
+    <p class="module-sub">Pythonic, compact syntax for building lists, dicts, sets, and generators from iterables.</p>
+
+    <div class="section-block">
+      <h3>📖 The Comprehension Pattern</h3>
+      <p>A comprehension builds a new collection from an existing iterable in a single readable expression, replacing verbose loops:</p>
+      <pre><code># Traditional loop
+squares = []
+for n in range(10):
+    squares.append(n ** 2)
+
+# List comprehension — equivalent, more Pythonic
+squares = [n ** 2 for n in range(10)]
+
+# With a filter condition
+evens_sq = [n ** 2 for n in range(10) if n % 2 == 0]
+
+# Dict comprehension
+square_map = {n: n ** 2 for n in range(5)}
+
+# Set comprehension
+unique_lengths = {len(word) for word in ["hi","bye","yo","cat"]}
+
+# Generator expression (lazy, memory-efficient)
+gen = (n ** 2 for n in range(1000000))</code></pre>
+      <div class="analogy">🧩 <b>Analogy:</b> A comprehension is like ordering a <b>custom sandwich</b> in one sentence — "give me turkey, no tomato, on wheat" — instead of describing every assembly step to the chef individually (loop, condition, append).</div>
+    </div>
+
+    <div class="section-block">
+      <h3>⚡ Build a Comprehension — Try It</h3>
+      <div class="interactive-demo">
+        <p class="muted">Pick a transformation applied to <code>range(1, 11)</code>:</p>
+        <div class="demo-controls">
+          <button class="chip-btn" onclick="compDemo('squares')">[n*n for n in range]</button>
+          <button class="chip-btn" onclick="compDemo('evens')">[n for n in range if n%2==0]</button>
+          <button class="chip-btn" onclick="compDemo('dict')">{n: n*n for n in range}</button>
+          <button class="chip-btn" onclick="compDemo('set')">{n%3 for n in range}</button>
+        </div>
+        <div class="demo-out" id="compDemoOut">>>> choose a comprehension</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="section-block">
+        <h3>📊 Comprehension Types</h3>
+        <table class="cmp">
+          <tr><th>Type</th><th>Syntax</th><th>Returns</th></tr>
+          <tr><td>List</td><td><code>[x for x in it]</code></td><td>list</td></tr>
+          <tr><td>Dict</td><td><code>{k:v for k,v in it}</code></td><td>dict</td></tr>
+          <tr><td>Set</td><td><code>{x for x in it}</code></td><td>set</td></tr>
+          <tr><td>Generator</td><td><code>(x for x in it)</code></td><td>generator (lazy)</td></tr>
+        </table>
+      </div>
+      <div class="section-block">
+        <h3>🚫 Common Misconceptions</h3>
+        <div class="misconception"><b>Myth:</b> "Comprehensions are always faster than loops." <br><b>Truth:</b> They're often faster due to internal optimizations, but readability matters more — an overly nested comprehension can hurt both speed and clarity.</div>
+        <div class="misconception"><b>Myth:</b> "<code>(x for x in it)</code> is a tuple comprehension." <br><b>Truth:</b> Parentheses create a <b>generator expression</b>, not a tuple — there's no such thing as a tuple comprehension.</div>
+        <div class="misconception"><b>Myth:</b> "Nesting comprehensions is always better than a loop." <br><b>Truth:</b> Deeply nested comprehensions become unreadable; a plain loop is often clearer for complex logic.</div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>🏋️ Practical Exercise</h3>
+      <div class="exercise">
+        <div class="exercise-title">Write a list comprehension that returns the squares of only the odd numbers from 1 to 10.</div>
+        <textarea id="ex3" placeholder="e.g. [n**2 for n in range(1,11) if n % 2 != 0]"></textarea>
+        <button class="btn btn-primary" onclick="checkEx('ex3','ex3fb', ['if n % 2 != 0','if n%2!=0','if n % 2 == 1','if n%2==1'])">Check Answer</button>
+        <div class="exercise-feedback" id="ex3fb"></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>✅ Key Takeaways</h3>
+      <ul class="takeaways">
+        <li>Comprehensions replace loop+append boilerplate with a single expressive line.</li>
+        <li>List/dict/set comprehensions use <code>[]</code>/<code>{}</code>; generator expressions use <code>()</code> and are lazy.</li>
+        <li>Add an <code>if</code> clause to filter; keep nesting shallow for readability.</li>
+        <li>Generators save memory for large or infinite sequences since values are produced on demand.</li>
+      </ul>
+    </div>
+
+    <div id="quiz-3"></div>
+  </section>
+
+  <!-- MODULE 4: Mastery -->
+  <section class="module" id="module-4" data-module="4">
+    <div class="module-head"><span class="mchip">MODULE 4</span><h2>Mastery — Choosing & Combining Structures</h2></div>
+    <p class="module-sub">Bringing it all together: performance trade-offs, nested structures, and real-world decision-making.</p>
+
+    <div class="section-block">
+      <h3>📖 The Decision Framework</h3>
+      <p>Real Python programs combine structures. A common pattern: a <b>list of dicts</b> for records, or a <b>dict of lists</b> for grouping.</p>
+      <pre><code># List of dicts — like rows in a table
+users = [
+    {"name": "Ava", "age": 29},
+    {"name": "Ben", "age": 34},
+]
+
+# Dict of lists — grouping by category
+by_dept = {
+    "engineering": ["Ava", "Ben"],
+    "sales": ["Cleo"],
+}
+
+# Nested comprehension: flatten a dict of lists
+all_names = [name for names in by_dept.values() for name in names]</code></pre>
+      <div class="analogy">🧩 <b>Analogy:</b> Think of it like organizing a <b>filing cabinet</b>: tuples are locked folders (fixed records), lists are open trays you can rearrange, dicts are labeled drawers you search by name, and sets are a "no duplicates allowed" stamp collection.</div>
+    </div>
+
+    <div class="section-block">
+      <h3>⚡ Performance: Membership Test Race — Try It</h3>
+      <div class="interactive-demo">
+        <p class="muted">Searching for one item among 100,000 elements — which is faster?</p>
+        <div class="demo-controls">
+          <button class="chip-btn" onclick="perfDemo()">Run comparison</button>
+        </div>
+        <div class="demo-out" id="perfDemoOut">>>> click "Run comparison"</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="section-block">
+        <h3>📊 Master Comparison Table</h3>
+        <table class="cmp">
+          <tr><th>Structure</th><th>Ordered</th><th>Mutable</th><th>Duplicates</th><th>Best for</th></tr>
+          <tr><td>List</td><td>✅</td><td>✅</td><td>✅</td><td>Sequences, order matters</td></tr>
+          <tr><td>Tuple</td><td>✅</td><td>❌</td><td>✅</td><td>Fixed records, dict keys</td></tr>
+          <tr><td>Dict</td><td>✅</td><td>✅</td><td>Keys: ❌</td><td>Key-value lookups</td></tr>
+          <tr><td>Set</td><td>❌</td><td>✅</td><td>❌</td><td>Uniqueness, fast membership</td></tr>
+        </table>
+      </div>
+      <div class="section-block">
+        <h3>🚫 Common Misconceptions</h3>
+        <div class="misconception"><b>Myth:</b> "One structure is always 'the best'." <br><b>Truth:</b> The right choice always depends on access pattern — lookups vs iteration vs order vs uniqueness.</div>
+        <div class="misconception"><b>Myth:</b> "Converting a list to a set to dedupe always preserves order." <br><b>Truth:</b> Sets don't guarantee order; use <code>dict.fromkeys(list)</code> to dedupe while preserving order.</div>
+        <div class="misconception"><b>Myth:</b> "Nested data structures need custom classes." <br><b>Truth:</b> Plain nested lists/dicts/tuples handle most real-world structured data just fine — reach for classes only when behavior, not just data, is needed.</div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>🏋️ Practical Exercise</h3>
+      <div class="exercise">
+        <div class="exercise-title">Write code to deduplicate <code>nums = [3,1,3,2,1,4]</code> while preserving original order.</div>
+        <textarea id="ex4" placeholder="e.g. list(dict.fromkeys(nums))"></textarea>
+        <button class="btn btn-primary" onclick="checkEx('ex4','ex4fb', ['dict.fromkeys(nums)'])">Check Answer</button>
+        <div class="exercise-feedback" id="ex4fb"></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>✅ Key Takeaways</h3>
+      <ul class="takeaways">
+        <li>Combine structures — lists of dicts, dicts of lists — to model real-world data.</li>
+        <li>Sets/dicts give O(1) average membership tests; lists give O(n) — choose accordingly.</li>
+        <li><code>dict.fromkeys()</code> dedupes while preserving order; <code>set()</code> does not guarantee order.</li>
+        <li>Mastery is about matching the structure's guarantees to your problem's real needs.</li>
+      </ul>
+    </div>
+
+    <div id="quiz-4"></div>
+  </section>
+
+  <!-- FINAL CHALLENGE -->
+  <section class="module" id="module-final" data-module="final">
+    <div class="module-head"><span class="mchip">FINAL</span><h2>Final Practical Challenge</h2></div>
+    <div class="section-block">
+      <h3>🏆 Challenge: Build a Word-Frequency Report</h3>
+      <p>Given a sentence, write Python that:</p>
+      <ol style="padding-left:20px; margin-bottom:12px;">
+        <li>Splits it into lowercase words (a list)</li>
+        <li>Counts frequency of each word (a dict)</li>
+        <li>Finds the set of unique words</li>
+        <li>Uses a comprehension to list words that appear more than once</li>
+      </ol>
+      <pre><code>text = "the cat sat on the mat the cat ran"
+words = text.lower().split()                       # list
+freq = {}
+for w in words:
+    freq[w] = freq.get(w, 0) + 1                    # dict build
+unique_words = set(words)                            # set
+repeated = [w for w, c in freq.items() if c > 1]     # comprehension
+print(freq)        # {'the': 3, 'cat': 2, 'sat': 1, ...}
+print(repeated)    # ['the', 'cat']</code></pre>
+      <div class="exercise">
+        <div class="exercise-title">Your turn: write the comprehension line that builds <code>freq</code> as a dict comprehension instead of a loop (hint: use <code>set(words)</code> and <code>.count()</code>).</div>
+        <textarea id="exF" placeholder="e.g. {w: words.count(w) for w in set(words)}"></textarea>
+        <button class="btn btn-primary" onclick="checkEx('exF','exFfb', ['words.count(w)'])">Check Answer</button>
+        <div class="exercise-feedback" id="exFfb"></div>
+      </div>
+      <div style="text-align:center; margin-top:20px;">
+        <button class="btn btn-primary btn-lg" onclick="completeChallenge()">Mark Challenge Complete 🎉</button>
+      </div>
+    </div>
+
+    <div class="certificate" id="certificate" style="display:none;">
+      <h2>🎓 Certificate of Completion</h2>
+      <p>This certifies that you have completed</p>
+      <h3 style="margin:8px 0;">Python Data Structures — Interactive Learning Studio</h3>
+      <p id="certDate"></p>
+      <p style="margin-top:10px; font-weight:700;" id="certScore"></p>
+    </div>
+
+    <!-- CHEAT SHEET -->
+    <div class="section-block">
+      <h3>📄 Cheat Sheet</h3>
+      <div class="cheat-grid">
+        <div class="cheat-card"><h4>Lists</h4><pre><code>l = [1,2,3]
+l.append(4)
+l.pop()
+l.sort()
+l[1:3]
+l[::-1]</code></pre></div>
+        <div class="cheat-card"><h4>Tuples</h4><pre><code>t = (1,2,3)
+t[0]
+a, b, c = t
+single = (5,)</code></pre></div>
+        <div class="cheat-card"><h4>Dicts</h4><pre><code>d = {"a":1}
+d["b"] = 2
+d.get("c", 0)
+d.items() / .keys() / .values()
+del d["a"]</code></pre></div>
+        <div class="cheat-card"><h4>Sets</h4><pre><code>s = {1,2,3}
+s.add(4)
+a | b   # union
+a & b   # intersection
+a - b   # difference</code></pre></div>
+        <div class="cheat-card"><h4>Comprehensions</h4><pre><code>[x*x for x in it]
+{k:v for k,v in it}
+{x for x in it}
+(x for x in it)  # generator</code></pre></div>
+        <div class="cheat-card"><h4>Dedupe / Combine</h4><pre><code>list(dict.fromkeys(l))  # ordered dedupe
+list(set(l))            # unordered dedupe
+[d["name"] for d in users]</code></pre></div>
+      </div>
+    </div>
+
+    <!-- SUMMARY NOTES -->
+    <div class="section-block">
+      <h3>📝 Summary Notes</h3>
+      <ul class="takeaways">
+        <li>Lists: ordered, mutable sequences — the default general-purpose container.</li>
+        <li>Tuples: ordered, immutable — used for fixed records and as hashable dict keys.</li>
+        <li>Dicts: hash-based key→value maps with O(1) average lookup and insertion order.</li>
+        <li>Sets: hash-based unique collections — best for membership tests and set algebra.</li>
+        <li>Comprehensions: concise, Pythonic construction of lists/dicts/sets/generators.</li>
+        <li>Real applications combine structures: lists of dicts, dicts of lists, nested comprehensions.</li>
+      </ul>
+    </div>
+
+    <!-- CONTINUE LEARNING -->
+    <div class="section-block">
+      <h3>🔭 Continue Learning</h3>
+      <div class="resource-grid">
+        <div class="resource-card"><h4>📚 Books</h4><ul>
+          <li>Fluent Python — Luciano Ramalho</li>
+          <li>Python Tricks — Dan Bader</li>
+          <li>Effective Python — Brett Slatkin</li>
+        </ul></div>
+        <div class="resource-card"><h4>📘 Documentation</h4><ul>
+          <li>docs.python.org — Data Structures tutorial</li>
+          <li>docs.python.org — <code>collections</code> module</li>
+          <li>Python Language Reference — Data model</li>
+        </ul></div>
+        <div class="resource-card"><h4>📄 Research / Deep Dives</h4><ul>
+          <li>CPython source: dict & set hash table implementation notes</li>
+          <li>"Time Complexity" — Python Wiki</li>
+        </ul></div>
+        <div class="resource-card"><h4>👥 Communities</h4><ul>
+          <li>r/learnpython (Reddit)</li>
+          <li>Python Discord</li>
+          <li>Stack Overflow — [python] tag</li>
+        </ul></div>
+        <div class="resource-card"><h4>🧪 Practice Platforms</h4><ul>
+          <li>LeetCode — Array/Hash Table problems</li>
+          <li>HackerRank — Python domain</li>
+          <li>Exercism — Python track</li>
+        </ul></div>
+        <div class="resource-card"><h4>🔎 Search Keywords</h4><div class="kw-tags">
+          <span class="kw-tag">python list vs tuple</span>
+          <span class="kw-tag">dict comprehension</span>
+          <span class="kw-tag">set operations python</span>
+          <span class="kw-tag">time complexity python data structures</span>
+          <span class="kw-tag">collections.Counter</span>
+        </div></div>
+        <div class="resource-card"><h4>🤖 AI Prompts for Further Learning</h4><ul>
+          <li>"Explain Python's <code>collections</code> module (Counter, defaultdict, deque, namedtuple) with examples."</li>
+          <li>"Show me how dict hashing collisions are resolved internally in CPython."</li>
+          <li>"Give me 5 medium-difficulty coding problems using sets and dicts, with solutions."</li>
+          <li>"Compare list comprehensions vs map/filter vs generator expressions for performance."</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>Interactive Learning Studio · Built for deep, single-session mastery · Python Data Structures</footer>
+
+<script>
+/* ---------- THEME ---------- */
+function toggleTheme(){
+  const body = document.body;
+  const isDark = body.getAttribute('data-theme') === 'dark';
+  body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+}
+
+/* ---------- STATE ---------- */
+const state = {
+  unlocked: {1:true, 2:false, 3:false, 4:false, final:false},
+  quizScores: {1:null,2:null,3:null,4:null},
+  currentModule: 'intro'
+};
+
+const modules = [1,2,3,4];
+
+const quizData = {
+  1: {
+    title:"Module 1 Quiz — Lists & Tuples",
+    qs:[
+      {q:"Which of these creates a tuple with exactly one item?", opts:["(5)","[5]","(5,)","{5}"], correct:2, expl:"A single value in parentheses without a comma is just that value. The trailing comma (5,) is what makes it a one-item tuple."},
+      {q:"What does fruits[1:3] return from [\"a\",\"b\",\"c\",\"d\"]?", opts:["['a','b']","['b','c']","['b','c','d']","['c','d']"], correct:1, expl:"Slicing is start-inclusive, end-exclusive: index 1 ('b') through index 2 ('c')."},
+      {q:"Why can tuples be used as dictionary keys but lists cannot?", opts:["Tuples are shorter","Tuples are hashable/immutable, lists are not","Lists don't support indexing","There's no real reason"], correct:1, expl:"Dict keys must be hashable, which requires immutability. Tuples qualify (if their contents do too); lists are mutable and therefore unhashable."},
+      {q:"What is fruits[-1] on [\"apple\",\"banana\",\"cherry\"]?", opts:["apple","banana","cherry","Error"], correct:2, expl:"Negative indices count from the end: -1 is the last element, 'cherry'."}
+    ]
+  },
+  2: {
+    title:"Module 2 Quiz — Dictionaries & Sets",
+    qs:[
+      {q:"Which method safely retrieves a dict value with a fallback default?", opts:["d.fetch(key, default)","d.get(key, default)","d.find(key, default)","d[key] or default"], correct:1, expl:"dict.get(key, default) returns default if the key is missing, without raising a KeyError."},
+      {q:"What is the time complexity of an average key lookup in a dict?", opts:["O(n)","O(log n)","O(1)","O(n^2)"], correct:2, expl:"Dicts use hash tables, giving average O(1) lookup time regardless of dict size."},
+      {q:"Which is true about sets in Python?", opts:["They allow duplicate values","They preserve insertion order like a list","They only store unique, hashable items","They are indexed like lists"], correct:2, expl:"Sets automatically enforce uniqueness and require hashable elements; they are unordered and not indexable."},
+      {q:"Given A={1,2,3}, B={2,3,4}, what is A & B?", opts:["{1,2,3,4}","{2,3}","{1}","{4}"], correct:1, expl:"& is intersection — elements present in both sets: {2,3}."}
+    ]
+  },
+  3: {
+    title:"Module 3 Quiz — Comprehensions",
+    qs:[
+      {q:"What does (x for x in range(5)) create?", opts:["A tuple","A list","A generator expression","A set"], correct:2, expl:"Parentheses around a comprehension create a lazy generator expression, not a tuple — there is no tuple comprehension syntax."},
+      {q:"Which comprehension returns only even numbers squared, from 0–9?", opts:["[x**2 for x in range(10) if x%2==0]","[x for x in range(10) if x**2%2==0]","{x**2 for x in range(10)}","[x**2 if x%2==0 for x in range(10)]"], correct:0, expl:"The filter `if x%2==0` must come after the `for` clause; option A follows correct syntax and logic."},
+      {q:"What type does {n: n*2 for n in range(3)} produce?", opts:["list","set","dict","generator"], correct:2, expl:"Curly braces with a key:value pair form a dict comprehension, producing a dict."},
+      {q:"Why prefer a generator expression over a list comprehension for very large sequences?", opts:["Generators are always faster to iterate fully","Generators use less memory since items are produced lazily","Generators support indexing better","There's no difference"], correct:1, expl:"Generators yield items one at a time on demand instead of building the whole collection in memory, which is far more memory-efficient for large data."}
+    ]
+  },
+  4: {
+    title:"Module 4 Quiz — Mastery",
+    qs:[
+      {q:"Which data structure gives the fastest average membership test (`x in structure`)?", opts:["list","tuple","set","string"], correct:2, expl:"Sets (and dicts) use hashing for O(1) average membership tests, versus O(n) for lists/tuples which must scan linearly."},
+      {q:"How do you deduplicate a list while preserving original order?", opts:["list(set(mylist))","sorted(set(mylist))","list(dict.fromkeys(mylist))","mylist.unique()"], correct:2, expl:"dict.fromkeys() uses each item as a key (deduping) while dicts preserve insertion order — converting back to a list preserves original order."},
+      {q:"What's a natural structure for representing multiple records, each with named fields?", opts:["A single set","A list of dicts","A dict of sets","A tuple of tuples only"], correct:1, expl:"A list of dicts mirrors rows of a table: each dict is a record with named fields, and the list preserves order and allows duplicates."},
+      {q:"When should you reach for a custom class instead of nested lists/dicts?", opts:["Always, for any structured data","Never, nested structures are always enough","When you need behavior/methods, not just data storage","Only for single values"], correct:2, expl:"Plain data structures are great for storage; classes are worth the overhead when you need attached behavior, validation, or methods."}
+    ]
+  }
+};
+
+/* ---------- MODULE MAP ---------- */
+function renderMap(){
+  const map = document.getElementById('moduleMap');
+  map.innerHTML='';
+  const titles = {1:"Lists & Tuples",2:"Dicts & Sets",3:"Comprehensions",4:"Mastery"};
+  modules.forEach(m=>{
+    const done = state.quizScores[m]!==null;
+    const locked = !state.unlocked[m];
+    const active = state.currentModule===m;
+    const div = document.createElement('div');
+    div.className = 'map-card' + (locked?' locked':'') + (active?' active':'') + (done?' done':'');
+    div.innerHTML = `<div class="mnum">${done?'✓':m}</div><div class="mtitle">${titles[m]}</div><div class="mstatus">${locked?'🔒 Locked':done?'Score '+state.quizScores[m]+'/4':'Ready'}</div>`;
+    div.onclick = ()=>{ if(!locked) goToModule(m); };
+    map.appendChild(div);
+  });
+}
+
+/* ---------- NAVIGATION ---------- */
+function goToModule(m){
+  document.querySelectorAll('.module').forEach(el=>el.classList.remove('visible'));
+  const target = document.getElementById('module-'+m);
+  if(target) target.classList.add('visible');
+  state.currentModule = m;
+  renderMap();
+  updateProgress();
+  window.scrollTo({top: target ? target.offsetTop-70 : 0, behavior:'smooth'});
+  if(quizData[m] && !document.getElementById('quiz-'+m).dataset.built){
+    buildQuiz(m);
+  }
+}
+
+function updateProgress(){
+  const doneCount = Object.values(state.quizScores).filter(v=>v!==null).length;
+  const pct = Math.round((doneCount/4)*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressLabel').textContent = pct+'% complete';
+}
+
+/* ---------- QUIZ BUILD ---------- */
+function buildQuiz(m){
+  const data = quizData[m];
+  const container = document.getElementById('quiz-'+m);
+  container.dataset.built = "1";
+  let html = `<div class="quiz-block"><h3>🧠 ${data.title}</h3><div class="quiz-meta">4 questions · instant feedback · unlocks next module</div>`;
+  data.qs.forEach((q,qi)=>{
+    html += `<div class="q-item" data-qindex="${qi}">
+      <div class="q-text">Q${qi+1}. ${q.q}</div>
+      <div class="q-options">`;
+    q.opts.forEach((opt,oi)=>{
+      html += `<div class="q-option" onclick="selectAnswer(${m},${qi},${oi})" id="m${m}q${qi}o${oi}">${opt}</div>`;
+    });
+    html += `</div><div class="q-explain" id="m${m}q${qi}explain"></div></div>`;
+  });
+  html += `<div style="text-align:center;"><button class="btn btn-primary" onclick="submitQuiz(${m})" id="submitBtn${m}">Submit Quiz</button></div>
+  <div class="quiz-result" id="result${m}">
+    <div class="score-circle" id="scoreCircle${m}"></div>
+    <h4 id="resultTitle${m}"></h4>
+    <p id="resultMsg${m}" style="color:var(--muted); margin-bottom:16px;"></p>
+    <button class="btn btn-primary" id="nextBtn${m}"></button>
+  </div></div>`;
+  container.innerHTML = html;
+}
+
+const userAnswers = {};
+function selectAnswer(m, qi, oi){
+  if(!userAnswers[m]) userAnswers[m]={};
+  userAnswers[m][qi]=oi;
+  document.querySelectorAll(`#quiz-${m} [data-qindex="${qi}"] .q-option`).forEach(el=>el.classList.remove('selected'));
+  document.getElementById(`m${m}q${qi}o${oi}`).classList.add('selected');
+}
+
+function submitQuiz(m){
+  const data = quizData[m];
+  const answers = userAnswers[m] || {};
+  let score = 0;
+  data.qs.forEach((q,qi)=>{
+    const chosen = answers[qi];
+    const explainEl = document.getElementById(`m${m}q${qi}explain`);
+    q.opts.forEach((opt,oi)=>{
+      const el = document.getElementById(`m${m}q${qi}o${oi}`);
+      el.onclick = null;
+      if(oi===q.correct) el.classList.add('correct');
+      else if(oi===chosen) el.classList.add('incorrect');
+    });
+    if(chosen===q.correct) score++;
+    explainEl.textContent = "💡 " + q.expl;
+    explainEl.classList.add('show');
+  });
+  state.quizScores[m] = score;
+  document.getElementById('submitBtn'+m).style.display='none';
+
+  const pct = Math.round((score/4)*100);
+  const circle = document.getElementById('scoreCircle'+m);
+  circle.textContent = score+"/4";
+  circle.style.background = pct>=75 ? 'linear-gradient(135deg,#12b76a,#00c2a8)' : pct>=50 ? 'linear-gradient(135deg,#ff9f1c,#ffcd3c)' : 'linear-gradient(135deg,#ff4d6d,#ff9f1c)';
+  document.getElementById('resultTitle'+m).textContent = pct>=75 ? "🎉 Excellent work!" : pct>=50 ? "👍 Good effort!" : "📘 Keep practicing!";
+  document.getElementById('resultMsg'+m).textContent = `You scored ${score} out of 4 (${pct}%). ${pct>=75?"You've mastered this module.":"Review the explanations above, then move on."}`;
+
+  const nextBtn = document.getElementById('nextBtn'+m);
+  const nextModule = m===4 ? 'final' : m+1;
+  nextBtn.textContent = m===4 ? "Go to Final Challenge →" : `Unlock Module ${m+1} →`;
+  nextBtn.onclick = ()=>{ state.unlocked[nextModule]=true; goToModule(nextModule); };
+
+  document.getElementById('result'+m).classList.add('show');
+  renderMap();
+  updateProgress();
+}
+
+/* ---------- EXERCISE CHECK ---------- */
+function checkEx(taId, fbId, validSubstrings){
+  const val = document.getElementById(taId).value.replace(/\s+/g,'');
+  const fb = document.getElementById(fbId);
+  const ok = validSubstrings.some(s => val.includes(s.replace(/\s+/g,'')));
+  fb.classList.add('show');
+  if(ok){
+    fb.className = 'exercise-feedback show ok';
+    fb.textContent = "✅ Correct! That's a valid solution.";
+  } else {
+    fb.className = 'exercise-feedback show warn';
+    fb.textContent = "🤔 Not quite — check the syntax pattern shown in the examples above and try again.";
+  }
+}
+
+/* ---------- INTERACTIVE DEMOS ---------- */
+let demoList = ["banana","apple","cherry"];
+function listDemo(action){
+  const out = document.getElementById('listDemoOut');
+  if(action==='append'){ demoList.push('mango'); out.textContent = ">>> fruits.append('mango')\n"+JSON.stringify(demoList); }
+  else if(action==='remove'){ demoList = demoList.filter(f=>f!=='banana'); out.textContent = ">>> fruits.remove('banana')\n"+JSON.stringify(demoList); }
+  else if(action==='sort'){ demoList.sort(); out.textContent = ">>> fruits.sort()\n"+JSON.stringify(demoList); }
+  else if(action==='tuple'){ out.textContent = ">>> t = (1,2,3)\n>>> t[0] = 'x'\nTypeError: 'tuple' object does not support item assignment"; }
+  else if(action==='reset'){ demoList=["banana","apple","cherry"]; out.textContent = ">>> fruits = [\"banana\", \"apple\", \"cherry\"]"; }
+}
+
+function setDemo(op){
+  const A=[1,2,3,4], B=[3,4,5,6];
+  const out = document.getElementById('setDemoOut');
+  let result, label;
+  if(op==='union'){ result=[...new Set([...A,...B])].sort(); label='A | B'; }
+  else if(op==='inter'){ result=A.filter(x=>B.includes(x)); label='A & B'; }
+  else if(op==='diff'){ result=A.filter(x=>!B.includes(x)); label='A - B'; }
+  else if(op==='sym'){ result=[...A.filter(x=>!B.includes(x)),...B.filter(x=>!A.includes(x))].sort(); label='A ^ B'; }
+  out.textContent = `>>> ${label}\n{${result.join(', ')}}`;
+}
+
+function compDemo(kind){
+  const out = document.getElementById('compDemoOut');
+  const range = Array.from({length:10}, (_,i)=>i+1);
+  if(kind==='squares'){ out.textContent = ">>> [n*n for n in range(1,11)]\n["+range.map(n=>n*n).join(', ')+"]"; }
+  else if(kind==='evens'){ out.textContent = ">>> [n for n in range(1,11) if n%2==0]\n["+range.filter(n=>n%2===0).join(', ')+"]"; }
+  else if(kind==='dict'){ const pairs = range.map(n=>`${n}: ${n*n}`).join(', '); out.textContent = ">>> {n: n*n for n in range(1,11)}\n{"+pairs+"}"; }
+  else if(kind==='set'){ const s=[...new Set(range.map(n=>n%3))].sort(); out.textContent = ">>> {n%3 for n in range(1,11)}\n{"+s.join(', ')+"}"; }
+}
+
+function perfDemo(){
+  const out = document.getElementById('perfDemoOut');
+  const n = 100000;
+  const arr = Array.from({length:n},(_,i)=>i);
+  const set = new Set(arr);
+  const target = n-1;
+  let t0 = performance.now();
+  arr.includes(target);
+  let t1 = performance.now();
+  set.has(target);
+  let t2 = performance.now();
+  out.textContent = `>>> Searching for last item among ${n.toLocaleString()} elements\nlist.includes(): ~${(t1-t0).toFixed(3)} ms  (O(n) linear scan)\nset.has():      ~${(t2-t1).toFixed(4)} ms  (O(1) hash lookup)\n\n→ The set lookup is dramatically faster and stays fast as data grows.`;
+}
+
+/* ---------- FINAL CHALLENGE ---------- */
+function completeChallenge(){
+  state.unlocked.final = true;
+  const cert = document.getElementById('certificate');
+  cert.style.display='block';
+  const total = Object.values(state.quizScores).reduce((a,b)=>a+(b||0),0);
+  document.getElementById('certDate').textContent = "Completed on " + new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('certScore').textContent = `Total Quiz Score: ${total}/16`;
+  cert.scrollIntoView({behavior:'smooth'});
+}
+
+/* ---------- PRINT ---------- */
+function printReport(){
+  document.querySelectorAll('.module').forEach(el=>el.classList.add('visible'));
+  window.print();
+  setTimeout(()=>{ goToModule(state.currentModule); },300);
+}
+
+/* ---------- DEMO MODE ---------- */
+async function runDemo(){
+  const btn = document.getElementById('demoBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Running demo...';
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  for (const m of modules) {
+    state.unlocked[m] = true;
+    goToModule(m);
+    await wait(500);
+    if (!document.getElementById('quiz-'+m).dataset.built) buildQuiz(m);
+
+    const data = quizData[m];
+    data.qs.forEach((q, qi) => selectAnswer(m, qi, q.correct));
+    await wait(400);
+    submitQuiz(m);
+    await wait(700);
+  }
+
+  state.unlocked.final = true;
+  goToModule('final');
+  await wait(400);
+  document.getElementById('exF').value = "{w: words.count(w) for w in set(words)}";
+  checkEx('exF','exFfb', ['words.count(w)']);
+  await wait(300);
+  completeChallenge();
+
+  btn.disabled = false;
+  btn.textContent = '🎬 Demo';
+}
+
+/* ---------- INIT ---------- */
+renderMap();
+updateProgress();
+</script>
+</body>
+</html>
