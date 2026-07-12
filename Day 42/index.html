@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Financial Command Center</title>
+<style>
+:root{
+  --bg:#f2f4f8; --surface:#ffffff; --surface-2:#eef1f6; --border:#e1e4ec;
+  --text:#181c28; --text-2:#5c6376; --text-3:#8a90a1;
+  --accent:#3a4fe0; --accent-2:#5566e8; --good:#158a4a; --warn:#b3790f; --bad:#c8372f;
+  --shadow:0 2px 8px rgba(20,24,50,.06);
+  --radius:8px;
+  --grad:linear-gradient(135deg,#3a4fe0,#5566e8);
+}
+[data-theme="dark"]{
+  --bg:#0c0e15; --surface:#12151f; --surface-2:#181c29; --border:#252a3a;
+  --text:#e7e9f3; --text-2:#9aa0b6; --text-3:#6d7388;
+  --accent:#6c7cf5; --accent-2:#5566e8; --good:#2fbf74; --warn:#e0a83a; --bad:#e2554d;
+  --shadow:0 2px 10px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,'Segoe UI',system-ui,Roboto,Helvetica,Arial,sans-serif;
+  transition:background .2s ease,color .2s ease;
+  min-height:100vh;
+  font-size:13px;
+}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+a{color:var(--accent);text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+input,select{font-family:inherit;}
+
+/* ---------- Layout ---------- */
+.app{display:flex;min-height:100vh;}
+.sidebar{
+  width:206px;flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);padding:14px 10px;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  display:flex;flex-direction:column;gap:14px;
+}
+.brand{display:flex;align-items:center;gap:8px;padding:2px 6px 10px;border-bottom:1px solid var(--border);margin-bottom:2px;}
+.brand-logo{
+  width:26px;height:26px;border-radius:6px;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:12.5px;
+  flex-shrink:0;
+}
+.brand-text b{display:block;font-size:12.5px;font-weight:700;letter-spacing:.1px;}
+.brand-text span{font-size:9.5px;color:var(--text-3);}
+
+.navgroup{display:flex;flex-direction:column;gap:1px;}
+.navgroup-title{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin:8px 8px 3px;font-weight:700;}
+.navlink{
+  display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;
+  color:var(--text-2);font-size:12px;font-weight:600;border:none;background:transparent;text-align:left;width:100%;
+  transition:.12s;
+}
+.navlink:hover{background:var(--surface-2);color:var(--text);}
+.navlink.active{background:var(--accent);color:#fff;}
+.navlink .ic{font-size:12.5px;width:15px;text-align:center;}
+
+.sidebar-foot{margin-top:auto;display:flex;flex-direction:column;gap:6px;}
+.theme-toggle{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text-2);font-weight:600;
+}
+.switch{width:32px;height:17px;background:var(--border);border-radius:999px;position:relative;cursor:pointer;flex-shrink:0;}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+[data-theme="dark"] .switch{background:var(--accent);}
+[data-theme="dark"] .switch::after{left:17px;}
+
+.main{flex:1;min-width:0;padding:16px 22px 40px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;}
+.topbar h1{font-size:16.5px;margin:0;font-weight:700;letter-spacing:-.1px;}
+.topbar p{margin:1px 0 0;color:var(--text-2);font-size:11.5px;}
+.topbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{
+  border:1px solid var(--border);background:var(--surface);color:var(--text);
+  padding:6px 12px;border-radius:6px;font-size:11.5px;font-weight:600;display:inline-flex;align-items:center;gap:5px;
+  transition:.12s;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.primary{background:var(--accent);color:#fff;border:1px solid var(--accent);}
+.btn.primary:hover{opacity:.9;color:#fff;}
+.btn.danger:hover{border-color:var(--bad);color:var(--bad);}
+
+.view{display:none;animation:fadein .2s ease;}
+.view.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:translateY(0);}}
+
+/* ---------- Grid / Cards ---------- */
+.grid{display:grid;gap:10px;}
+.grid.cols-4{grid-template-columns:repeat(4,1fr);}
+.grid.cols-3{grid-template-columns:repeat(3,1fr);}
+.grid.cols-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:1100px){.grid.cols-4{grid-template-columns:repeat(2,1fr);}.grid.cols-3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:680px){.grid.cols-4,.grid.cols-3,.grid.cols-2{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px 14px;box-shadow:var(--shadow);
+}
+.card h3{margin:0 0 2px;font-size:12px;font-weight:700;}
+.card .sub{color:var(--text-3);font-size:10.5px;margin-bottom:8px;}
+
+.kpi{display:flex;flex-direction:column;gap:4px;}
+.kpi .label{font-size:10.5px;color:var(--text-2);font-weight:600;display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:.02em;}
+.kpi .value{font-size:19px;font-weight:700;letter-spacing:-.2px;}
+.kpi .delta{font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px;width:fit-content;padding:1px 7px;border-radius:4px;}
+.delta.up{color:var(--good);background:rgba(21,138,74,.1);}
+.delta.down{color:var(--bad);background:rgba(200,55,47,.1);}
+.delta.flat{color:var(--text-3);background:var(--surface-2);}
+
+.section-title{font-size:12.5px;font-weight:700;margin:18px 0 8px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.03em;color:var(--text-2);}
+.section-title .tag{font-size:9.5px;background:var(--surface-2);color:var(--text-2);padding:1px 7px;border-radius:4px;font-weight:700;text-transform:none;letter-spacing:0;}
+
+table{width:100%;border-collapse:collapse;font-size:11.5px;}
+th{text-align:left;color:var(--text-3);font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;padding:6px 8px;border-bottom:1px solid var(--border);}
+td{padding:6px 8px;border-bottom:1px solid var(--border);}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--surface-2);}
+.pill{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;}
+.pill.good{background:rgba(21,138,74,.12);color:var(--good);}
+.pill.warn{background:rgba(179,121,15,.12);color:var(--warn);}
+.pill.bad{background:rgba(200,55,47,.12);color:var(--bad);}
+
+form.inline-form{display:grid;grid-template-columns:repeat(5,1fr) auto;gap:6px;margin-bottom:10px;}
+@media(max-width:900px){form.inline-form{grid-template-columns:repeat(2,1fr);}}
+.field{display:flex;flex-direction:column;gap:3px;}
+.field label{font-size:9.5px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  padding:6px 8px;border-radius:5px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:11.5px;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+.icon-btn{background:transparent;border:none;color:var(--text-3);font-size:12px;padding:3px 5px;border-radius:4px;}
+.icon-btn:hover{color:var(--bad);background:rgba(200,55,47,.1);}
+
+.progress{height:6px;background:var(--surface-2);border-radius:20px;overflow:hidden;}
+.progress > div{height:100%;background:var(--accent);border-radius:20px;transition:width .3s ease;}
+.progress.warn > div{background:var(--warn);}
+.progress.bad > div{background:var(--bad);}
+
+.badge-score{
+  width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;
+  background:conic-gradient(var(--accent) calc(var(--score,70)*1%), var(--surface-2) 0);
+  margin:0 auto;position:relative;
+}
+.badge-score::before{content:'';position:absolute;width:68px;height:68px;background:var(--surface);border-radius:50%;}
+.badge-score b{position:relative;font-size:19px;font-weight:700;}
+.badge-score span{position:relative;font-size:8.5px;color:var(--text-3);font-weight:700;}
+
+.insight{
+  display:flex;gap:8px;align-items:flex-start;padding:9px 11px;border-radius:6px;background:var(--surface-2);
+  border-left:3px solid var(--accent);margin-bottom:7px;font-size:11.5px;line-height:1.45;
+}
+.insight.warn{border-color:var(--warn);}
+.insight.bad{border-color:var(--bad);}
+.insight.good{border-color:var(--good);}
+.insight .ic{font-size:13px;}
+
+canvas{max-width:100%;}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:12px;flex-wrap:wrap;}
+.tab{padding:7px 12px;font-size:11.5px;font-weight:700;color:var(--text-2);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;}
+.tab.active{color:var(--accent);border-color:var(--accent);}
+
+.checklist{display:flex;flex-direction:column;gap:5px;}
+.checklist label{display:flex;align-items:center;gap:8px;font-size:11.5px;padding:6px 10px;border-radius:6px;background:var(--surface-2);cursor:pointer;}
+.checklist input{width:14px;height:14px;accent-color:var(--accent);}
+.checklist label.done span{text-decoration:line-through;color:var(--text-3);}
+
+.tip-card{display:flex;gap:9px;padding:10px;border-radius:6px;background:var(--surface-2);align-items:flex-start;}
+.tip-card .ic{font-size:15px;}
+.tip-card h4{margin:0 0 2px;font-size:11.5px;}
+.tip-card p{margin:0;font-size:10.5px;color:var(--text-2);line-height:1.4;}
+
+footer.appfoot{margin-top:28px;padding-top:14px;border-top:1px solid var(--border);color:var(--text-3);font-size:10.5px;text-align:center;}
+
+.calc-result{background:var(--accent);color:#fff;border-radius:8px;padding:12px 14px;margin-top:8px;}
+.calc-result .big{font-size:19px;font-weight:700;}
+.calc-result .rowline{display:flex;justify-content:space-between;font-size:11px;opacity:.92;margin-top:3px;}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:10px;}
+.legend span{display:inline-flex;align-items:center;gap:5px;color:var(--text-2);font-weight:600;}
+.legend i{width:8px;height:8px;border-radius:2px;display:inline-block;}
+
+.empty{color:var(--text-3);font-size:11px;padding:14px;text-align:center;}
+
+.hamburger{display:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:14px;}
+@media(max-width:880px){
+  .sidebar{position:fixed;left:-230px;z-index:50;transition:left .2s ease;box-shadow:var(--shadow);}
+  .sidebar.open{left:0;}
+  .hamburger{display:block;}
+  .main{padding:12px;}
+}
+
+/* ================= PRINT REPORT (multi-page PDF) ================= */
+.print-report{display:none;}
+@page{ size:A4; margin:14mm 13mm; }
+@media print{
+  .sidebar,.topbar-actions,.hamburger,.tabs,form.inline-form,.icon-btn{display:none !important;}
+  body{background:#fff;color:#1a1d29;font-size:11px;}
+  .app{display:block;}
+  .main{padding:0;}
+  .view{display:none !important;}
+  .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid;}
+
+  .print-report{display:block !important;}
+  .pdf-page{page-break-after:always;position:relative;min-height:257mm;}
+  .pdf-page:last-child{page-break-after:auto;}
+  .pdf-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #3a4fe0;padding-bottom:6px;margin-bottom:12px;}
+  .pdf-header .ph-brand{display:flex;align-items:center;gap:7px;font-weight:800;font-size:12px;color:#181c28;}
+  .pdf-header .ph-brand .sq{width:18px;height:18px;border-radius:4px;background:#3a4fe0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+  .pdf-header .ph-meta{font-size:9px;color:#6b7186;text-align:right;}
+  .pdf-footer{position:absolute;bottom:0;left:0;right:0;border-top:1px solid #ddd;padding-top:5px;display:flex;justify-content:space-between;font-size:8.5px;color:#8a90a1;}
+
+  .pdf-cover{display:flex;flex-direction:column;justify-content:center;align-items:center;height:250mm;text-align:center;background:linear-gradient(180deg,#f4f6fc,#fff 55%);border-radius:6px;}
+  .pdf-cover .sq{width:64px;height:64px;border-radius:14px;background:#3a4fe0;color:#fff;font-size:30px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
+  .pdf-cover h1{font-size:26px;margin:0 0 6px;letter-spacing:-.3px;color:#12141d;}
+  .pdf-cover h2{font-size:13px;font-weight:600;color:#565c70;margin:0 0 26px;}
+  .pdf-cover .pdf-cover-meta{font-size:10.5px;color:#6b7186;line-height:2;border-top:1px solid #dfe2ea;padding-top:14px;margin-top:14px;width:260px;}
+  .pdf-cover .pdf-score-ring{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:8px 0 22px;position:relative;}
+  .pdf-cover .pdf-score-ring::before{content:'';position:absolute;width:92px;height:92px;background:#fff;border-radius:50%;}
+  .pdf-cover .pdf-score-ring b{position:relative;font-size:28px;color:#12141d;}
+  .pdf-cover .pdf-score-ring span{position:relative;font-size:9px;color:#8a90a1;font-weight:700;}
+
+  .pdf-h1{font-size:15px;font-weight:800;color:#12141d;margin:0 0 2px;}
+  .pdf-sub{font-size:9.5px;color:#8a90a1;margin:0 0 12px;}
+  .pdf-section-label{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#3a4fe0;margin:14px 0 6px;border-bottom:1px solid #e4e6ee;padding-bottom:4px;}
+  .pdf-section-label:first-of-type{margin-top:0;}
+
+  .pdf-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px;}
+  .pdf-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px;}
+  .pdf-grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:6px;}
+  .pdf-kpi{border:1px solid #e4e6ee;border-radius:6px;padding:8px 10px;background:#fafbfd;}
+  .pdf-kpi .l{font-size:8px;text-transform:uppercase;letter-spacing:.04em;color:#8a90a1;font-weight:700;margin-bottom:3px;}
+  .pdf-kpi .v{font-size:14px;font-weight:800;color:#12141d;}
+  .pdf-kpi .d{font-size:8.5px;font-weight:700;margin-top:2px;}
+  .pdf-kpi .d.up{color:#158a4a;} .pdf-kpi .d.down{color:#c8372f;}
+
+  .pdf-table{width:100%;border-collapse:collapse;font-size:9.5px;margin-bottom:4px;}
+  .pdf-table th{text-align:left;background:#3a4fe0;color:#fff;font-size:8px;text-transform:uppercase;letter-spacing:.03em;padding:5px 7px;}
+  .pdf-table td{padding:4.5px 7px;border-bottom:1px solid #eceef4;}
+  .pdf-table tr:nth-child(even) td{background:#f7f8fc;}
+  .pdf-table tfoot td{font-weight:800;border-top:1.5px solid #3a4fe0;background:#eef0fb;}
+
+  .pdf-note{font-size:9px;color:#565c70;background:#f4f6fc;border-left:2.5px solid #3a4fe0;padding:6px 9px;margin:6px 0;border-radius:0 4px 4px 0;}
+  .pdf-note.warn{border-color:#b3790f;background:#fdf7ec;}
+  .pdf-note.bad{border-color:#c8372f;background:#fdf1f0;}
+  .pdf-note.good{border-color:#158a4a;background:#eff8f2;}
+
+  .pdf-bar-row{display:flex;align-items:center;gap:8px;font-size:9.5px;margin-bottom:5px;}
+  .pdf-bar-row .lab{width:110px;flex-shrink:0;color:#33384a;font-weight:600;}
+  .pdf-bar-row .track{flex:1;height:6px;background:#eceef4;border-radius:4px;overflow:hidden;}
+  .pdf-bar-row .track > div{height:100%;background:#3a4fe0;}
+  .pdf-bar-row .amt{width:78px;text-align:right;flex-shrink:0;color:#565c70;}
+
+  .pdf-checklist{list-style:none;margin:0;padding:0;columns:2;column-gap:18px;font-size:9.5px;}
+  .pdf-checklist li{break-inside:avoid;display:flex;gap:6px;padding:3px 0;color:#33384a;}
+  .pdf-checklist li .box{width:10px;height:10px;border:1.3px solid #3a4fe0;border-radius:2px;flex-shrink:0;margin-top:1.5px;}
+
+  .pdf-2col{columns:2;column-gap:16px;}
+  .pdf-tip{break-inside:avoid;font-size:9.5px;margin-bottom:8px;padding-left:2px;}
+  .pdf-tip b{display:block;color:#12141d;font-size:10px;}
+  .pdf-tip span{color:#565c70;}
+}
+</style>
+</head>
+<body data-theme="light">
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">₹</div>
+      <div class="brand-text"><b>Command Center</b><span>Personal Finance OS</span></div>
+    </div>
+
+    <div class="navgroup">
+      <div class="navgroup-title">Overview</div>
+      <button class="navlink active" data-view="dashboard"><span class="ic">📊</span> Dashboard</button>
+      <button class="navlink" data-view="insights"><span class="ic">💡</span> AI Insights</button>
+    </div>
+
+    <div class="navgroup">
+      <div class="navgroup-title">Money In / Out</div>
+      <button class="navlink" data-view="income"><span class="ic">💰</span> Income</button>
+      <button class="navlink" data-view="expenses"><span class="ic">🧾</span> Expenses &amp; Budget</button>
+      <button class="navlink" data-view="cashflow"><span class="ic">🔁</span> Cash Flow</button>
+    </div>
+
+    <div class="navgroup">
+      <div class="navgroup-title">Build Wealth</div>
+      <button class="navlink" data-view="savings"><span class="ic">🏦</span> Savings</button>
+      <button class="navlink" data-view="investments"><span class="ic">📈</span> Investments</button>
+      <button class="navlink" data-view="goals"><span class="ic">🎯</span> Goals</button>
+    </div>
+
+    <div class="navgroup">
+      <div class="navgroup-title">Obligations</div>
+      <button class="navlink" data-view="loans"><span class="ic">🏠</span> Loans &amp; EMIs</button>
+      <button class="navlink" data-view="subscriptions"><span class="ic">🔔</span> Subscriptions</button>
+    </div>
+
+    <div class="navgroup">
+      <div class="navgroup-title">Tools</div>
+      <button class="navlink" data-view="calculators"><span class="ic">🧮</span> Calculators</button>
+      <button class="navlink" data-view="simulator"><span class="ic">🧪</span> What-If Simulator</button>
+      <button class="navlink" data-view="reports"><span class="ic">🖨️</span> Reports</button>
+      <button class="navlink" data-view="learn"><span class="ic">🎓</span> Learn &amp; Tips</button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="theme-toggle">
+        <span>🌙 Dark Mode</span>
+        <div class="switch" id="themeSwitch"></div>
+      </div>
+      <button class="btn danger" id="resetBtn" style="width:100%;justify-content:center;">↺ Reset Demo Data</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger" id="hamburger">☰</button>
+        <div>
+          <h1 id="pageTitle">Financial Dashboard</h1>
+          <p id="pageSub">A complete view of your money, built for a salaried professional focused on growing wealth.</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn" id="printBtn">🖨️ Print Report</button>
+        <button class="btn primary" id="quickAddBtn">＋ Quick Add</button>
+      </div>
+    </div>
+
+    <!-- ================= DASHBOARD ================= -->
+    <section class="view active" id="view-dashboard">
+      <div class="grid cols-4" id="kpiRow"></div>
+
+      <div class="grid cols-3" style="margin-top:16px;align-items:stretch;">
+        <div class="card" style="grid-column:span 2;">
+          <h3>Cash Flow — Last 6 Months</h3>
+          <div class="sub">Income vs. expenses trend</div>
+          <canvas id="chartCashflow" height="160"></canvas>
+          <div class="legend"><span><i style="background:var(--accent)"></i>Income</span><span><i style="background:var(--bad)"></i>Expenses</span></div>
+        </div>
+        <div class="card">
+          <h3>Financial Health Score</h3>
+          <div class="sub">Composite of savings rate, debt ratio &amp; emergency fund</div>
+          <div class="badge-score" id="healthBadge" style="--score:70;"><b id="healthScoreNum">70</b><span>/ 100</span></div>
+          <div id="healthLabel" style="text-align:center;margin-top:10px;font-weight:700;font-size:13px;"></div>
+        </div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top:16px;">
+        <div class="card">
+          <h3>Spending by Category</h3>
+          <div class="sub">This month's expense breakdown</div>
+          <canvas id="chartCategory" height="160"></canvas>
+          <div class="legend" id="categoryLegend"></div>
+        </div>
+        <div class="card">
+          <h3>Net Worth Growth</h3>
+          <div class="sub">Savings + investments over time</div>
+          <canvas id="chartNetworth" height="160"></canvas>
+        </div>
+      </div>
+
+      <div class="section-title">🎯 Goal Progress <span class="tag" id="goalCountTag">0 goals</span></div>
+      <div class="grid cols-3" id="goalMiniRow"></div>
+    </section>
+
+    <!-- ================= AI INSIGHTS ================= -->
+    <section class="view" id="view-insights">
+      <div class="card">
+        <h3>AI-Generated Recommendations</h3>
+        <div class="sub">Automatically derived from your income, spending and savings patterns</div>
+        <div id="insightsList"></div>
+      </div>
+      <div class="section-title">📚 Financial Literacy Prompts</div>
+      <div class="card">
+        <div class="sub">Copy any prompt into your favourite AI assistant to go deeper</div>
+        <div class="grid cols-2" id="aiPrompts"></div>
+      </div>
+    </section>
+
+    <!-- ================= INCOME ================= -->
+    <section class="view" id="view-income">
+      <div class="grid cols-3">
+        <div class="card kpi"><div class="label">Monthly Gross Income</div><div class="value" id="incGross">₹0</div></div>
+        <div class="card kpi"><div class="label">Monthly Net (Take-home)</div><div class="value" id="incNet">₹0</div></div>
+        <div class="card kpi"><div class="label">Income Sources</div><div class="value" id="incCount">0</div></div>
+      </div>
+      <div class="section-title">Income Sources</div>
+      <div class="card">
+        <form class="inline-form" id="formIncome">
+          <div class="field"><label>Source</label><input type="text" id="incSource" placeholder="e.g. Salary" required></div>
+          <div class="field"><label>Type</label><select id="incType"><option>Salary</option><option>Bonus</option><option>Freelance</option><option>Rental</option><option>Interest/Dividend</option><option>Other</option></select></div>
+          <div class="field"><label>Amount (₹/mo)</label><input type="number" id="incAmount" min="0" required></div>
+          <div class="field"><label>Frequency</label><select id="incFreq"><option>Monthly</option><option>Yearly</option><option>One-time</option></select></div>
+          <div class="field"><label>Growth %/yr</label><input type="number" id="incGrowth" value="8"></div>
+          <button type="submit" class="btn primary">＋ Add</button>
+        </form>
+        <table><thead><tr><th>Source</th><th>Type</th><th>Frequency</th><th>Amount</th><th>Growth</th><th></th></tr></thead><tbody id="incomeTable"></tbody></table>
+      </div>
+    </section>
+
+    <!-- ================= EXPENSES ================= -->
+    <section class="view" id="view-expenses">
+      <div class="grid cols-4">
+        <div class="card kpi"><div class="label">Total Monthly Spend</div><div class="value" id="expTotal">₹0</div></div>
+        <div class="card kpi"><div class="label">Total Budget</div><div class="value" id="budTotal">₹0</div></div>
+        <div class="card kpi"><div class="label">Budget Used</div><div class="value" id="budUsedPct">0%</div></div>
+        <div class="card kpi"><div class="label">Categories Over Budget</div><div class="value" id="overBudgetCount">0</div></div>
+      </div>
+
+      <div class="section-title">Budget by Category</div>
+      <div class="card">
+        <form class="inline-form" id="formBudget">
+          <div class="field" style="grid-column:span 2;"><label>Category</label><input type="text" id="budCategory" placeholder="e.g. Groceries" required></div>
+          <div class="field"><label>Monthly Budget (₹)</label><input type="number" id="budAmount" min="0" required></div>
+          <div class="field" style="grid-column:span 2;"><label>Icon</label>
+            <select id="budIcon"><option value="🛒">🛒 Groceries</option><option value="🏠">🏠 Housing</option><option value="🚗">🚗 Transport</option><option value="🍽️">🍽️ Dining</option><option value="⚡">⚡ Utilities</option><option value="🎬">🎬 Entertainment</option><option value="🏥">🏥 Health</option><option value="👕">👕 Shopping</option><option value="📚">📚 Education</option><option value="✈️">✈️ Travel</option><option value="🎁">🎁 Other</option></select>
+          </div>
+          <button type="submit" class="btn primary">＋ Add</button>
+        </form>
+        <div id="budgetList"></div>
+      </div>
+
+      <div class="section-title">Expense Log</div>
+      <div class="card">
+        <form class="inline-form" id="formExpense">
+          <div class="field"><label>Description</label><input type="text" id="expDesc" placeholder="e.g. Big Bazaar" required></div>
+          <div class="field"><label>Category</label><select id="expCategory"></select></div>
+          <div class="field"><label>Amount (₹)</label><input type="number" id="expAmount" min="0" required></div>
+          <div class="field"><label>Date</label><input type="date" id="expDate"></div>
+          <div class="field"><label>Method</label><select id="expMethod"><option>UPI</option><option>Card</option><option>Cash</option><option>Bank Transfer</option></select></div>
+          <button type="submit" class="btn primary">＋ Add</button>
+        </form>
+        <table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Method</th><th>Amount</th><th></th></tr></thead><tbody id="expenseTable"></tbody></table>
+      </div>
+    </section>
+
+    <!-- ================= CASH FLOW ================= -->
+    <section class="view" id="view-cashflow">
+      <div class="grid cols-3">
+        <div class="card kpi"><div class="label">Monthly Surplus / Deficit</div><div class="value" id="cfSurplus">₹0</div></div>
+        <div class="card kpi"><div class="label">Savings Rate</div><div class="value" id="cfSavingsRate">0%</div></div>
+        <div class="card kpi"><div class="label">Expense-to-Income Ratio</div><div class="value" id="cfRatio">0%</div></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3>12-Month Cash Flow Projection</h3>
+        <div class="sub">Based on current income growth and average spending</div>
+        <canvas id="chartCFProjection" height="170"></canvas>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3>Income vs Expense Waterfall</h3>
+        <div class="sub">Where this month's money went</div>
+        <canvas id="chartWaterfall" height="160"></canvas>
+      </div>
+    </section>
+
+    <!-- ================= SAVINGS ================= -->
+    <section class="view" id="view-savings">
+      <div class="grid cols-3">
+        <div class="card kpi"><div class="label">Total Savings Balance</div><div class="value" id="savTotal">₹0</div></div>
+        <div class="card kpi"><div class="label">Emergency Fund Coverage</div><div class="value" id="savEmergencyMonths">0 months</div></div>
+        <div class="card kpi"><div class="label">Monthly Contribution</div><div class="value" id="savMonthly">₹0</div></div>
+      </div>
+      <div class="section-title">Savings Accounts</div>
+      <div class="card">
+        <form class="inline-form" id="formSavings">
+          <div class="field"><label>Account Name</label><input type="text" id="savName" placeholder="e.g. Emergency Fund" required></div>
+          <div class="field"><label>Type</label><select id="savType"><option>Emergency Fund</option><option>High-Yield Savings</option><option>Fixed Deposit</option><option>Recurring Deposit</option><option>Other</option></select></div>
+          <div class="field"><label>Current Balance (₹)</label><input type="number" id="savBalance" min="0" required></div>
+          <div class="field"><label>Interest %/yr</label><input type="number" id="savInterest" value="6.5"></div>
+          <div class="field"><label>Monthly Add (₹)</label><input type="number" id="savContribution" value="0"></div>
+          <button type="submit" class="btn primary">＋ Add</button>
+        </form>
+        <table><thead><tr><th>Account</th><th>Type</th><th>Balance</th><th>Interest</th><th>Monthly Add</th><th></th></tr></thead><tbody id="savingsTable"></tbody></table>
+      </div>
+    </section>
+
+    <!-- ================= INVESTMENTS ================= -->
+    <section class="view" id="view-investments">
+      <div class="grid cols-4">
+        <div class="card kpi"><div class="label">Portfolio Value</div><div class="value" id="invTotal">₹0</div></div>
+        <div class="card kpi"><div class="label">Monthly SIP/Contribution</div><div class="value" id="invMonthly">₹0</div></div>
+        <div class="card kpi"><div class="label">Weighted Avg Return</div><div class="value" id="invReturn">0%</div></div>
+        <div class="card kpi"><div class="label">Projected in 10 yrs</div><div class="value" id="inv10yr">₹0</div></div>
+      </div>
+      <div class="grid cols-2" style="margin-top:16px;">
+        <div class="card">
+          <h3>Asset Allocation</h3>
+          <canvas id="chartAllocation" height="160"></canvas>
+          <div class="legend" id="allocLegend"></div>
+        </div>
+        <div class="card">
+          <h3>Projected Portfolio Growth</h3>
+          <div class="sub">Assuming current SIPs continue at avg. return</div>
+          <canvas id="chartInvGrowth" height="160"></canvas>
+        </div>
+      </div>
+      <div class="section-title">Holdings</div>
+      <div class="card">
+        <form class="inline-form" id="formInvestment">
+          <div class="field"><label>Name</label><input type="text" id="invName" placeholder="e.g. Nifty Index Fund" required></div>
+          <div class="field"><label>Type</label><select id="invType"><option>Mutual Fund</option><option>Stocks</option><option>PPF</option><option>EPF</option><option>NPS</option><option>Gold</option><option>Crypto</option><option>Other</option></select></div>
+          <div class="field"><label>Current Value (₹)</label><input type="number" id="invValue" min="0" required></div>
+          <div class="field"><label>Monthly SIP (₹)</label><input type="number" id="invSip" value="0"></div>
+          <div class="field"><label>Expected Return %/yr</label><input type="number" id="invExpReturn" value="12"></div>
+          <button type="submit" class="btn primary">＋ Add</button>
+        </form>
+        <table><thead><tr><th>Name</th><th>Type</th><th>Value</th><th>SIP/mo</th><th>Return</th><th></th></tr></thead><tbody id="investmentTable"></tbody></table>
+      </div>
+    </section>
+
+    <!-- ================= GOALS ================= -->
+    <section class="view" id="view-goals">
+      <div class="section-title">Financial Goals</div>
+      <div class="card">
+        <form class="inline-form" id="formGoal">
+          <div class="field"><label>Goal Name</label><input type="text" id="goalName" placeholder="e.g. Buy a Car" required></div>
+          <div class="field"><label>Target (₹)</label><input type="number" id="goalTarget" min="0" required></div>
+          <div class="field"><label>Saved so far (₹)</label><input type="number" id="goalSaved" min="0" value="0"></div>
+          <div class="field"><label>Target Date</label><input type="date" id="goalDate"></div>
+          <div class="field"><label>Icon</label><select id="goalIcon"><option value="🚗">🚗 Vehicle</option><option value="🏠">🏠 Home</option><option value="✈️">✈️ Travel</option><option value="🎓">🎓 Education</option><option value="💍">💍 Wedding</option><option value="🏖️">🏖️ Retirement</option><option value="🎯">🎯 Other</option></select></div>
+          <button type="submit" class="btn primary">＋ Add</button>
+        </form>
+        <div class="grid cols-3" id="goalFullRow"></div>
+      </div>
+    </section>
+
+    <!-- ================= LOANS ================= -->
+    <section class="view" id="view-loans">
+      <div class="grid cols-3">
+        <div class="card kpi"><div class="label">Total Outstanding Debt</div><div class="value" id="loanTotal">₹0</div></div>
+        <div class="card kpi"><div class="label">Total Monthly EMI</div><div class="value" id="loanEmiTotal">₹0</div></div>
+        <div class="card kpi"><div class="label">Debt-to-Income Ratio</div><div class="value" id="loanDTI">0%</div></div>
+      </div>
+      <div class="section-title">Loans &amp; EMIs</div>
+      <div class="card">
+        <form class="inline-form" id="formLoan">
+          <div class="field"><label>Loan Name</label><input type="text" id="loanName" placeholder="e.g. Home Loan" required></div>
+          <div class="field"><label>Type</label><select id="loanType"><option>Home Loan</option><option>Car Loan</option><option>Personal Loan</option><option>Education Loan</option><option>Credit Card</option><option>Other</option></select></div>
+          <div class="field"><label>Outstanding (₹)</label><input type="number" id="loanPrincipal" min="0" required></div>
+          <div class="field"><label>Interest %/yr</label><input type="number" id="loanRate" value="9" required></div>
+          <div class="field"><label>Tenure (months left)</label><input type="number" id="loanTenure" value="60" required></div>
+          <button type="submit" class="btn primary">＋ Add</button>
+        </form>
+        <table><thead><tr><th>Loan</th><th>Type</th><th>Outstanding</th><th>Rate</th><th>EMI</th><th>Tenure Left</th><th></th></tr></thead><tbody id="loanTable"></tbody></table>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3>Debt Payoff Projection</h3>
+        <div class="sub">Combined outstanding balance over time at current EMIs</div>
+        <canvas id="chartDebtPayoff" height="160"></canvas>
+      </div>
+    </section>
+
+    <!-- ================= SUBSCRIPTIONS ================= -->
+    <section class="view" id="view-subscriptions">
+      <div class="grid cols-3">
+        <div class="card kpi"><div class="label">Active Subscriptions</div><div class="value" id="subCount">0</div></div>
+        <div class="card kpi"><div class="label">Monthly Cost</div><div class="value" id="subMonthly">₹0</div></div>
+        <div class="card kpi"><div class="label">Annual Cost</div><div class="value" id="subYearly">₹0</div></div>
+      </div>
+      <div class="section-title">Subscriptions</div>
+      <div class="card">
+        <form class="inline-form" id="formSub">
+          <div class="field"><label>Service</label><input type="text" id="subName" placeholder="e.g. Netflix" required></div>
+          <div class="field"><label>Category</label><select id="subCategory"><option>Streaming</option><option>Software</option><option>Fitness</option><option>News</option><option>Cloud Storage</option><option>Other</option></select></div>
+          <div class="field"><label>Amount (₹)</label><input type="number" id="subAmount" min="0" required></div>
+          <div class="field"><label>Billing Cycle</label><select id="subCycle"><option>Monthly</option><option>Yearly</option></select></div>
+          <button type="submit" class="btn primary">＋ Add</button>
+        </form>
+        <table><thead><tr><th>Service</th><th>Category</th><th>Cycle</th><th>Amount</th><th>Monthly Equiv.</th><th></th></tr></thead><tbody id="subTable"></tbody></table>
+      </div>
+    </section>
+
+    <!-- ================= CALCULATORS ================= -->
+    <section class="view" id="view-calculators">
+      <div class="tabs" id="calcTabs">
+        <button class="tab active" data-calc="sip">SIP / Investment</button>
+        <button class="tab" data-calc="emi">Loan EMI</button>
+        <button class="tab" data-calc="compound">Compound Interest</button>
+        <button class="tab" data-calc="retirement">Retirement</button>
+        <button class="tab" data-calc="emergency">Emergency Fund</button>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="card" id="calc-sip">
+          <h3>SIP / Investment Calculator</h3>
+          <div class="field"><label>Monthly Investment (₹)</label><input type="number" id="sipAmount" value="10000"></div>
+          <div class="field" style="margin-top:8px;"><label>Expected Annual Return (%)</label><input type="number" id="sipReturn" value="12"></div>
+          <div class="field" style="margin-top:8px;"><label>Time Period (years)</label><input type="number" id="sipYears" value="15"></div>
+          <button class="btn primary" style="margin-top:12px;" onclick="calcSIP()">Calculate</button>
+          <div class="calc-result" id="sipResult"></div>
+        </div>
+
+        <div class="card" id="calc-emi" style="display:none;">
+          <h3>Loan EMI Calculator</h3>
+          <div class="field"><label>Loan Amount (₹)</label><input type="number" id="emiPrincipal" value="2500000"></div>
+          <div class="field" style="margin-top:8px;"><label>Interest Rate (%/yr)</label><input type="number" id="emiRate" value="8.5"></div>
+          <div class="field" style="margin-top:8px;"><label>Tenure (years)</label><input type="number" id="emiYears" value="20"></div>
+          <button class="btn primary" style="margin-top:12px;" onclick="calcEMI()">Calculate</button>
+          <div class="calc-result" id="emiResult"></div>
+        </div>
+
+        <div class="card" id="calc-compound" style="display:none;">
+          <h3>Compound Interest Calculator</h3>
+          <div class="field"><label>Principal (₹)</label><input type="number" id="ciPrincipal" value="100000"></div>
+          <div class="field" style="margin-top:8px;"><label>Annual Rate (%)</label><input type="number" id="ciRate" value="7"></div>
+          <div class="field" style="margin-top:8px;"><label>Years</label><input type="number" id="ciYears" value="10"></div>
+          <div class="field" style="margin-top:8px;"><label>Compounding / year</label><select id="ciFreq"><option value="1">Annually</option><option value="4">Quarterly</option><option value="12" selected>Monthly</option></select></div>
+          <button class="btn primary" style="margin-top:12px;" onclick="calcCompound()">Calculate</button>
+          <div class="calc-result" id="compoundResult"></div>
+        </div>
+
+        <div class="card" id="calc-retirement" style="display:none;">
+          <h3>Retirement Corpus Calculator</h3>
+          <div class="field"><label>Current Age</label><input type="number" id="retAge" value="28"></div>
+          <div class="field" style="margin-top:8px;"><label>Retirement Age</label><input type="number" id="retRetireAge" value="60"></div>
+          <div class="field" style="margin-top:8px;"><label>Monthly Expenses Today (₹)</label><input type="number" id="retExpenses" value="40000"></div>
+          <div class="field" style="margin-top:8px;"><label>Expected Inflation (%)</label><input type="number" id="retInflation" value="6"></div>
+          <div class="field" style="margin-top:8px;"><label>Post-retirement Return (%)</label><input type="number" id="retReturn" value="7"></div>
+          <button class="btn primary" style="margin-top:12px;" onclick="calcRetirement()">Calculate</button>
+          <div class="calc-result" id="retirementResult"></div>
+        </div>
+
+        <div class="card" id="calc-emergency" style="display:none;">
+          <h3>Emergency Fund Calculator</h3>
+          <div class="field"><label>Monthly Essential Expenses (₹)</label><input type="number" id="efExpenses" value="35000"></div>
+          <div class="field" style="margin-top:8px;"><label>Months of Coverage Desired</label><input type="number" id="efMonths" value="6"></div>
+          <div class="field" style="margin-top:8px;"><label>Current Emergency Savings (₹)</label><input type="number" id="efCurrent" value="50000"></div>
+          <button class="btn primary" style="margin-top:12px;" onclick="calcEmergency()">Calculate</button>
+          <div class="calc-result" id="emergencyResult"></div>
+        </div>
+
+        <div class="card">
+          <h3>Growth Visualization</h3>
+          <div class="sub">Updates with the calculator you last used</div>
+          <canvas id="chartCalc" height="180"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= WHAT-IF SIMULATOR ================= -->
+    <section class="view" id="view-simulator">
+      <div class="card">
+        <h3>What-If Simulator</h3>
+        <div class="sub">Drag the sliders to see how decisions today affect your 10-year net worth</div>
+        <div class="grid cols-2">
+          <div>
+            <div class="field"><label>Increase Monthly Savings By: <b id="simSaveVal">₹0</b></label>
+              <input type="range" id="simSave" min="0" max="30000" step="500" value="0"></div>
+            <div class="field" style="margin-top:14px;"><label>Cut Monthly Expenses By: <b id="simCutVal">₹0</b></label>
+              <input type="range" id="simCut" min="0" max="20000" step="500" value="0"></div>
+            <div class="field" style="margin-top:14px;"><label>Extra Lump Sum Investment: <b id="simLumpVal">₹0</b></label>
+              <input type="range" id="simLump" min="0" max="1000000" step="10000" value="0"></div>
+            <div class="field" style="margin-top:14px;"><label>Assumed Annual Return: <b id="simReturnVal">10%</b></label>
+              <input type="range" id="simReturn" min="4" max="20" step="1" value="10"></div>
+          </div>
+          <div>
+            <canvas id="chartSimulator" height="180"></canvas>
+            <div class="legend"><span><i style="background:var(--text-3)"></i>Current Path</span><span><i style="background:var(--accent)"></i>With Changes</span></div>
+          </div>
+        </div>
+        <div class="grid cols-3" style="margin-top:14px;">
+          <div class="card kpi" style="background:var(--surface-2);"><div class="label">Net Worth in 10 yrs (Current)</div><div class="value" id="simBase10">₹0</div></div>
+          <div class="card kpi" style="background:var(--surface-2);"><div class="label">Net Worth in 10 yrs (Simulated)</div><div class="value" id="simNew10">₹0</div></div>
+          <div class="card kpi" style="background:var(--surface-2);"><div class="label">Extra Wealth Gained</div><div class="value" id="simGain">₹0</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= REPORTS ================= -->
+    <section class="view" id="view-reports">
+      <div class="card">
+        <h3>Monthly Financial Report</h3>
+        <div class="sub">Generated summary — printable via the Print Report button above</div>
+        <div id="reportBody" class="grid cols-2"></div>
+      </div>
+      <div class="section-title">Full Financial Statement</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Category</th><th>Item</th><th>Monthly Amount</th></tr></thead>
+          <tbody id="fullStatement"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= LEARN ================= -->
+    <section class="view" id="view-learn">
+      <div class="section-title">💡 Smart Money Tips</div>
+      <div class="grid cols-2" id="tipsGrid"></div>
+
+      <div class="section-title">✅ Financial Planning Checklist</div>
+      <div class="card">
+        <div class="checklist" id="checklistBox"></div>
+      </div>
+
+      <div class="section-title">📎 Useful Resources</div>
+      <div class="card">
+        <ul id="resourceList" style="margin:0;padding-left:18px;line-height:2;font-size:13.5px;"></ul>
+      </div>
+    </section>
+
+    <!-- ================= PRINT-ONLY MULTI-PAGE PDF REPORT ================= -->
+    <div class="print-report" id="printReport"></div>
+
+  </main>
+</div>
+
+<script>
+/* =====================================================================
+   DATA LAYER
+===================================================================== */
+const STORAGE_KEY = 'pfcc_data_v1';
+
+function defaultData(){
+  return {
+    profile:{ type:'Salaried Employee', goal:'Saving & building wealth' },
+    income:[
+      {id:1, source:'Primary Salary', type:'Salary', amount:85000, freq:'Monthly', growth:8},
+      {id:2, source:'Freelance Design', type:'Freelance', amount:6000, freq:'Monthly', growth:5}
+    ],
+    budgets:[
+      {id:1, category:'Housing / Rent', icon:'🏠', amount:22000},
+      {id:2, category:'Groceries', icon:'🛒', amount:8000},
+      {id:3, category:'Transport', icon:'🚗', amount:4000},
+      {id:4, category:'Dining Out', icon:'🍽️', amount:5000},
+      {id:5, category:'Utilities', icon:'⚡', amount:3500},
+      {id:6, category:'Entertainment', icon:'🎬', amount:3000},
+      {id:7, category:'Shopping', icon:'👕', amount:4000}
+    ],
+    expenses:[
+      {id:1, desc:'Monthly Rent', category:'Housing / Rent', amount:22000, date:'2026-07-02', method:'Bank Transfer'},
+      {id:2, desc:'Big Basket Order', category:'Groceries', amount:3200, date:'2026-07-04', method:'UPI'},
+      {id:3, desc:'Fuel', category:'Transport', amount:2500, date:'2026-07-05', method:'Card'},
+      {id:4, desc:'Dinner Out', category:'Dining Out', amount:1800, date:'2026-07-06', method:'UPI'},
+      {id:5, desc:'Electricity Bill', category:'Utilities', amount:2100, date:'2026-07-07', method:'UPI'},
+      {id:6, desc:'Movie Night', category:'Entertainment', amount:900, date:'2026-07-08', method:'Card'},
+      {id:7, desc:'New Shoes', category:'Shopping', amount:3500, date:'2026-07-09', method:'Card'},
+      {id:8, desc:'Groceries Restock', category:'Groceries', amount:2600, date:'2026-07-10', method:'UPI'}
+    ],
+    savings:[
+      {id:1, name:'Emergency Fund', type:'Emergency Fund', balance:180000, interest:6.5, contribution:5000},
+      {id:2, name:'HDFC High-Yield Savings', type:'High-Yield Savings', balance:60000, interest:5.5, contribution:2000}
+    ],
+    investments:[
+      {id:1, name:'Nifty 50 Index Fund', type:'Mutual Fund', value:220000, sip:8000, expReturn:12},
+      {id:2, name:'EPF', type:'EPF', value:310000, sip:4200, expReturn:8.1},
+      {id:3, name:'PPF', type:'PPF', value:150000, sip:2000, expReturn:7.1},
+      {id:4, name:'Direct Equity', type:'Stocks', value:95000, sip:3000, expReturn:14}
+    ],
+    goals:[
+      {id:1, name:'Buy a Car', target:800000, saved:220000, date:'2027-12-01', icon:'🚗'},
+      {id:2, name:'Emergency Fund Top-up', target:300000, saved:180000, date:'2026-12-01', icon:'🎯'},
+      {id:3, name:'Dream Vacation', target:200000, saved:60000, date:'2026-11-01', icon:'✈️'}
+    ],
+    loans:[
+      {id:1, name:'Home Loan', type:'Home Loan', principal:2800000, rate:8.6, tenure:180},
+      {id:2, name:'Car Loan', type:'Car Loan', principal:350000, rate:9.5, tenure:24}
+    ],
+    subscriptions:[
+      {id:1, name:'Netflix', category:'Streaming', amount:649, cycle:'Monthly'},
+      {id:2, name:'Amazon Prime', category:'Streaming', amount:1499, cycle:'Yearly'},
+      {id:3, name:'Google One', category:'Cloud Storage', amount:210, cycle:'Monthly'},
+      {id:4, name:'Gym Membership', category:'Fitness', amount:1200, cycle:'Monthly'}
+    ],
+    checklist:{},
+    theme:'light'
+  };
+}
+
+let DATA = load();
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return defaultData();
+}
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); }
+function uid(){ return Date.now() + Math.floor(Math.random()*1000); }
+function money(n){
+  n = Math.round(n||0);
+  return '₹' + n.toLocaleString('en-IN');
+}
+function money1(n){ return '₹' + (Math.round((n||0)*100)/100).toLocaleString('en-IN'); }
+
+/* =====================================================================
+   THEME + NAVIGATION
+===================================================================== */
+function applyTheme(){
+  document.body.setAttribute('data-theme', DATA.theme);
+}
+applyTheme();
+document.getElementById('themeSwitch').addEventListener('click', ()=>{
+  DATA.theme = DATA.theme === 'dark' ? 'light' : 'dark';
+  applyTheme(); save(); renderAllCharts();
+});
+
+document.querySelectorAll('.navlink').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.navlink').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const v = btn.dataset.view;
+    document.querySelectorAll('.view').forEach(sec=>sec.classList.remove('active'));
+    document.getElementById('view-'+v).classList.add('active');
+    const titles = {
+      dashboard:['Financial Dashboard','A complete view of your money at a glance.'],
+      insights:['AI Insights','Personalized recommendations based on your data.'],
+      income:['Income','Track every source of money coming in.'],
+      expenses:['Expenses & Budget','Log spending and manage category budgets.'],
+      cashflow:['Cash Flow','Understand what flows in vs. what flows out.'],
+      savings:['Savings','Track balances and your emergency fund cushion.'],
+      investments:['Investments','Monitor your portfolio and long-term growth.'],
+      goals:['Goals','Track progress toward what matters to you.'],
+      loans:['Loans & EMIs','Stay on top of debt and payoff timelines.'],
+      subscriptions:['Subscriptions','Catch recurring charges before they add up.'],
+      calculators:['Financial Calculators','Run the numbers before you commit.'],
+      simulator:['What-If Simulator','See how small changes compound over time.'],
+      reports:['Reports','A print-ready summary of your finances.'],
+      learn:['Learn & Tips','Build better money habits.']
+    };
+    document.getElementById('pageTitle').textContent = titles[v][0];
+    document.getElementById('pageSub').textContent = titles[v][1];
+    document.getElementById('sidebar').classList.remove('open');
+    requestAnimationFrame(()=> requestAnimationFrame(renderAllCharts));
+  });
+});
+document.getElementById('hamburger').addEventListener('click', ()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+});
+document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+document.getElementById('quickAddBtn').addEventListener('click', ()=>{
+  document.querySelector('[data-view="expenses"]').click();
+  document.getElementById('expDesc').focus();
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(confirm('Reset all data back to the demo dataset? This cannot be undone.')){
+    DATA = defaultData();
+    save(); renderAll();
+  }
+});
+
+/* =====================================================================
+   DERIVED CALCULATIONS
+===================================================================== */
+function totalMonthlyIncome(){
+  return DATA.income.reduce((s,i)=>{
+    let m = i.amount;
+    if(i.freq==='Yearly') m = i.amount/12;
+    if(i.freq==='One-time') m = 0;
+    return s+m;
+  },0);
+}
+function totalMonthlyExpenses(){ return DATA.expenses.reduce((s,e)=>s+Number(e.amount),0); }
+function totalBudget(){ return DATA.budgets.reduce((s,b)=>s+Number(b.amount),0); }
+function expensesByCategory(){
+  const map = {};
+  DATA.expenses.forEach(e=>{ map[e.category] = (map[e.category]||0)+Number(e.amount); });
+  return map;
+}
+function totalSavings(){ return DATA.savings.reduce((s,a)=>s+Number(a.balance),0); }
+function totalSavingsMonthly(){ return DATA.savings.reduce((s,a)=>s+Number(a.contribution),0); }
+function totalInvestments(){ return DATA.investments.reduce((s,i)=>s+Number(i.value),0); }
+function totalInvMonthly(){ return DATA.investments.reduce((s,i)=>s+Number(i.sip),0); }
+function weightedInvReturn(){
+  const total = totalInvestments();
+  if(total===0) return 0;
+  return DATA.investments.reduce((s,i)=>s+ (i.value/total)*i.expReturn, 0);
+}
+function totalLoans(){ return DATA.loans.reduce((s,l)=>s+Number(l.principal),0); }
+function emiFor(loan){
+  const P = loan.principal, r = loan.rate/12/100, n = loan.tenure;
+  if(r===0) return P/n;
+  return P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+}
+function totalEMI(){ return DATA.loans.reduce((s,l)=>s+emiFor(l),0); }
+function totalSubMonthly(){
+  return DATA.subscriptions.reduce((s,x)=>s+(x.cycle==='Yearly'? x.amount/12 : x.amount),0);
+}
+function netWorth(){ return totalSavings() + totalInvestments() - totalLoans(); }
+
+function financialHealthScore(){
+  const income = totalMonthlyIncome();
+  const expenses = totalMonthlyExpenses() + totalEMI() + totalSubMonthly();
+  const savingsRate = income>0 ? Math.max(0,(income-expenses)/income) : 0;
+  const dti = income>0 ? totalEMI()/income : 1;
+  const emergencyMonths = expenses>0 ? (DATA.savings.find(s=>s.type==='Emergency Fund')?.balance||0)/expenses : 0;
+
+  let score = 0;
+  score += Math.min(40, savingsRate*100*1.3);
+  score += Math.min(30, Math.max(0, 30 - dti*100));
+  score += Math.min(30, (emergencyMonths/6)*30);
+  return Math.round(Math.max(5,Math.min(100,score)));
+}
+
+/* =====================================================================
+   RENDER: DASHBOARD
+===================================================================== */
+function renderKPIs(){
+  const income = totalMonthlyIncome();
+  const expenses = totalMonthlyExpenses();
+  const emi = totalEMI();
+  const savingsRate = income>0 ? ((income-expenses-emi)/income*100) : 0;
+  const nw = netWorth();
+
+  const kpis = [
+    {label:'Monthly Income', value:money(income), delta:'+8% YoY growth assumed', cls:'up', icon:'💰'},
+    {label:'Monthly Expenses', value:money(expenses+totalSubMonthly()), delta: (expenses > totalBudget() ? 'Over budget':'Within budget'), cls: expenses>totalBudget()?'down':'up', icon:'🧾'},
+    {label:'Net Worth', value:money(nw), delta:'Savings + Investments − Debt', cls:'flat', icon:'📈'},
+    {label:'Savings Rate', value: savingsRate.toFixed(1)+'%', delta: savingsRate>=20 ? 'Healthy: 20%+ target':'Below 20% target', cls: savingsRate>=20?'up':'down', icon:'🎯'}
+  ];
+  document.getElementById('kpiRow').innerHTML = kpis.map(k=>`
+    <div class="card kpi">
+      <div class="label"><span>${k.icon}</span> ${k.label}</div>
+      <div class="value">${k.value}</div>
+      <div class="delta ${k.cls}">${k.delta}</div>
+    </div>`).join('');
+}
+
+function renderHealthScore(){
+  const score = financialHealthScore();
+  document.getElementById('healthBadge').style.setProperty('--score', score);
+  document.getElementById('healthScoreNum').textContent = score;
+  let label='', color='';
+  if(score>=80){label="Excellent — you're financially thriving";color='var(--good)';}
+  else if(score>=60){label='Good — a few tweaks will strengthen it';color='var(--accent)';}
+  else if(score>=40){label='Fair — focus on savings rate and debt';color='var(--warn)';}
+  else {label='Needs attention — build your safety net first';color='var(--bad)';}
+  const el = document.getElementById('healthLabel');
+  el.textContent = label; el.style.color = color;
+}
+
+function renderGoalMini(){
+  const el = document.getElementById('goalMiniRow');
+  document.getElementById('goalCountTag').textContent = DATA.goals.length + ' goals';
+  if(DATA.goals.length===0){ el.innerHTML = '<div class="empty">No goals yet — add one in the Goals tab.</div>'; return; }
+  el.innerHTML = DATA.goals.map(g=>{
+    const pct = Math.min(100, Math.round(g.saved/g.target*100));
+    const cls = pct>=75?'':pct>=40?'warn':'bad';
+    return `<div class="card">
+      <h3>${g.icon} ${g.name}</h3>
+      <div class="sub">${money(g.saved)} of ${money(g.target)} · ${pct}%</div>
+      <div class="progress ${cls}"><div style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* =====================================================================
+   RENDER: INCOME
+===================================================================== */
+function renderIncome(){
+  const gross = totalMonthlyIncome();
+  document.getElementById('incGross').textContent = money(gross);
+  document.getElementById('incNet').textContent = money(gross*0.82);
+  document.getElementById('incCount').textContent = DATA.income.length;
+  document.getElementById('incomeTable').innerHTML = DATA.income.map(i=>`
+    <tr><td>${i.source}</td><td>${i.type}</td><td>${i.freq}</td><td>${money(i.amount)}</td><td>${i.growth}%/yr</td>
+    <td><button class="icon-btn" onclick="removeItem('income',${i.id})">✕</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty">No income sources yet.</td></tr>';
+}
+document.getElementById('formIncome').addEventListener('submit', e=>{
+  e.preventDefault();
+  DATA.income.push({id:uid(), source:incSource.value, type:incType.value, amount:+incAmount.value, freq:incFreq.value, growth:+incGrowth.value});
+  e.target.reset(); save(); renderAll();
+});
+
+/* =====================================================================
+   RENDER: EXPENSES / BUDGET
+===================================================================== */
+function refreshExpenseCategoryOptions(){
+  const sel = document.getElementById('expCategory');
+  sel.innerHTML = DATA.budgets.map(b=>`<option>${b.category}</option>`).join('');
+}
+function renderBudgets(){
+  const byCategory = expensesByCategory();
+  const list = document.getElementById('budgetList');
+  let overCount = 0;
+  list.innerHTML = DATA.budgets.map(b=>{
+    const spent = byCategory[b.category]||0;
+    const pct = Math.min(100, Math.round(spent/b.amount*100));
+    const over = spent>b.amount;
+    if(over) overCount++;
+    const cls = pct>=100?'bad':pct>=80?'warn':'';
+    return `<div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;">
+        <span>${b.icon} <b>${b.category}</b></span>
+        <span>${money(spent)} / ${money(b.amount)} <button class="icon-btn" onclick="removeItem('budgets',${b.id})">✕</button></span>
+      </div>
+      <div class="progress ${cls}"><div style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('') || '<div class="empty">No budgets set yet.</div>';
+  document.getElementById('overBudgetCount').textContent = overCount;
+  document.getElementById('budTotal').textContent = money(totalBudget());
+}
+function renderExpenses(){
+  const total = totalMonthlyExpenses();
+  document.getElementById('expTotal').textContent = money(total);
+  document.getElementById('budUsedPct').textContent = totalBudget()>0 ? Math.round(total/totalBudget()*100)+'%' : '0%';
+  const sorted = [...DATA.expenses].sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+  document.getElementById('expenseTable').innerHTML = sorted.map(e=>`
+    <tr><td>${e.date||'-'}</td><td>${e.desc}</td><td>${e.category}</td><td>${e.method}</td><td>${money(e.amount)}</td>
+    <td><button class="icon-btn" onclick="removeItem('expenses',${e.id})">✕</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty">No expenses logged yet.</td></tr>';
+  refreshExpenseCategoryOptions();
+}
+document.getElementById('formBudget').addEventListener('submit', e=>{
+  e.preventDefault();
+  DATA.budgets.push({id:uid(), category:budCategory.value, icon:budIcon.value, amount:+budAmount.value});
+  e.target.reset(); save(); renderAll();
+});
+document.getElementById('formExpense').addEventListener('submit', e=>{
+  e.preventDefault();
+  DATA.expenses.push({id:uid(), desc:expDesc.value, category:expCategory.value, amount:+expAmount.value, date:expDate.value||new Date().toISOString().slice(0,10), method:expMethod.value});
+  e.target.reset(); save(); renderAll();
+});
+
+/* =====================================================================
+   RENDER: CASH FLOW
+===================================================================== */
+function renderCashflow(){
+  const income = totalMonthlyIncome();
+  const expenses = totalMonthlyExpenses()+totalEMI()+totalSubMonthly();
+  const surplus = income-expenses;
+  document.getElementById('cfSurplus').textContent = money(surplus);
+  document.getElementById('cfSavingsRate').textContent = income>0 ? Math.round(surplus/income*100)+'%' : '0%';
+  document.getElementById('cfRatio').textContent = income>0 ? Math.round(expenses/income*100)+'%' : '0%';
+}
+
+/* =====================================================================
+   RENDER: SAVINGS
+===================================================================== */
+function renderSavings(){
+  document.getElementById('savTotal').textContent = money(totalSavings());
+  document.getElementById('savMonthly').textContent = money(totalSavingsMonthly());
+  const efBalance = DATA.savings.filter(s=>s.type==='Emergency Fund').reduce((s,a)=>s+a.balance,0);
+  const monthlyExp = totalMonthlyExpenses()+totalEMI();
+  document.getElementById('savEmergencyMonths').textContent = monthlyExp>0 ? (efBalance/monthlyExp).toFixed(1)+' months' : '—';
+  document.getElementById('savingsTable').innerHTML = DATA.savings.map(s=>`
+    <tr><td>${s.name}</td><td>${s.type}</td><td>${money(s.balance)}</td><td>${s.interest}%</td><td>${money(s.contribution)}</td>
+    <td><button class="icon-btn" onclick="removeItem('savings',${s.id})">✕</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty">No savings accounts yet.</td></tr>';
+}
+document.getElementById('formSavings').addEventListener('submit', e=>{
+  e.preventDefault();
+  DATA.savings.push({id:uid(), name:savName.value, type:savType.value, balance:+savBalance.value, interest:+savInterest.value, contribution:+savContribution.value});
+  e.target.reset(); save(); renderAll();
+});
+
+/* =====================================================================
+   RENDER: INVESTMENTS
+===================================================================== */
+function renderInvestments(){
+  document.getElementById('invTotal').textContent = money(totalInvestments());
+  document.getElementById('invMonthly').textContent = money(totalInvMonthly());
+  document.getElementById('invReturn').textContent = weightedInvReturn().toFixed(1)+'%';
+  const fv = futureValue(totalInvestments(), totalInvMonthly(), weightedInvReturn(), 10);
+  document.getElementById('inv10yr').textContent = money(fv);
+  document.getElementById('investmentTable').innerHTML = DATA.investments.map(i=>`
+    <tr><td>${i.name}</td><td>${i.type}</td><td>${money(i.value)}</td><td>${money(i.sip)}</td><td>${i.expReturn}%</td>
+    <td><button class="icon-btn" onclick="removeItem('investments',${i.id})">✕</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty">No holdings yet.</td></tr>';
+}
+document.getElementById('formInvestment').addEventListener('submit', e=>{
+  e.preventDefault();
+  DATA.investments.push({id:uid(), name:invName.value, type:invType.value, value:+invValue.value, sip:+invSip.value, expReturn:+invExpReturn.value});
+  e.target.reset(); save(); renderAll();
+});
+function futureValue(present, monthly, annualRatePct, years){
+  const r = annualRatePct/100/12, n = years*12;
+  const fvPresent = present*Math.pow(1+r,n);
+  const fvMonthly = r>0 ? monthly*((Math.pow(1+r,n)-1)/r)*(1+r) : monthly*n;
+  return fvPresent+fvMonthly;
+}
+
+/* =====================================================================
+   RENDER: GOALS
+===================================================================== */
+function renderGoalsFull(){
+  const el = document.getElementById('goalFullRow');
+  el.innerHTML = DATA.goals.map(g=>{
+    const pct = Math.min(100, Math.round(g.saved/g.target*100));
+    const cls = pct>=75?'':pct>=40?'warn':'bad';
+    const monthsLeft = g.date ? Math.max(1, Math.round((new Date(g.date)-new Date())/(1000*60*60*24*30))) : null;
+    const remaining = Math.max(0,g.target-g.saved);
+    const perMonth = monthsLeft ? remaining/monthsLeft : null;
+    return `<div class="card">
+      <h3>${g.icon} ${g.name} <button class="icon-btn" style="float:right;" onclick="removeItem('goals',${g.id})">✕</button></h3>
+      <div class="sub">${money(g.saved)} of ${money(g.target)} · ${pct}% ${g.date?('· by '+g.date):''}</div>
+      <div class="progress ${cls}"><div style="width:${pct}%"></div></div>
+      ${perMonth ? `<div style="font-size:12px;color:var(--text-2);margin-top:8px;">Need to save ~${money(perMonth)}/mo to hit this goal on time.</div>` : ''}
+    </div>`;
+  }).join('') || '<div class="empty">No goals yet.</div>';
+}
+document.getElementById('formGoal').addEventListener('submit', e=>{
+  e.preventDefault();
+  DATA.goals.push({id:uid(), name:goalName.value, target:+goalTarget.value, saved:+goalSaved.value, date:goalDate.value, icon:goalIcon.value});
+  e.target.reset(); save(); renderAll();
+});
+
+/* =====================================================================
+   RENDER: LOANS
+===================================================================== */
+function renderLoans(){
+  document.getElementById('loanTotal').textContent = money(totalLoans());
+  document.getElementById('loanEmiTotal').textContent = money(totalEMI());
+  const income = totalMonthlyIncome();
+  document.getElementById('loanDTI').textContent = income>0 ? Math.round(totalEMI()/income*100)+'%' : '0%';
+  document.getElementById('loanTable').innerHTML = DATA.loans.map(l=>`
+    <tr><td>${l.name}</td><td>${l.type}</td><td>${money(l.principal)}</td><td>${l.rate}%</td><td>${money(emiFor(l))}</td><td>${l.tenure} mo</td>
+    <td><button class="icon-btn" onclick="removeItem('loans',${l.id})">✕</button></td></tr>`).join('') || '<tr><td colspan="7" class="empty">No loans added — debt-free!</td></tr>';
+}
+document.getElementById('formLoan').addEventListener('submit', e=>{
+  e.preventDefault();
+  DATA.loans.push({id:uid(), name:loanName.value, type:loanType.value, principal:+loanPrincipal.value, rate:+loanRate.value, tenure:+loanTenure.value});
+  e.target.reset(); save(); renderAll();
+});
+
+/* =====================================================================
+   RENDER: SUBSCRIPTIONS
+===================================================================== */
+function renderSubscriptions(){
+  document.getElementById('subCount').textContent = DATA.subscriptions.length;
+  document.getElementById('subMonthly').textContent = money(totalSubMonthly());
+  document.getElementById('subYearly').textContent = money(totalSubMonthly()*12);
+  document.getElementById('subTable').innerHTML = DATA.subscriptions.map(s=>`
+    <tr><td>${s.name}</td><td>${s.category}</td><td>${s.cycle}</td><td>${money(s.amount)}</td><td>${money(s.cycle==='Yearly'?s.amount/12:s.amount)}</td>
+    <td><button class="icon-btn" onclick="removeItem('subscriptions',${s.id})">✕</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty">No subscriptions tracked yet.</td></tr>';
+}
+document.getElementById('formSub').addEventListener('submit', e=>{
+  e.preventDefault();
+  DATA.subscriptions.push({id:uid(), name:subName.value, category:subCategory.value, amount:+subAmount.value, cycle:subCycle.value});
+  e.target.reset(); save(); renderAll();
+});
+
+/* =====================================================================
+   GENERIC REMOVE
+===================================================================== */
+function removeItem(key, id){
+  DATA[key] = DATA[key].filter(x=>x.id!==id);
+  save(); renderAll();
+}
+
+/* =====================================================================
+   AI INSIGHTS (rule-based)
+===================================================================== */
+function generateInsights(){
+  const income = totalMonthlyIncome();
+  const expenses = totalMonthlyExpenses();
+  const emi = totalEMI();
+  const subs = totalSubMonthly();
+  const savingsRate = income>0 ? (income-expenses-emi-subs)/income*100 : 0;
+  const dti = income>0 ? emi/income*100 : 0;
+  const efBalance = DATA.savings.filter(s=>s.type==='Emergency Fund').reduce((s,a)=>s+a.balance,0);
+  const efMonths = (expenses+emi)>0 ? efBalance/(expenses+emi) : 0;
+  const byCat = expensesByCategory();
+  const topCat = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
+
+  const insights = [];
+
+  if(savingsRate < 20){
+    insights.push({type:'warn', icon:'⚠️', text:`Your savings rate is ${savingsRate.toFixed(1)}%, below the recommended 20% benchmark. Consider trimming discretionary spend or automating a higher SIP amount right after payday.`});
+  } else {
+    insights.push({type:'good', icon:'✅', text:`Great work — your savings rate of ${savingsRate.toFixed(1)}% meets or exceeds the 20% benchmark used by most financial planners.`});
+  }
+
+  if(efMonths < 6){
+    insights.push({type:'bad', icon:'🚨', text:`Your emergency fund covers only ${efMonths.toFixed(1)} months of expenses. Aim for 6 months — at your current contribution rate, prioritize this before increasing investment risk.`});
+  } else {
+    insights.push({type:'good', icon:'🛡️', text:`Your emergency fund covers ${efMonths.toFixed(1)} months of expenses — a solid safety net that lets you invest more confidently.`});
+  }
+
+  if(dti > 40){
+    insights.push({type:'bad', icon:'📉', text:`Your debt-to-income ratio is ${dti.toFixed(0)}%, above the healthy 40% ceiling. Consider prepaying high-interest loans or refinancing before taking on new debt.`});
+  } else if(dti>0){
+    insights.push({type:'warn', icon:'📋', text:`Your debt-to-income ratio is ${dti.toFixed(0)}%, within a manageable range. Extra prepayments now could still save significant interest over the loan term.`});
+  }
+
+  if(topCat){
+    insights.push({type:'warn', icon:'🔍', text:`Your highest spending category this period is "${topCat[0]}" at ${money(topCat[1])}. Review recent transactions there for any easy wins.`});
+  }
+
+  if(subs*12 > 15000){
+    insights.push({type:'warn', icon:'🔔', text:`Subscriptions cost you ${money(subs*12)}/year. Audit which ones you actually use weekly — cancelling 2-3 rarely-used ones is often painless.`});
+  }
+
+  const investTotal = totalInvestments();
+  if(investTotal < totalSavings()*0.5 && income>0){
+    insights.push({type:'warn', icon:'📈', text:`You're holding relatively more in low-yield savings than in growth investments. Once your emergency fund is solid, consider directing extra savings into diversified index funds for long-term growth.`});
+  }
+
+  const score = financialHealthScore();
+  insights.unshift({type: score>=70?'good':score>=45?'warn':'bad', icon:'🎯', text:`Your overall Financial Health Score is ${score}/100. ${score>=70?'You are in strong shape — keep the momentum with consistent SIPs.':'Focus on the emergency fund and savings rate first; investments compound best once the base is stable.'}`});
+
+  return insights;
+}
+function renderInsights(){
+  const insights = generateInsights();
+  document.getElementById('insightsList').innerHTML = insights.map(i=>
+    `<div class="insight ${i.type}"><span class="ic">${i.icon}</span><span>${i.text}</span></div>`
+  ).join('');
+
+  const prompts = [
+    "Analyze my monthly savings rate and suggest 3 realistic ways to increase it by 5% without major lifestyle changes.",
+    "Explain the difference between EPF, PPF and NPS for a salaried employee in India, and which mix suits long-term wealth building.",
+    "Given my debt-to-income ratio, should I prioritize prepaying my loan or investing the surplus? Walk through the tradeoffs.",
+    "Create a beginner-friendly 12-month plan to build a 6-month emergency fund from my current savings rate.",
+    "What are common budgeting frameworks (50/30/20, zero-based, envelope) and which fits a variable freelance + salary income best?",
+    "Explain how compounding works with a real example using my monthly SIP amount and a 15-year horizon."
+  ];
+  document.getElementById('aiPrompts').innerHTML = prompts.map(p=>`
+    <div class="card" style="cursor:pointer;" onclick="navigator.clipboard && navigator.clipboard.writeText('${p.replace(/'/g,"\\'")}'); this.querySelector('.sub').textContent='Copied to clipboard ✓';">
+      <h3>💬 Prompt</h3>
+      <div class="sub">${p}</div>
+    </div>`).join('');
+}
+
+/* =====================================================================
+   REPORTS
+===================================================================== */
+function renderReports(){
+  const income = totalMonthlyIncome();
+  const expenses = totalMonthlyExpenses();
+  const emi = totalEMI();
+  const subs = totalSubMonthly();
+  const surplus = income-expenses-emi-subs;
+  const score = financialHealthScore();
+
+  document.getElementById('reportBody').innerHTML = `
+    <div class="card"><h3>Income Summary</h3>
+      <table><tbody>
+        <tr><td>Total Monthly Income</td><td>${money(income)}</td></tr>
+        <tr><td>Income Sources</td><td>${DATA.income.length}</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card"><h3>Spending Summary</h3>
+      <table><tbody>
+        <tr><td>Expenses</td><td>${money(expenses)}</td></tr>
+        <tr><td>EMIs</td><td>${money(emi)}</td></tr>
+        <tr><td>Subscriptions</td><td>${money(subs)}</td></tr>
+        <tr><td><b>Total Outflow</b></td><td><b>${money(expenses+emi+subs)}</b></td></tr>
+      </tbody></table>
+    </div>
+    <div class="card"><h3>Net Position</h3>
+      <table><tbody>
+        <tr><td>Monthly Surplus</td><td>${money(surplus)}</td></tr>
+        <tr><td>Net Worth</td><td>${money(netWorth())}</td></tr>
+        <tr><td>Financial Health Score</td><td>${score}/100</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card"><h3>Assets vs Liabilities</h3>
+      <table><tbody>
+        <tr><td>Total Savings</td><td>${money(totalSavings())}</td></tr>
+        <tr><td>Total Investments</td><td>${money(totalInvestments())}</td></tr>
+        <tr><td>Total Debt</td><td>${money(totalLoans())}</td></tr>
+      </tbody></table>
+    </div>`;
+
+  const rows = [];
+  DATA.income.forEach(i=> rows.push(['Income', i.source, money(i.freq==='Yearly'?i.amount/12:i.amount)]));
+  DATA.budgets.forEach(b=> rows.push(['Budget', b.category, money(b.amount)]));
+  DATA.savings.forEach(s=> rows.push(['Savings', s.name, money(s.contribution)]));
+  DATA.investments.forEach(i=> rows.push(['Investment', i.name, money(i.sip)]));
+  DATA.loans.forEach(l=> rows.push(['Loan EMI', l.name, money(emiFor(l))]));
+  DATA.subscriptions.forEach(s=> rows.push(['Subscription', s.name, money(s.cycle==='Yearly'?s.amount/12:s.amount)]));
+  document.getElementById('fullStatement').innerHTML = rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+}
+
+/* =====================================================================
+   PRINT-ONLY MULTI-PAGE PDF REPORT (~4-6 pages)
+===================================================================== */
+function pdfHeader(title){
+  const d = new Date();
+  const dateStr = isNaN(d) ? '' : d.toDateString();
+  return `<div class="pdf-header">
+    <div class="ph-brand"><span class="sq">₹</span> Personal Financial Command Center — ${title}</div>
+    <div class="ph-meta">${DATA.profile.type} · Generated ${dateStr || ''}</div>
+  </div>`;
+}
+function pdfFooter(pageLabel){
+  return `<div class="pdf-footer"><span>Confidential — for personal use only</span><span>${pageLabel}</span></div>`;
+}
+function pdfBar(label, value, max){
+  const pct = max>0 ? Math.min(100, Math.round(value/max*100)) : 0;
+  return `<div class="pdf-bar-row"><div class="lab">${label}</div><div class="track"><div style="width:${pct}%"></div></div><div class="amt">${money(value)}</div></div>`;
+}
+
+function renderPrintReport(){
+  const income = totalMonthlyIncome();
+  const expenses = totalMonthlyExpenses();
+  const budget = totalBudget();
+  const emi = totalEMI();
+  const subs = totalSubMonthly();
+  const outflow = expenses+emi+subs;
+  const surplus = income-outflow;
+  const savingsRate = income>0 ? (surplus/income*100) : 0;
+  const score = financialHealthScore();
+  const nw = netWorth();
+  const efBalance = DATA.savings.filter(s=>s.type==='Emergency Fund').reduce((s,a)=>s+a.balance,0);
+  const efMonths = (expenses+emi)>0 ? efBalance/(expenses+emi) : 0;
+  const dti = income>0 ? emi/income*100 : 0;
+  const byCat = expensesByCategory();
+  const insights = generateInsights();
+  const invTotal = totalInvestments();
+  const fv10 = futureValue(invTotal, totalInvMonthly(), weightedInvReturn()||8, 10);
+
+  let scoreColor = score>=70 ? '#158a4a' : score>=45 ? '#b3790f' : '#c8372f';
+
+  /* ---------- PAGE 1 — COVER ---------- */
+  const page1 = `<div class="pdf-page">
+    <div class="pdf-cover">
+      <div class="sq">₹</div>
+      <h1>Personal Financial Command Center</h1>
+      <h2>Comprehensive Monthly Financial Report — ${DATA.profile.type}</h2>
+      <div class="pdf-score-ring" style="background:conic-gradient(${scoreColor} calc(${score}*1%), #eceef4 0);">
+        <b>${score}</b><span>HEALTH SCORE</span>
+      </div>
+      <div class="pdf-cover-meta">
+        Prepared for: ${DATA.profile.type}<br>
+        Primary Objective: ${DATA.profile.goal}<br>
+        Report Date: ${new Date().toDateString()}<br>
+        Net Worth: ${money(nw)} &nbsp;·&nbsp; Savings Rate: ${savingsRate.toFixed(1)}%
+      </div>
+    </div>
+  </div>`;
+
+  /* ---------- PAGE 2 — EXECUTIVE SUMMARY ---------- */
+  const page2 = `<div class="pdf-page">
+    ${pdfHeader('Executive Summary')}
+    <div class="pdf-h1">Executive Summary</div>
+    <div class="pdf-sub">A snapshot of your complete financial position this period</div>
+
+    <div class="pdf-grid4">
+      <div class="pdf-kpi"><div class="l">Monthly Income</div><div class="v">${money(income)}</div><div class="d up">+8% YoY assumed</div></div>
+      <div class="pdf-kpi"><div class="l">Total Outflow</div><div class="v">${money(outflow)}</div><div class="d ${outflow>income?'down':'up'}">${outflow>income?'Exceeds income':'Within income'}</div></div>
+      <div class="pdf-kpi"><div class="l">Monthly Surplus</div><div class="v">${money(surplus)}</div><div class="d ${surplus>=0?'up':'down'}">${savingsRate.toFixed(1)}% savings rate</div></div>
+      <div class="pdf-kpi"><div class="l">Net Worth</div><div class="v">${money(nw)}</div><div class="d up">Savings + Invest − Debt</div></div>
+    </div>
+    <div class="pdf-grid3">
+      <div class="pdf-kpi"><div class="l">Emergency Fund</div><div class="v">${efMonths.toFixed(1)} mo</div><div class="d ${efMonths>=6?'up':'down'}">Target: 6 months</div></div>
+      <div class="pdf-kpi"><div class="l">Debt-to-Income</div><div class="v">${dti.toFixed(0)}%</div><div class="d ${dti<=40?'up':'down'}">Healthy ceiling: 40%</div></div>
+      <div class="pdf-kpi"><div class="l">Portfolio Value</div><div class="v">${money(invTotal)}</div><div class="d up">Proj. 10yr: ${money(fv10)}</div></div>
+    </div>
+
+    <div class="pdf-section-label">Financial Health Score Breakdown</div>
+    ${pdfBar('Savings Rate Component', Math.min(40, Math.max(0,savingsRate*1.3)), 40)}
+    ${pdfBar('Debt Management Component', Math.min(30, Math.max(0,30-dti*0.3)), 30)}
+    ${pdfBar('Emergency Fund Component', Math.min(30,(efMonths/6)*30), 30)}
+
+    <div class="pdf-section-label">Key Insights</div>
+    ${insights.slice(0,4).map(i=>`<div class="pdf-note ${i.type}">${i.icon} ${i.text}</div>`).join('')}
+
+    ${pdfFooter('Page 2 · Executive Summary')}
+  </div>`;
+
+  /* ---------- PAGE 3 — INCOME & EXPENSES ---------- */
+  const incomeRows = DATA.income.map(i=>`<tr><td>${i.source}</td><td>${i.type}</td><td>${i.freq}</td><td>${money(i.freq==='Yearly'?i.amount/12:i.amount)}</td><td>${i.growth}%/yr</td></tr>`).join('') || `<tr><td colspan="5">No income sources recorded.</td></tr>`;
+  const budgetRows = DATA.budgets.map(b=>{
+    const spent = byCat[b.category]||0;
+    const pct = b.amount>0? Math.round(spent/b.amount*100):0;
+    return `<tr><td>${b.icon} ${b.category}</td><td>${money(b.amount)}</td><td>${money(spent)}</td><td>${pct}%</td><td>${spent>b.amount?'Over':'On Track'}</td></tr>`;
+  }).join('') || `<tr><td colspan="5">No budgets recorded.</td></tr>`;
+  const expenseRowsSorted = [...DATA.expenses].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const expenseRows = expenseRowsSorted.map(e=>`<tr><td>${e.date||'-'}</td><td>${e.desc}</td><td>${e.category}</td><td>${e.method}</td><td>${money(e.amount)}</td></tr>`).join('') || `<tr><td colspan="5">No expenses logged.</td></tr>`;
+
+  const page3 = `<div class="pdf-page">
+    ${pdfHeader('Income & Expense Detail')}
+    <div class="pdf-h1">Income Sources</div>
+    <div class="pdf-sub">Total monthly income: ${money(income)} across ${DATA.income.length} source(s)</div>
+    <table class="pdf-table"><thead><tr><th>Source</th><th>Type</th><th>Frequency</th><th>Monthly Amt</th><th>Growth</th></tr></thead>
+      <tbody>${incomeRows}</tbody>
+      <tfoot><tr><td colspan="3">Total Monthly Income</td><td>${money(income)}</td><td></td></tr></tfoot>
+    </table>
+
+    <div class="pdf-section-label">Budget vs. Actual Spend</div>
+    <table class="pdf-table"><thead><tr><th>Category</th><th>Budget</th><th>Spent</th><th>Used</th><th>Status</th></tr></thead>
+      <tbody>${budgetRows}</tbody>
+      <tfoot><tr><td>Total</td><td>${money(budget)}</td><td>${money(expenses)}</td><td>${budget>0?Math.round(expenses/budget*100):0}%</td><td></td></tr></tfoot>
+    </table>
+
+    <div class="pdf-section-label">Recent Expense Log (${DATA.expenses.length} entries)</div>
+    <table class="pdf-table"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Method</th><th>Amount</th></tr></thead>
+      <tbody>${expenseRows}</tbody>
+    </table>
+    ${pdfFooter('Page 3 · Income & Expenses')}
+  </div>`;
+
+  /* ---------- PAGE 4 — CASH FLOW, SAVINGS & INVESTMENTS ---------- */
+  const savingsRows = DATA.savings.map(s=>`<tr><td>${s.name}</td><td>${s.type}</td><td>${money(s.balance)}</td><td>${s.interest}%</td><td>${money(s.contribution)}</td></tr>`).join('') || `<tr><td colspan="5">No savings accounts recorded.</td></tr>`;
+  const invRows = DATA.investments.map(i=>`<tr><td>${i.name}</td><td>${i.type}</td><td>${money(i.value)}</td><td>${money(i.sip)}</td><td>${i.expReturn}%</td></tr>`).join('') || `<tr><td colspan="5">No investment holdings recorded.</td></tr>`;
+
+  const page4 = `<div class="pdf-page">
+    ${pdfHeader('Cash Flow, Savings & Investments')}
+    <div class="pdf-h1">Cash Flow Summary</div>
+    <div class="pdf-grid3">
+      <div class="pdf-kpi"><div class="l">Monthly Surplus</div><div class="v">${money(surplus)}</div></div>
+      <div class="pdf-kpi"><div class="l">Savings Rate</div><div class="v">${savingsRate.toFixed(1)}%</div></div>
+      <div class="pdf-kpi"><div class="l">Expense/Income Ratio</div><div class="v">${income>0?Math.round(outflow/income*100):0}%</div></div>
+    </div>
+
+    <div class="pdf-section-label">Savings Accounts — Total: ${money(totalSavings())}</div>
+    <table class="pdf-table"><thead><tr><th>Account</th><th>Type</th><th>Balance</th><th>Interest</th><th>Monthly Add</th></tr></thead>
+      <tbody>${savingsRows}</tbody>
+      <tfoot><tr><td colspan="2">Total</td><td>${money(totalSavings())}</td><td></td><td>${money(totalSavingsMonthly())}</td></tr></tfoot>
+    </table>
+
+    <div class="pdf-section-label">Investment Holdings — Total: ${money(invTotal)}</div>
+    <table class="pdf-table"><thead><tr><th>Holding</th><th>Type</th><th>Current Value</th><th>Monthly SIP</th><th>Exp. Return</th></tr></thead>
+      <tbody>${invRows}</tbody>
+      <tfoot><tr><td colspan="2">Total</td><td>${money(invTotal)}</td><td>${money(totalInvMonthly())}</td><td>${weightedInvReturn().toFixed(1)}% avg</td></tr></tfoot>
+    </table>
+
+    <div class="pdf-note good">Projected portfolio value in 10 years at current contributions and weighted return: <b>${money(fv10)}</b></div>
+    ${pdfFooter('Page 4 · Cash Flow & Wealth')}
+  </div>`;
+
+  /* ---------- PAGE 5 — GOALS, DEBT & SUBSCRIPTIONS ---------- */
+  const goalRows = DATA.goals.map(g=>{
+    const pct = g.target>0 ? Math.round(g.saved/g.target*100):0;
+    return `<tr><td>${g.icon} ${g.name}</td><td>${money(g.saved)}</td><td>${money(g.target)}</td><td>${pct}%</td><td>${g.date||'—'}</td></tr>`;
+  }).join('') || `<tr><td colspan="5">No goals recorded.</td></tr>`;
+  const loanRows = DATA.loans.map(l=>`<tr><td>${l.name}</td><td>${l.type}</td><td>${money(l.principal)}</td><td>${l.rate}%</td><td>${money(emiFor(l))}</td><td>${l.tenure} mo</td></tr>`).join('') || `<tr><td colspan="6">No active loans — debt-free.</td></tr>`;
+  const subRows = DATA.subscriptions.map(s=>`<tr><td>${s.name}</td><td>${s.category}</td><td>${s.cycle}</td><td>${money(s.cycle==='Yearly'?s.amount/12:s.amount)}</td></tr>`).join('') || `<tr><td colspan="4">No subscriptions tracked.</td></tr>`;
+
+  const page5 = `<div class="pdf-page">
+    ${pdfHeader('Goals, Debt & Subscriptions')}
+    <div class="pdf-h1">Financial Goals</div>
+    <table class="pdf-table"><thead><tr><th>Goal</th><th>Saved</th><th>Target</th><th>Progress</th><th>Target Date</th></tr></thead>
+      <tbody>${goalRows}</tbody>
+    </table>
+
+    <div class="pdf-section-label">Loans &amp; EMI Obligations — Total Outstanding: ${money(totalLoans())}</div>
+    <table class="pdf-table"><thead><tr><th>Loan</th><th>Type</th><th>Outstanding</th><th>Rate</th><th>EMI</th><th>Tenure Left</th></tr></thead>
+      <tbody>${loanRows}</tbody>
+      <tfoot><tr><td colspan="2">Total</td><td>${money(totalLoans())}</td><td></td><td>${money(emi)}</td><td></td></tr></tfoot>
+    </table>
+
+    <div class="pdf-section-label">Subscriptions — Monthly: ${money(subs)} · Annual: ${money(subs*12)}</div>
+    <table class="pdf-table"><thead><tr><th>Service</th><th>Category</th><th>Cycle</th><th>Monthly Equiv.</th></tr></thead>
+      <tbody>${subRows}</tbody>
+    </table>
+    ${pdfFooter('Page 5 · Goals & Obligations')}
+  </div>`;
+
+  /* ---------- PAGE 6 — INSIGHTS, CHECKLIST & RESOURCES ---------- */
+  const page6 = `<div class="pdf-page">
+    ${pdfHeader('Recommendations & Action Plan')}
+    <div class="pdf-h1">Full AI-Generated Insights</div>
+    ${insights.map(i=>`<div class="pdf-note ${i.type}">${i.icon} ${i.text}</div>`).join('')}
+
+    <div class="pdf-section-label">Financial Planning Checklist</div>
+    <ul class="pdf-checklist">
+      ${CHECKLIST_ITEMS.map((item,idx)=>`<li><span class="box">${DATA.checklist[idx]?'✓':''}</span>${item}</li>`).join('')}
+    </ul>
+
+    <div class="pdf-section-label">Smart Money Tips</div>
+    <div class="pdf-2col">
+      ${TIPS.map(t=>`<div class="pdf-tip"><b>${t.ic} ${t.title}</b><span>${t.text}</span></div>`).join('')}
+    </div>
+    ${pdfFooter('Page 6 · Recommendations')}
+  </div>`;
+
+  document.getElementById('printReport').innerHTML = page1+page2+page3+page4+page5+page6;
+}
+
+/* =====================================================================
+   LEARN / TIPS / CHECKLIST / RESOURCES
+===================================================================== */
+const TIPS = [
+  {ic:'🐷', title:'Pay Yourself First', text:'Automate transfers to savings/investments on payday, before discretionary spending begins.'},
+  {ic:'📊', title:'Follow the 50/30/20 Rule', text:'50% needs, 30% wants, 20% savings & debt repayment as a starting benchmark.'},
+  {ic:'🛡️', title:'Build a 6-Month Buffer', text:'An emergency fund prevents high-interest debt when the unexpected happens.'},
+  {ic:'📈', title:'Start SIPs Early', text:'Compounding rewards time in the market far more than timing the market.'},
+  {ic:'💳', title:'Avoid Revolving Credit Card Debt', text:'Interest rates of 30-40% annually erode wealth faster than most investments can build it.'},
+  {ic:'🎯', title:'Set SMART Goals', text:'Specific, Measurable, Achievable, Relevant, Time-bound goals convert vague wishes into a plan.'},
+  {ic:'🔍', title:'Audit Subscriptions Quarterly', text:'Recurring charges are the easiest budget leaks to miss and the easiest to fix.'},
+  {ic:'🏦', title:'Diversify Across Asset Classes', text:'Blend equity, debt, and fixed-income instruments to balance growth and stability.'}
+];
+function renderTips(){
+  document.getElementById('tipsGrid').innerHTML = TIPS.map(t=>`
+    <div class="tip-card"><span class="ic">${t.ic}</span><div><h4>${t.title}</h4><p>${t.text}</p></div></div>`).join('');
+}
+
+const CHECKLIST_ITEMS = [
+  'Track all income sources and confirm net take-home pay',
+  'Set a monthly budget for every major spending category',
+  'Build an emergency fund covering 6 months of expenses',
+  'Automate monthly SIP/investment contributions',
+  'Review and reduce high-interest debt',
+  'Cancel unused subscriptions',
+  'Set at least 3 concrete financial goals with target dates',
+  'Review insurance coverage (health, life, term)',
+  'Check credit score / report at least twice a year',
+  'Revisit this financial plan every quarter'
+];
+function renderChecklist(){
+  const box = document.getElementById('checklistBox');
+  box.innerHTML = CHECKLIST_ITEMS.map((item,idx)=>{
+    const checked = DATA.checklist[idx] ? 'checked' : '';
+    const doneCls = DATA.checklist[idx] ? 'done' : '';
+    return `<label class="${doneCls}"><input type="checkbox" data-idx="${idx}" ${checked}><span>${item}</span></label>`;
+  }).join('');
+  box.querySelectorAll('input').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      DATA.checklist[cb.dataset.idx] = cb.checked;
+      save(); renderChecklist();
+    });
+  });
+}
+
+const RESOURCES = [
+  ['RBI Financial Literacy Portal','Government-backed guides on saving, credit and fraud prevention.'],
+  ['SEBI Investor Education','Free courses on mutual funds, stocks and investor rights.'],
+  ['NPS Trust', 'Official information on the National Pension System.'],
+  ['CIBIL / Credit Bureau Reports', 'Check and understand your credit score for free annually.'],
+  ['Income Tax e-Filing Portal', 'File returns and explore tax-saving investment options (80C, 80D).'],
+  ['Personal Finance Subreddits & Podcasts', 'Community-driven learning to stay current on strategies.']
+];
+function renderResources(){
+  document.getElementById('resourceList').innerHTML = RESOURCES.map(r=>`<li><b>${r[0]}</b> — ${r[1]}</li>`).join('');
+}
+
+/* =====================================================================
+   CALCULATORS
+===================================================================== */
+document.querySelectorAll('#calcTabs .tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('#calcTabs .tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('[id^="calc-"]').forEach(c=>c.style.display='none');
+    document.getElementById('calc-'+t.dataset.calc).style.display='block';
+  });
+});
+
+let calcChartData = null;
+function calcSIP(){
+  const amt = +document.getElementById('sipAmount').value;
+  const ret = +document.getElementById('sipReturn').value;
+  const yrs = +document.getElementById('sipYears').value;
+  const r = ret/100/12, n = yrs*12;
+  const fv = r>0 ? amt*((Math.pow(1+r,n)-1)/r)*(1+r) : amt*n;
+  const invested = amt*n;
+  const gains = fv-invested;
+  document.getElementById('sipResult').innerHTML = `
+    <div class="big">${money(fv)}</div>
+    <div class="rowline"><span>Total Invested</span><span>${money(invested)}</span></div>
+    <div class="rowline"><span>Wealth Gained</span><span>${money(gains)}</span></div>`;
+  const series=[]; for(let y=0;y<=yrs;y++){ const nn=y*12; series.push(r>0? amt*((Math.pow(1+r,nn)-1)/r)*(1+r) : amt*nn); }
+  calcChartData = {labels:series.map((_,i)=>'Yr '+i), series:[{name:'Value',color:'var(--accent)',data:series}]};
+  drawLineChart('chartCalc', calcChartData);
+}
+function calcEMI(){
+  const P = +document.getElementById('emiPrincipal').value;
+  const rate = +document.getElementById('emiRate').value;
+  const yrs = +document.getElementById('emiYears').value;
+  const r = rate/12/100, n = yrs*12;
+  const emi = r>0 ? P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1) : P/n;
+  const total = emi*n, interest = total-P;
+  document.getElementById('emiResult').innerHTML = `
+    <div class="big">${money(emi)} /mo</div>
+    <div class="rowline"><span>Total Payment</span><span>${money(total)}</span></div>
+    <div class="rowline"><span>Total Interest</span><span>${money(interest)}</span></div>`;
+  let bal=P; const series=[];
+  for(let y=0;y<=yrs;y++){ series.push(bal); for(let m=0;m<12 && bal>0;m++){ const interestPortion=bal*r; bal = bal + interestPortion - emi; if(bal<0) bal=0; } }
+  calcChartData = {labels:series.map((_,i)=>'Yr '+i), series:[{name:'Balance',color:'var(--bad)',data:series}]};
+  drawLineChart('chartCalc', calcChartData);
+}
+function calcCompound(){
+  const P = +document.getElementById('ciPrincipal').value;
+  const rate = +document.getElementById('ciRate').value;
+  const yrs = +document.getElementById('ciYears').value;
+  const freq = +document.getElementById('ciFreq').value;
+  const amount = P*Math.pow(1+ (rate/100)/freq, freq*yrs);
+  document.getElementById('compoundResult').innerHTML = `
+    <div class="big">${money(amount)}</div>
+    <div class="rowline"><span>Principal</span><span>${money(P)}</span></div>
+    <div class="rowline"><span>Interest Earned</span><span>${money(amount-P)}</span></div>`;
+  const series=[]; for(let y=0;y<=yrs;y++){ series.push(P*Math.pow(1+(rate/100)/freq, freq*y)); }
+  calcChartData = {labels:series.map((_,i)=>'Yr '+i), series:[{name:'Value',color:'var(--accent)',data:series}]};
+  drawLineChart('chartCalc', calcChartData);
+}
+function calcRetirement(){
+  const age = +document.getElementById('retAge').value;
+  const retireAge = +document.getElementById('retRetireAge').value;
+  const monthlyExp = +document.getElementById('retExpenses').value;
+  const inflation = +document.getElementById('retInflation').value;
+  const postReturn = +document.getElementById('retReturn').value;
+  const yrsToRetire = retireAge-age;
+  const futureMonthlyExp = monthlyExp*Math.pow(1+inflation/100, yrsToRetire);
+  const annualExpAtRetire = futureMonthlyExp*12;
+  const realReturn = ((1+postReturn/100)/(1+inflation/100))-1;
+  const corpus = realReturn>0 ? annualExpAtRetire/realReturn : annualExpAtRetire*25;
+  const monthlySipNeeded = (()=>{
+    const n = yrsToRetire*12, r = 0.10/12; // assume 10% accumulation return
+    return r>0 ? corpus / (((Math.pow(1+r,n)-1)/r)*(1+r)) : corpus/n;
+  })();
+  document.getElementById('retirementResult').innerHTML = `
+    <div class="big">${money(corpus)}</div>
+    <div class="rowline"><span>Future Monthly Expense</span><span>${money(futureMonthlyExp)}</span></div>
+    <div class="rowline"><span>Est. Monthly SIP Needed (@10%)</span><span>${money(monthlySipNeeded)}</span></div>`;
+  const series=[]; const n=yrsToRetire*12, r=0.10/12;
+  for(let y=0;y<=yrsToRetire;y++){ const nn=y*12; series.push(r>0? monthlySipNeeded*((Math.pow(1+r,nn)-1)/r)*(1+r): monthlySipNeeded*nn); }
+  calcChartData = {labels:series.map((_,i)=>'Yr '+i), series:[{name:'Corpus',color:'var(--good)',data:series}]};
+  drawLineChart('chartCalc', calcChartData);
+}
+function calcEmergency(){
+  const exp = +document.getElementById('efExpenses').value;
+  const months = +document.getElementById('efMonths').value;
+  const current = +document.getElementById('efCurrent').value;
+  const target = exp*months;
+  const gap = Math.max(0, target-current);
+  document.getElementById('emergencyResult').innerHTML = `
+    <div class="big">${money(target)}</div>
+    <div class="rowline"><span>Current Savings</span><span>${money(current)}</span></div>
+    <div class="rowline"><span>Amount Still Needed</span><span>${money(gap)}</span></div>`;
+  calcChartData = {labels:['Current','Target'], series:[{name:'₹',color:'var(--accent)',data:[current,target]}]};
+  drawBarChart('chartCalc', calcChartData);
+}
+
+/* =====================================================================
+   WHAT-IF SIMULATOR
+===================================================================== */
+const simEls = ['simSave','simCut','simLump','simReturn'].map(id=>document.getElementById(id));
+simEls.forEach(el=> el.addEventListener('input', renderSimulator));
+
+function renderSimulator(){
+  const save = +document.getElementById('simSave').value;
+  const cut = +document.getElementById('simCut').value;
+  const lump = +document.getElementById('simLump').value;
+  const ret = +document.getElementById('simReturn').value;
+  document.getElementById('simSaveVal').textContent = money(save);
+  document.getElementById('simCutVal').textContent = money(cut);
+  document.getElementById('simLumpVal').textContent = money(lump);
+  document.getElementById('simReturnVal').textContent = ret+'%';
+
+  const baseMonthly = totalInvMonthly()+totalSavingsMonthly();
+  const baseValue = totalInvestments()+totalSavings();
+  const baseReturn = weightedInvReturn() || 8;
+
+  const newMonthly = baseMonthly+save+cut;
+  const newValue = baseValue+lump;
+
+  const years=10;
+  const baseSeries=[], newSeries=[];
+  for(let y=0;y<=years;y++){
+    baseSeries.push(futureValue(baseValue, baseMonthly, baseReturn, y));
+    newSeries.push(futureValue(newValue, newMonthly, ret, y));
+  }
+  drawLineChart('chartSimulator', {labels:baseSeries.map((_,i)=>'Yr '+i), series:[
+    {name:'Current', color:'var(--text-3)', data:baseSeries},
+    {name:'Simulated', color:'var(--accent)', data:newSeries}
+  ]});
+
+  document.getElementById('simBase10').textContent = money(baseSeries[10]);
+  document.getElementById('simNew10').textContent = money(newSeries[10]);
+  document.getElementById('simGain').textContent = money(newSeries[10]-baseSeries[10]);
+}
+
+/* =====================================================================
+   CANVAS CHART ENGINE (no external libs)
+===================================================================== */
+function getCssVar(name){
+  const val = getComputedStyle(document.body).getPropertyValue(name.replace('var(','').replace(')',''));
+  if(val) return val.trim();
+  return name;
+}
+function resolveColor(c){
+  if(c.startsWith('var(')) return getCssVar(c);
+  return c;
+}
+function setupCanvas(id){
+  const canvas = document.getElementById(id);
+  if(!canvas) return null;
+  const parentWidth = canvas.parentElement.clientWidth;
+  const dpr = window.devicePixelRatio || 1;
+  const cssHeight = canvas.getAttribute('height') ? +canvas.getAttribute('height') : 220;
+  canvas.style.width = parentWidth+'px';
+  canvas.style.height = cssHeight+'px';
+  canvas.width = parentWidth*dpr;
+  canvas.height = cssHeight*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx, w:parentWidth, h:cssHeight};
+}
+
+function drawLineChart(id, data){
+  const setup = setupCanvas(id); if(!setup) return;
+  const {ctx,w,h} = setup;
+  ctx.clearRect(0,0,w,h);
+  const pad = {l:50,r:16,t:16,b:26};
+  const allVals = data.series.flatMap(s=>s.data);
+  const maxV = Math.max(...allVals, 1)*1.1;
+  const minV = Math.min(0, ...allVals);
+  const n = data.labels.length;
+  const plotW = w-pad.l-pad.r, plotH = h-pad.t-pad.b;
+  const textColor = getCssVar('--text-3');
+  const gridColor = getCssVar('--border');
+
+  ctx.strokeStyle = gridColor; ctx.lineWidth=1; ctx.font='10px Segoe UI';
+  ctx.fillStyle = textColor;
+  for(let i=0;i<=4;i++){
+    const y = pad.t + plotH - (plotH*i/4);
+    const val = minV + (maxV-minV)*i/4;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.fillText(shortNum(val), 4, y+3);
+  }
+  const stepX = n>1 ? plotW/(n-1) : plotW;
+  data.labels.forEach((lab,i)=>{
+    if(i%Math.ceil(n/8||1)===0){
+      const x = pad.l + i*stepX;
+      ctx.fillText(lab, x-8, h-8);
+    }
+  });
+
+  data.series.forEach(s=>{
+    const color = resolveColor(s.color);
+    ctx.beginPath();
+    s.data.forEach((v,i)=>{
+      const x = pad.l+i*stepX;
+      const y = pad.t + plotH - ((v-minV)/(maxV-minV||1))*plotH;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
+
+    // gradient fill
+    const grad = ctx.createLinearGradient(0,pad.t,0,pad.t+plotH);
+    grad.addColorStop(0, color+'55'); grad.addColorStop(1, color+'02');
+    ctx.lineTo(pad.l+(n-1)*stepX, pad.t+plotH);
+    ctx.lineTo(pad.l, pad.t+plotH);
+    ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+  });
+}
+
+function drawBarChart(id, data){
+  const setup = setupCanvas(id); if(!setup) return;
+  const {ctx,w,h} = setup;
+  ctx.clearRect(0,0,w,h);
+  const pad = {l:50,r:16,t:16,b:26};
+  const vals = data.series[0].data;
+  const maxV = Math.max(...vals,1)*1.15;
+  const plotW = w-pad.l-pad.r, plotH = h-pad.t-pad.b;
+  const textColor = getCssVar('--text-3'), gridColor = getCssVar('--border');
+  ctx.strokeStyle=gridColor; ctx.fillStyle=textColor; ctx.font='10px Segoe UI';
+  for(let i=0;i<=4;i++){
+    const y = pad.t+plotH-(plotH*i/4);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.fillText(shortNum(maxV*i/4), 4, y+3);
+  }
+  const bw = plotW/vals.length*0.55;
+  vals.forEach((v,i)=>{
+    const slot = plotW/vals.length;
+    const x = pad.l+i*slot+(slot-bw)/2;
+    const bh = (v/maxV)*plotH;
+    const y = pad.t+plotH-bh;
+    const color = resolveColor(data.series[0].color);
+    ctx.fillStyle=color; ctx.fillRect(x,y,bw,bh);
+    ctx.fillStyle=textColor; ctx.fillText(data.labels[i], x, h-8);
+  });
+}
+
+function drawDonut(id, entries){
+  const setup = setupCanvas(id); if(!setup) return;
+  const {ctx,w,h} = setup;
+  ctx.clearRect(0,0,w,h);
+  const cx=w/2, cy=h/2, r=Math.min(w,h)/2-10, inner=r*0.6;
+  const total = entries.reduce((s,e)=>s+e.value,0) || 1;
+  let start = -Math.PI/2;
+  entries.forEach(e=>{
+    const angle = (e.value/total)*Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,start+angle);
+    ctx.closePath();
+    ctx.fillStyle = resolveColor(e.color);
+    ctx.fill();
+    start += angle;
+  });
+  ctx.globalCompositeOperation='destination-out';
+  ctx.beginPath(); ctx.arc(cx,cy,inner,0,Math.PI*2); ctx.fill();
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle = getCssVar('--text');
+  ctx.font='bold 14px Segoe UI'; ctx.textAlign='center';
+  ctx.fillText(money(total), cx, cy+5);
+  ctx.textAlign='left';
+}
+
+function shortNum(v){
+  const abs = Math.abs(v);
+  if(abs>=10000000) return (v/10000000).toFixed(1)+'Cr';
+  if(abs>=100000) return (v/100000).toFixed(1)+'L';
+  if(abs>=1000) return (v/1000).toFixed(0)+'k';
+  return Math.round(v);
+}
+
+const PALETTE = ['var(--accent)','#f472b6','#34d399','#fbbf24','#60a5fa','#a78bfa','#f87171','#2dd4bf'];
+
+function renderAllCharts(){
+  // Cashflow trend (simulate 6 months around current values)
+  const income = totalMonthlyIncome();
+  const expenses = totalMonthlyExpenses()+totalEMI()+totalSubMonthly();
+  const months = ['Feb','Mar','Apr','May','Jun','Jul'];
+  const incSeries = months.map((_,i)=> income*(0.94+i*0.012));
+  const expSeries = months.map((_,i)=> expenses*(0.9+ (Math.sin(i)*0.05) + i*0.01));
+  drawLineChart('chartCashflow', {labels:months, series:[
+    {name:'Income',color:'var(--accent)',data:incSeries},
+    {name:'Expenses',color:'var(--bad)',data:expSeries}
+  ]});
+
+  // Category donut
+  const byCat = expensesByCategory();
+  const entries = Object.entries(byCat).map(([k,v],i)=>({label:k,value:v,color:PALETTE[i%PALETTE.length]}));
+  drawDonut('chartCategory', entries.length? entries : [{label:'No data',value:1,color:'var(--border)'}]);
+  document.getElementById('categoryLegend').innerHTML = entries.map(e=>`<span><i style="background:${resolveColor(e.color)}"></i>${e.label}</span>`).join('') || '<span>No expenses logged yet</span>';
+
+  // Net worth growth (12 months projection)
+  const nwSeries = []; const nwLabels=[];
+  const baseNW = netWorth();
+  const monthlyNet = totalSavingsMonthly()+totalInvMonthly()-totalEMI()*0.05;
+  for(let m=0;m<=11;m++){ nwLabels.push('M'+(m+1)); nwSeries.push(baseNW + monthlyNet*m); }
+  drawLineChart('chartNetworth', {labels:nwLabels, series:[{name:'Net Worth',color:'var(--good)',data:nwSeries}]});
+
+  // Allocation donut
+  const allocMap = {};
+  DATA.investments.forEach(i=>{ allocMap[i.type]=(allocMap[i.type]||0)+i.value; });
+  const allocEntries = Object.entries(allocMap).map(([k,v],i)=>({label:k,value:v,color:PALETTE[i%PALETTE.length]}));
+  drawDonut('chartAllocation', allocEntries.length? allocEntries : [{label:'No data',value:1,color:'var(--border)'}]);
+  document.getElementById('allocLegend').innerHTML = allocEntries.map(e=>`<span><i style="background:${resolveColor(e.color)}"></i>${e.label} (${money(e.value)})</span>`).join('') || '<span>No investments yet</span>';
+
+  // Investment growth
+  const invSeries=[]; for(let y=0;y<=15;y++){ invSeries.push(futureValue(totalInvestments(), totalInvMonthly(), weightedInvReturn()||8, y)); }
+  drawLineChart('chartInvGrowth', {labels:invSeries.map((_,i)=>'Yr '+i), series:[{name:'Portfolio',color:'var(--accent)',data:invSeries}]});
+
+  // CF projection 12mo
+  const cfSeries=[]; let running=0;
+  for(let m=0;m<12;m++){ running += (income-expenses); cfSeries.push(running); }
+  drawLineChart('chartCFProjection', {labels:Array.from({length:12},(_,i)=>'M'+(i+1)), series:[{name:'Cumulative Surplus',color:'var(--accent)',data:cfSeries}]});
+
+  // Waterfall (bar) - simplified as bar chart of categories vs remaining
+  const catVals = Object.values(byCat);
+  const catLabels = Object.keys(byCat);
+  drawBarChart('chartWaterfall', {labels: catLabels.length?catLabels:['No data'], series:[{name:'Spend',color:'var(--accent)',data: catVals.length?catVals:[0]}]});
+
+  // Debt payoff
+  let bal = totalLoans();
+  const debtSeries=[]; const debtLabels=[];
+  const monthlyEMI = totalEMI();
+  const avgRate = DATA.loans.length ? DATA.loans.reduce((s,l)=>s+l.rate,0)/DATA.loans.length/1200 : 0;
+  for(let y=0;y<=15 && bal>0.01;y++){
+    debtLabels.push('Yr '+y); debtSeries.push(Math.max(0,bal));
+    for(let m=0;m<12;m++){ if(bal<=0) break; const interest=bal*avgRate; bal = bal+interest-monthlyEMI; if(bal<0) bal=0; }
+  }
+  if(debtSeries.length===0){ debtLabels.push('Now'); debtSeries.push(0); }
+  drawLineChart('chartDebtPayoff', {labels:debtLabels, series:[{name:'Balance',color:'var(--bad)',data:debtSeries}]});
+
+  renderSimulator();
+}
+
+/* =====================================================================
+   MASTER RENDER
+===================================================================== */
+function renderAll(){
+  renderKPIs();
+  renderHealthScore();
+  renderGoalMini();
+  renderIncome();
+  renderExpenses();
+  renderBudgets();
+  renderCashflow();
+  renderSavings();
+  renderInvestments();
+  renderGoalsFull();
+  renderLoans();
+  renderSubscriptions();
+  renderInsights();
+  renderReports();
+  renderTips();
+  renderChecklist();
+  renderResources();
+  renderPrintReport();
+  requestAnimationFrame(()=> requestAnimationFrame(renderAllCharts));
+}
+
+window.addEventListener('resize', ()=>{ clearTimeout(window._rt); window._rt=setTimeout(renderAllCharts,150); });
+
+renderAll();
+</script>
+</body>
+</html>
