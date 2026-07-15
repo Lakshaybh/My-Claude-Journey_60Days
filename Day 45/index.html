@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Decision Report | Acquisition vs. Independence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root{
+    --brand-orange:#FF6633; --brand-orange-hover:#FF7D52; --brand-orange-dim:#E04E1F;
+    --brand-navy:#0B1B33;
+    --orange-soft:rgba(255,102,51,0.08); --orange-glow:rgba(255,102,51,0.18);
+    --danger:#E04545; --danger-soft:rgba(224,69,69,0.07);
+
+    --bg-base:#F7F8FA; --bg-surface:#FFFFFF; --bg-card:#FFFFFF; --bg-card-hover:#FBFAF8;
+    --border-subtle:#E7E9EE; --border-active:#D4D8E0;
+
+    --text-primary:#0B1B33; --text-secondary:#5A6577; --text-muted:#9AA3B2;
+
+    --accent:#FF6633; --accent-hover:#FF7D52; --accent-dim:#E04E1F;
+    --accent-glow:rgba(255,102,51,0.18);
+
+    --shadow-card:0 1px 2px rgba(11,27,51,.05), 0 8px 24px rgba(11,27,51,.06);
+    --font-sans:"Inter",-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+  }
+  [data-theme="dark"]{
+    --bg-base:#0A0E1A; --bg-surface:#111827; --bg-card:#1A2235; --bg-card-hover:#202B42;
+    --border-subtle:#1E2D45; --border-active:#33405C;
+    --text-primary:#F1F5F9; --text-secondary:#9AA6B8; --text-muted:#5A6477;
+    --accent:#FF6633; --accent-hover:#FF7D52; --accent-dim:#E04E1F;
+    --accent-glow:rgba(255,102,51,0.22);
+    --shadow-card:0 6px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+  body{
+    margin:0;
+    background:var(--bg-base);
+    color:var(--text-primary);
+    font-family:var(--font-sans);
+  }
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .container{max-width:1100px;margin:0 auto;padding:0 20px;}
+
+  /* APP HEADER (slim) */
+  .app-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;border-bottom:1px solid var(--border-subtle);
+    background:var(--bg-surface);position:sticky;top:0;z-index:10;
+  }
+  .app-header .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
+  .app-header .tagline{color:var(--text-secondary);font-size:13px;}
+
+  /* HERO */
+  .hero{
+    padding:72px 20px 56px;text-align:center;position:relative;overflow:hidden;
+    border-bottom:1px solid var(--border-subtle);
+  }
+  .hero::before{
+    content:"";position:absolute;top:-120px;left:50%;transform:translateX(-50%);
+    width:640px;height:320px;border-radius:50%;
+    background:radial-gradient(circle,var(--orange-glow),transparent 70%);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);position:relative;
+  }
+  .hero h1{
+    font-size:clamp(36px,5vw,56px);font-weight:800;letter-spacing:-.03em;line-height:1.05;
+    margin:14px 0 16px;position:relative;
+  }
+  .hero p.lead{
+    font-size:16px;line-height:1.65;color:var(--text-secondary);
+    max-width:60ch;margin:0 auto;position:relative;
+  }
+  .hero .meta{color:var(--text-muted);font-size:12px;margin-top:18px;position:relative;}
+  .gradient-line{
+    height:3px;max-width:200px;margin:24px auto 0;border-radius:2px;position:relative;
+    background:linear-gradient(90deg,var(--brand-navy),var(--accent));
+  }
+
+  section{padding:56px 0;}
+
+  .section-head{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
+  .section-head .num{
+    width:28px;height:28px;border-radius:8px;background:var(--orange-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;
+  }
+  .section-head h2{font-size:26px;font-weight:760;letter-spacing:-.02em;margin:0;}
+  .section-head svg{color:var(--accent);flex-shrink:0;}
+
+  .card{
+    background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;
+    padding:28px;box-shadow:var(--shadow-card);transition:transform .2s ease,background .2s ease;
+  }
+  .card:hover{transform:translateY(-2px);background:var(--bg-card-hover);}
+  .body-text{font-size:15px;line-height:1.65;color:var(--text-primary);}
+  .body-text + .body-text{margin-top:10px;}
+  .label{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--text-secondary);text-transform:uppercase;}
+
+  /* OPTION CARDS */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .option-card h3{margin:0 0 12px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .option-card .row{margin-bottom:12px;}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;background:var(--bg-base);border:1px solid var(--border-subtle);color:var(--text-secondary);}
+  .pill-accent{background:var(--orange-soft);color:var(--accent-dim);border-color:transparent;}
+
+  ul.tight{margin:8px 0 0;padding-left:20px;}
+  ul.tight li{margin-bottom:6px;font-size:15px;line-height:1.6;}
+
+  /* MATRIX */
+  .matrix-row{margin-bottom:18px;}
+  .matrix-label{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:8px;}
+  .bar-line{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+  .bar-tag{width:150px;font-size:12px;color:var(--text-secondary);flex-shrink:0;}
+  .bar-container{flex:1;height:26px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:8px;overflow:hidden;}
+  .bar-fill{
+    height:100%;border-radius:8px;width:0%;display:flex;align-items:center;justify-content:flex-end;
+    padding-right:10px;color:#fff;font-weight:700;font-size:12px;font-variant-numeric:tabular-nums;
+    animation:growBar .8s ease-out forwards;
+  }
+  @keyframes growBar{from{width:0%;}}
+  .fill-winner{background:linear-gradient(90deg,var(--brand-orange-dim),var(--brand-orange));}
+  .fill-loser{background:#B7BEC9;}
+  .total-row{
+    margin-top:8px;padding:16px 18px;border-radius:10px;background:var(--bg-base);
+    font-weight:700;font-size:15px;display:flex;justify-content:space-between;border:1px solid var(--border-subtle);
+  }
+  .total-row.winner{background:var(--orange-soft);color:var(--accent-dim);border-color:transparent;}
+
+  /* PREMORTEM */
+  .warn{color:var(--danger);}
+  .danger-callout{background:var(--danger-soft);border:1px solid rgba(224,69,69,.2);border-radius:10px;padding:12px 14px;margin-top:10px;font-size:14px;color:var(--text-primary);display:flex;gap:8px;align-items:flex-start;}
+  .danger-callout svg{color:var(--danger);flex-shrink:0;margin-top:2px;}
+
+  /* 7-DAY PLAN */
+  .plan-row{display:flex;gap:16px;padding:14px 0;border-bottom:1px solid var(--border-subtle);}
+  .plan-row:last-child{border-bottom:none;}
+  .plan-day{width:100px;flex-shrink:0;font-weight:700;font-size:13px;color:var(--accent);}
+
+  /* VERDICT */
+  .verdict-card{
+    background:var(--bg-surface);border:1px solid var(--border-active);border-radius:16px;
+    padding:44px;text-align:center;box-shadow:0 0 0 1px var(--orange-glow),var(--shadow-card);
+  }
+  .verdict-name{font-size:32px;font-weight:800;color:var(--accent-dim);margin:8px 0 16px;letter-spacing:-.02em;}
+  .hard-truth{font-style:italic;color:var(--text-secondary);margin-top:20px;font-size:15px;}
+
+  /* SHAREABLE */
+  .share-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .mini-card{
+    background:var(--bg-surface);border:1px solid var(--border-subtle);border-left:3px solid var(--accent);
+    border-radius:12px;padding:20px;min-height:170px;display:flex;flex-direction:column;justify-content:space-between;
+    box-shadow:var(--shadow-card);
+  }
+  .mini-card h5{margin:0 0 10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-secondary);}
+  .watermark{font-size:11px;color:var(--text-muted);margin-top:14px;}
+
+  .btn{
+    font-family:inherit;cursor:pointer;border-radius:9px;padding:12px 22px;font-weight:700;font-size:14px;
+    border:1px solid transparent;transition:transform .15s ease,background .15s ease;display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:var(--accent-hover);}
+  .btn-secondary{background:transparent;border-color:var(--border-active);color:var(--text-primary);}
+
+  footer{text-align:center;color:var(--text-muted);font-size:12px;padding:40px 20px;border-top:1px solid var(--border-subtle);}
+
+  @media print{
+    .app-header{position:static;}
+    #printBtn{display:none;}
+    .hero::before{display:none;}
+    .card:hover, .mini-card:hover{transform:none;}
+    section{padding:24px 0;break-inside:avoid;}
+    .card, .verdict-card, .mini-card{box-shadow:none;break-inside:avoid;}
+    body{background:#fff;}
+  }
+
+  @media(max-width:680px){
+    .grid-2{grid-template-columns:1fr;}
+    .share-row{grid-template-columns:1fr;}
+    .bar-tag{width:110px;font-size:11px;}
+    .card{padding:20px;}
+    section{padding:40px 0;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="brand"><span class="dot"></span>Decision Strategist</div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="tagline">Board-ready decision analysis</div>
+    <button class="btn btn-primary" id="printBtn" onclick="window.print()">
+      <svg width="16" height="16" data-lucide="printer"></svg>
+      Print report
+    </button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">Decision Report</div>
+  <h1>Acquisition offer vs. staying independent</h1>
+  <p class="lead">A structured breakdown of a $40M acquisition offer against raising a Series C and staying independent, scored on strategic fundamentals, not gut feel alone.</p>
+  <div class="meta">Prepared July 15, 2026 &middot; Confidential board material</div>
+  <div class="gradient-line"></div>
+</div>
+
+<div class="container">
+
+<section id="s1">
+  <div class="section-head">
+    <div class="num">1</div>
+    <h2>The real decision</h2>
+  </div>
+  <div class="card">
+    <p class="body-text">The choice is between a $40M acquisition offer today and staying independent to raise a Series C for a shot at a materially larger outcome.</p>
+    <p class="body-text">The real trade-off is certainty versus ceiling: one path locks in a known number, the other keeps the upside open at the cost of the guarantee.</p>
+    <p class="body-text">It is emotionally hard because co-founders want liquidity now, while walking away from a top-of-market offer is very difficult to reverse.</p>
+  </div>
+</section>
+
+<section id="s2">
+  <div class="section-head">
+    <div class="num">2</div>
+    <h2>The case for each option</h2>
+  </div>
+  <div class="grid-2">
+    <div class="card option-card">
+      <h3>Accept the acquisition</h3>
+      <div class="row"><span class="label">Strongest case</span>
+        <p class="body-text">Locks in $40M at the top of the current market and removes execution risk for the whole team.</p>
+      </div>
+      <div class="row"><span class="label">Hidden upside</span>
+        <p class="body-text">Frees the founding team's time and capital to build the next thing without existential financial pressure.</p>
+      </div>
+      <div class="row"><span class="label">Biggest weakness</span>
+        <p class="body-text">Caps the outcome permanently. If the company was headed toward a much larger exit, that value is gone.</p>
+      </div>
+      <span class="pill">Best if you value: certainty and control over outcome</span>
+    </div>
+    <div class="card option-card">
+      <h3>Stay independent, raise Series C</h3>
+      <div class="row"><span class="label">Strongest case</span>
+        <p class="body-text">Preserves the option for a 5-10x larger outcome and matches what the founder's gut is already signaling.</p>
+      </div>
+      <div class="row"><span class="label">Hidden upside</span>
+        <p class="body-text">A fresh raise brings new investor scrutiny and discipline that often sharpens strategy faster than staying private ever would.</p>
+      </div>
+      <div class="row"><span class="label">Biggest weakness</span>
+        <p class="body-text">Raise risk is real. If the market turns, the company may end up worth far less than the offer on the table today.</p>
+      </div>
+      <span class="pill pill-accent">Best if you value: long-term upside and momentum</span>
+    </div>
+  </div>
+</section>
+
+<section id="s3">
+  <div class="section-head">
+    <div class="num">3</div>
+    <h2>Assumption buster</h2>
+  </div>
+  <div class="card">
+    <span class="label">Assumptions likely in play</span>
+    <ul class="tight body-text">
+      <li>That a rejected offer of this size will come back later on similar terms. It usually does not.</li>
+      <li>That staying independent guarantees a bigger outcome. It only guarantees more time in the risk.</li>
+      <li>That co-founder pressure for liquidity reflects the company's actual trajectory, not just individual risk tolerance.</li>
+    </ul>
+    <span class="label" style="display:block;margin-top:20px;">Biases at play</span>
+    <ul class="tight body-text">
+      <li><strong>Loss aversion</strong>: the fear of regretting a rejected $40M offer is being weighted more heavily than the equally real cost of capping the upside.</li>
+      <li><strong>Status quo bias</strong>: staying independent feels like "no decision," when in fact it is an active bet to keep building under raise risk.</li>
+    </ul>
+    <div class="danger-callout">
+      <svg width="18" height="18" data-lucide="alert-triangle"></svg>
+      <span>What is being ignored: the cost of a slow, indecisive board process itself. Every week spent deliberating narrows the acquirer's patience and the fundraising window alike.</span>
+    </div>
+  </div>
+</section>
+
+<section id="s4">
+  <div class="section-head">
+    <div class="num">4</div>
+    <h2>Decision matrix</h2>
+  </div>
+  <div class="card" id="matrixCard">
+    <div id="barsHost"></div>
+    <div class="total-row" id="rowAccept"><span>Accept acquisition &mdash; total</span><span>39 / 70</span></div>
+    <div class="total-row winner" id="rowStay"><span>Stay independent &mdash; total</span><span>45 / 70</span></div>
+  </div>
+</section>
+
+<section id="s5">
+  <div class="section-head">
+    <div class="num">5</div>
+    <h2>Premortem</h2>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="font-size:16px;">Accept acquisition &mdash; fails by month 12</h3>
+      <ul class="tight body-text">
+        <li>The team disperses post-acquisition and the product loses its original edge.</li>
+        <li>Founders regret capping an outcome that would have been far larger.</li>
+        <li>Integration friction erodes the deal's promised terms.</li>
+      </ul>
+      <p class="body-text" style="margin-top:12px;"><span class="label">Early warning:</span> key team members start leaving within the first two quarters.</p>
+      <p class="body-text"><span class="label">Prevention:</span> negotiate retention terms and product autonomy into the deal before signing.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:16px;">Stay independent &mdash; fails by month 12</h3>
+      <ul class="tight body-text">
+        <li>The Series C raise stalls or closes at a down round.</li>
+        <li>Market conditions shift, and the $40M offer is no longer on the table.</li>
+        <li>Cash runway gets dangerously short before the round closes.</li>
+      </ul>
+      <p class="body-text" style="margin-top:12px;"><span class="label">Early warning:</span> lead investor interest goes quiet for more than three weeks.</p>
+      <p class="body-text"><span class="label">Prevention:</span> set a hard runway floor and a go/no-go date before starting the raise.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s6">
+  <div class="section-head">
+    <div class="num">6</div>
+    <h2>7-day test plan</h2>
+  </div>
+  <div class="card">
+    <div class="plan-row"><div class="plan-day">Day 1-2</div><div class="body-text">Get real numbers: independent valuation range and current fundraising market conditions.</div></div>
+    <div class="plan-row"><div class="plan-day">Day 3-4</div><div class="body-text">Run one small experiment: soft-circle interest from one lead investor without a formal raise.</div></div>
+    <div class="plan-row"><div class="plan-day">Day 5-6</div><div class="body-text">Have one direct conversation with the acquirer to test if any deal flexibility exists.</div></div>
+    <div class="plan-row"><div class="plan-day">Day 7</div><div class="body-text">Decide: if investor interest is credible and the acquirer will not move, proceed toward the raise.</div></div>
+  </div>
+</section>
+
+<section id="s7">
+  <div class="section-head">
+    <div class="num">7</div>
+    <h2>The verdict</h2>
+  </div>
+  <div class="verdict-card">
+    <span class="eyebrow" style="position:static;">Recommended path</span>
+    <div class="verdict-name">Stay independent, raise Series C</div>
+    <p class="body-text">It wins 45-39 on the matrix and matches the gut call already in play. The upside case is stronger than the safety case here.</p>
+    <p class="body-text" style="margin-top:8px;">What could flip it: if the 7-day investor test comes back cold, the acquisition becomes the safer, correct call.</p>
+    <p class="hard-truth">Hard truth: the fear here is not the wrong decision, it is losing a guarantee. That is a different risk than losing the company.</p>
+  </div>
+</section>
+
+<section id="s8">
+  <div class="section-head">
+    <div class="num">8</div>
+    <h2>Shareable cards</h2>
+  </div>
+  <div class="share-row">
+    <div class="mini-card">
+      <div>
+        <h5>Matrix summary</h5>
+        <p class="body-text" style="font-size:14px;">Accept acquisition: <strong>39/70</strong><br/>Stay independent: <strong style="color:var(--accent-dim);">45/70</strong></p>
+      </div>
+      <div class="watermark">Built with Claude AI</div>
+    </div>
+    <div class="mini-card">
+      <div>
+        <h5>Verdict</h5>
+        <p class="body-text" style="font-size:14px;"><strong style="color:var(--accent-dim);">Stay independent</strong><br/>Wins on upside, aligned with gut.</p>
+      </div>
+      <div class="watermark">Built with Claude AI</div>
+    </div>
+    <div class="mini-card">
+      <div>
+        <h5>Share hook</h5>
+        <p class="body-text" style="font-size:14px;">Turned a $40M exit decision into a 7-point scored matrix. The number that won surprised the room.</p>
+      </div>
+      <div class="watermark">Built with Claude AI</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>Built with Claude AI | ABTalks 60-Day Challenge</footer>
+
+<script>
+  lucide.createIcons();
+
+  const DIMENSIONS = [
+    ["Life/Career Upside", 6, 9],
+    ["Financial Safety", 9, 4],
+    ["Growth & Learning", 4, 9],
+    ["Stress Level (10=low)", 8, 3],
+    ["Reversibility (10=easy)", 2, 6],
+    ["Long-term Alignment", 5, 8],
+    ["Regret Risk (10=low)", 5, 6]
+  ];
+
+  const host = document.getElementById('barsHost');
+  DIMENSIONS.forEach(([label, a, b], i) => {
+    const row = document.createElement('div');
+    row.className = 'matrix-row';
+    row.innerHTML = `
+      <div class="matrix-label">${label}</div>
+      <div class="bar-line">
+        <div class="bar-tag">Accept acquisition</div>
+        <div class="bar-container"><div class="bar-fill fill-loser" style="width:${a*10}%;animation-delay:${i*0.08}s;">${a}</div></div>
+      </div>
+      <div class="bar-line">
+        <div class="bar-tag">Stay independent</div>
+        <div class="bar-container"><div class="bar-fill fill-winner" style="width:${b*10}%;animation-delay:${i*0.08+0.05}s;">${b}</div></div>
+      </div>`;
+    host.appendChild(row);
+  });
+</script>
+</body>
+</html>
