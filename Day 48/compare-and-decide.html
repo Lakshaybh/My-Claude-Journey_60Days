@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compare & Decide — Project Management Tools</title>
+<style>
+:root{
+  --brand-orange:#FF6633; --brand-orange-hover:#FF7D52; --brand-orange-dim:#E04E1F;
+  --brand-navy:#0B1B33;
+  --orange-soft:rgba(255,102,51,0.08); --orange-glow:rgba(255,102,51,0.18);
+  --danger:#E04545; --danger-soft:rgba(224,69,69,0.07);
+
+  --bg-base:#F7F8FA; --bg-surface:#FFFFFF; --bg-card:#FFFFFF; --bg-card-hover:#FBFAF8;
+  --border-subtle:#E7E9EE; --border-active:#D4D8E0;
+
+  --text-primary:#0B1B33; --text-secondary:#5A6577; --text-muted:#9AA3B2;
+
+  --accent:#FF6633; --accent-hover:#FF7D52; --accent-dim:#E04E1F;
+  --accent-glow:rgba(255,102,51,0.18);
+
+  --shadow-card:0 1px 2px rgba(11,27,51,.05), 0 8px 24px rgba(11,27,51,.06);
+  --font-sans:"Inter", -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
+}
+[data-theme="dark"]{
+  --bg-base:#0A0E1A; --bg-surface:#111827; --bg-card:#1A2235; --bg-card-hover:#202B42;
+  --border-subtle:#1E2D45; --border-active:#33405C;
+  --text-primary:#F1F5F9; --text-secondary:#9AA6B8; --text-muted:#5A6477;
+  --accent:#FF6633; --accent-hover:#FF7D52; --accent-dim:#E04E1F;
+  --accent-glow:rgba(255,102,51,0.22);
+  --shadow-card:0 6px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-base:#0A0E1A; --bg-surface:#111827; --bg-card:#1A2235; --bg-card-hover:#202B42;
+    --border-subtle:#1E2D45; --border-active:#33405C;
+    --text-primary:#F1F5F9; --text-secondary:#9AA6B8; --text-muted:#5A6477;
+    --accent:#FF6633; --accent-hover:#FF7D52; --accent-dim:#E04E1F;
+    --accent-glow:rgba(255,102,51,0.22);
+    --shadow-card:0 6px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family:var(--font-sans);
+  background:var(--bg-base);
+  color:var(--text-primary);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+img,svg{display:block;}
+.container{max-width:1100px; margin:0 auto; padding:0 20px;}
+
+/* App header */
+.app-header{
+  border-bottom:1px solid var(--border-subtle);
+  background:var(--bg-surface);
+  position:sticky; top:0; z-index:20;
+}
+.app-header-inner{
+  max-width:1100px; margin:0 auto; padding:14px 20px;
+  display:flex; align-items:center; gap:12px;
+}
+.logo-dot{
+  width:28px; height:28px; border-radius:8px;
+  background:var(--brand-navy);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.logo-dot svg{color:var(--accent);}
+.app-title{font-weight:760; font-size:15px; letter-spacing:-.01em;}
+.app-tagline{
+  margin-left:auto; font-size:12.5px; color:var(--text-secondary);
+  display:flex; align-items:center; gap:14px;
+}
+.theme-toggle{
+  background:none; border:1px solid var(--border-subtle); border-radius:8px;
+  padding:6px 8px; cursor:pointer; color:var(--text-secondary);
+  display:flex; align-items:center; justify-content:center;
+}
+.theme-toggle:hover{border-color:var(--border-active); color:var(--text-primary);}
+
+/* Hero-ish intro band (compact, app context) */
+.intro{
+  padding:40px 0 28px;
+  border-bottom:1px solid var(--border-subtle);
+}
+.eyebrow{
+  font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--accent); display:flex; align-items:center; gap:6px; margin-bottom:12px;
+}
+h1{
+  font-size:clamp(28px,4vw,40px); font-weight:800; letter-spacing:-.03em; line-height:1.1;
+  max-width:20ch; margin-bottom:12px;
+}
+.lead{font-size:16px; color:var(--text-secondary); max-width:62ch; margin-bottom:4px;}
+.decision-line{
+  font-size:14px; color:var(--text-muted); margin-top:10px;
+}
+
+section{padding:48px 0;}
+.section-head{display:flex; align-items:center; gap:8px; margin-bottom:20px;}
+.section-head svg{color:var(--accent); flex-shrink:0;}
+h2{font-size:22px; font-weight:760; letter-spacing:-.02em;}
+h3{font-size:16px; font-weight:700; letter-spacing:-.01em;}
+
+/* Card */
+.card{
+  background:var(--bg-card);
+  border:1px solid var(--border-subtle);
+  border-radius:12px;
+  box-shadow:var(--shadow-card);
+}
+
+/* Weight controls */
+.weights-card{padding:24px; margin-bottom:32px;}
+.weights-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
+.weight-item label{
+  display:flex; justify-content:space-between; font-size:13px; font-weight:600;
+  margin-bottom:8px;
+}
+.weight-item .wval{color:var(--accent); font-variant-numeric:tabular-nums;}
+input[type="range"]{
+  -webkit-appearance:none; width:100%; height:4px; border-radius:2px;
+  background:var(--border-subtle); outline:none;
+}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--accent); cursor:pointer; border:2px solid var(--bg-surface);
+  box-shadow:0 0 0 1px var(--accent);
+}
+input[type="range"]::-moz-range-thumb{
+  width:16px; height:16px; border-radius:50%; background:var(--accent); cursor:pointer;
+  border:2px solid var(--bg-surface); box-shadow:0 0 0 1px var(--accent);
+}
+.weights-foot{
+  display:flex; justify-content:space-between; align-items:center; margin-top:18px;
+  padding-top:16px; border-top:1px solid var(--border-subtle);
+}
+.weight-total{font-size:12.5px; color:var(--text-muted);}
+.weight-total strong{color:var(--text-primary); font-variant-numeric:tabular-nums;}
+
+/* Buttons */
+.btn{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--font-sans); font-size:13.5px; font-weight:600;
+  padding:9px 16px; border-radius:9px; border:1px solid var(--border-subtle);
+  background:var(--bg-surface); color:var(--text-primary); cursor:pointer;
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.btn:hover{transform:translateY(-2px); border-color:var(--border-active);}
+.btn-primary{
+  background:var(--accent); border-color:var(--accent); color:#fff;
+}
+.btn-primary:hover{background:var(--accent-hover); box-shadow:0 8px 20px var(--accent-glow);}
+.btn-secondary{background:var(--bg-surface);}
+
+/* Ranking list */
+.rank-list{display:flex; flex-direction:column; gap:14px;}
+.rank-row{
+  padding:20px; display:grid; grid-template-columns:44px 1fr 220px; gap:18px; align-items:center;
+  transition:transform .15s ease;
+}
+.rank-row:hover{transform:translateY(-2px);}
+.rank-row.top{border-color:var(--accent); box-shadow:0 1px 2px rgba(11,27,51,.05), 0 10px 28px var(--orange-glow);}
+.rank-num{
+  font-size:20px; font-weight:800; color:var(--text-muted); font-variant-numeric:tabular-nums;
+}
+.rank-row.top .rank-num{color:var(--accent);}
+.rank-name-row{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+.rank-name{font-size:17px; font-weight:760; letter-spacing:-.01em;}
+.pill{
+  font-size:11px; font-weight:700; letter-spacing:.02em; padding:3px 9px; border-radius:20px;
+  background:var(--bg-base); border:1px solid var(--border-subtle); color:var(--text-secondary);
+}
+.pill-accent{background:var(--orange-soft); border-color:var(--orange-glow); color:var(--accent-dim);}
+[data-theme="dark"] .pill-accent{color:var(--accent-hover);}
+.rank-bars{display:flex; flex-direction:column; gap:5px;}
+.bar-row{display:flex; align-items:center; gap:8px; font-size:11px; color:var(--text-muted);}
+.bar-label{width:64px; flex-shrink:0;}
+.bar-track{flex:1; height:6px; background:var(--bg-base); border-radius:4px; overflow:hidden; border:1px solid var(--border-subtle);}
+.bar-fill{height:100%; background:var(--accent); border-radius:4px; transition:width .3s ease;}
+.rank-score{text-align:right;}
+.rank-score .num{font-size:28px; font-weight:800; color:var(--text-primary); font-variant-numeric:tabular-nums;}
+.rank-score .cap{font-size:11px; color:var(--text-muted); letter-spacing:.02em;}
+
+/* Matrix table */
+.table-wrap{overflow-x:auto; border-radius:12px; border:1px solid var(--border-subtle);}
+table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:640px;}
+th,td{padding:14px 16px; text-align:left; border-bottom:1px solid var(--border-subtle);}
+th{background:var(--bg-base); font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-secondary); font-weight:700;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--bg-card-hover);}
+td.tool-cell{font-weight:700;}
+.estimate-flag{
+  display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:700;
+  color:var(--accent-dim); background:var(--orange-soft); border:1px solid var(--orange-glow);
+  padding:2px 7px; border-radius:20px; margin-left:6px; letter-spacing:.02em;
+}
+[data-theme="dark"] .estimate-flag{color:var(--accent-hover);}
+
+/* Sources panel */
+.sources-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+.source-item{
+  padding:16px; display:flex; flex-direction:column; gap:6px;
+}
+.source-item .stag{font-size:11px; font-weight:700; color:var(--accent); letter-spacing:.04em; text-transform:uppercase;}
+.source-item a{font-size:13.5px; color:var(--text-primary); text-decoration:none; font-weight:600; word-break:break-word;}
+.source-item a:hover{color:var(--accent);}
+.source-item .snote{font-size:12px; color:var(--text-muted);}
+
+/* Collapsible */
+.collapsible{padding:0;}
+.collapsible-head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:20px 24px; cursor:pointer; user-select:none;
+}
+.collapsible-head h3{display:flex; align-items:center; gap:8px;}
+.collapsible-head h3 svg{color:var(--accent);}
+.chev{transition:transform .2s ease; color:var(--text-muted); flex-shrink:0;}
+.collapsible.open .chev{transform:rotate(180deg);}
+.collapsible-body{
+  max-height:0; overflow:hidden; transition:max-height .3s ease;
+  padding:0 24px;
+}
+.collapsible.open .collapsible-body{padding:0 24px 24px;}
+.research-block{margin-bottom:18px;}
+.research-block:last-child{margin-bottom:0;}
+.research-block h4{font-size:13.5px; font-weight:700; margin-bottom:6px;}
+.research-block p{font-size:13.5px; color:var(--text-secondary); line-height:1.7;}
+.conflict-list{list-style:none; display:flex; flex-direction:column; gap:10px; margin-top:8px;}
+.conflict-list li{
+  font-size:13px; color:var(--text-secondary); padding-left:16px; position:relative; line-height:1.6;
+}
+.conflict-list li::before{
+  content:""; position:absolute; left:0; top:8px; width:6px; height:6px; border-radius:50%; background:var(--accent);
+}
+
+.caveat-banner{
+  display:flex; gap:12px; align-items:flex-start; padding:16px 18px; border-radius:10px;
+  background:var(--orange-soft); border:1px solid var(--orange-glow); margin-bottom:28px;
+}
+.caveat-banner svg{color:var(--accent-dim); flex-shrink:0; margin-top:2px;}
+[data-theme="dark"] .caveat-banner svg{color:var(--accent-hover);}
+.caveat-banner p{font-size:13px; color:var(--text-secondary); line-height:1.6;}
+.caveat-banner strong{color:var(--text-primary);}
+
+footer{
+  border-top:1px solid var(--border-subtle); padding:32px 0; text-align:center;
+}
+footer p{font-size:12.5px; color:var(--text-muted);}
+
+/* Loading / empty */
+.state-msg{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:12px; padding:60px 20px; text-align:center; color:var(--text-muted);
+}
+.state-msg svg{color:var(--text-muted);}
+.spinner{
+  width:28px; height:28px; border-radius:50%;
+  border:3px solid var(--border-subtle); border-top-color:var(--accent);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.hidden{display:none !important;}
+
+@media (max-width:820px){
+  .weights-grid{grid-template-columns:repeat(2,1fr);}
+  .rank-row{grid-template-columns:1fr; gap:12px;}
+  .rank-score{text-align:left;}
+  .sources-grid{grid-template-columns:1fr;}
+}
+@media (max-width:520px){
+  .weights-grid{grid-template-columns:1fr;}
+  .app-tagline span:not(.theme-toggle){display:none;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+}
+
+/* Print styles */
+@media print{
+  .app-header, .theme-toggle, .btn, .weights-card .weights-foot .btn, .no-print{display:none !important;}
+  body{background:#fff; color:#0B1B33;}
+  .card{box-shadow:none; border:1px solid #ccc;}
+  section{padding:20px 0;}
+  .collapsible-body{max-height:none !important; padding:0 24px 24px !important;}
+  .container{max-width:100%;}
+  a{color:#0B1B33; text-decoration:underline;}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <div class="logo-dot">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+    </div>
+    <span class="app-title">Compare & Decide</span>
+    <div class="app-tagline">
+      <span>Project management tools, ranked for your priorities</span>
+      <button class="theme-toggle no-print" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="intro">
+  <div class="container">
+    <div class="eyebrow">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg>
+      Decision builder
+    </div>
+    <h1>Notion vs Asana vs monday.com vs ClickUp</h1>
+    <p class="lead">Built for a startup founder picking the first project management tool for a 2 to 15 person team. Adjust the weights below to match what matters to you, and the ranking updates live.</p>
+    <p class="decision-line">One decision to walk away with: which tool to standardize on this quarter, and why.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+      <h2>Set your priorities</h2>
+    </div>
+
+    <div class="card weights-card">
+      <div class="weights-grid" id="weightsGrid"></div>
+      <div class="weights-foot">
+        <span class="weight-total">Weights are normalized automatically. Current split: <strong id="weightSummary">—</strong></span>
+        <button class="btn btn-secondary no-print" id="resetWeights">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          Reset to equal weights
+        </button>
+      </div>
+    </div>
+
+    <div id="loadingState" class="state-msg hidden">
+      <div class="spinner"></div>
+      <p>Recalculating ranking...</p>
+    </div>
+
+    <div id="rankSection">
+      <div class="section-head" style="margin-top:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        <h2>Live ranking</h2>
+      </div>
+      <div class="rank-list" id="rankList"></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:8px;">
+  <div class="container">
+    <div class="section-head">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      <h2>Full comparison matrix</h2>
+    </div>
+    <div class="caveat-banner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p><strong>Read this before trusting a single number.</strong> Items marked <span class="estimate-flag">ESTIMATE</span> are proxy figures, not a directly confirmed sourced statistic — see "How this was researched" below for exactly why.</p>
+    </div>
+    <div class="table-wrap">
+      <table id="matrixTable">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>Price (entry paid tier)</th>
+            <th>Ease of use</th>
+            <th>Features present</th>
+            <th>Integrations</th>
+          </tr>
+        </thead>
+        <tbody id="matrixBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:8px;">
+  <div class="container">
+    <div class="section-head">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <h2>Sources</h2>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div class="sources-grid" id="sourcesGrid"></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:8px; padding-bottom:64px;">
+  <div class="container">
+    <div class="card collapsible" id="researchPanel">
+      <div class="collapsible-head" id="researchToggle">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          How this was researched
+        </h3>
+        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="collapsible-body">
+        <div class="research-block">
+          <h4>Method</h4>
+          <p>Pricing and feature claims were pulled directly from each vendor's official pricing and integrations pages in July 2026. Ease-of-use figures come from G2 review data. G2's review pages blocked direct automated fetching (HTTP 403), so those four numbers were read from search-engine result snippets of G2 content rather than a live page load. Treat them as directionally accurate, not laboratory-precise.</p>
+        </div>
+        <div class="research-block">
+          <h4>Price score</h4>
+          <p>Scored on the cheapest annual-billed paid per-seat tier each vendor publishes (ClickUp Unlimited $7, monday.com Basic $9, Notion Plus $10, Asana Starter $10.99, all per user per month). Free plans exist for all four but were not used for scoring since a growing team outgrows them quickly; free-tier limits are listed in the matrix for reference.</p>
+        </div>
+        <div class="research-block">
+          <h4>Ease of use score</h4>
+          <p>Asana (8.6/10) and ClickUp (8.8/10, reported as 88% on G2) have a directly stated ease-of-use sub-score. Notion and monday.com do not have a confirmed public ease-of-use sub-score, so their scores use each product's overall G2 star rating (Notion 4.6/5, monday.com 4.7/5) converted to a /10 scale as a proxy, flagged as an estimate in the matrix.</p>
+        </div>
+        <div class="research-block">
+          <h4>Features score</h4>
+          <p>Built from an 8-point checklist (task management, docs/wiki, kanban view, gantt/timeline view, calendar view, automations, templates, AI features) using only capabilities each vendor's own pricing or feature page explicitly states. A tool scores a point per capability regardless of which paid tier unlocks it. Asana scored lower because its pricing page does not describe a dedicated docs product or AI feature the way the other three do.</p>
+        </div>
+        <div class="research-block">
+          <h4>Integrations score</h4>
+          <p>Vendors describe integration counts in rounded marketing language rather than a precise audited number: Notion "100+", Asana "200+", monday.com "200+", ClickUp "1,000+ tools." ClickUp's figure explicitly combines native integrations, auto-import connectors, and third-party tools in one headline number, which is not directly comparable to the other three vendors' native-integration framing. Third-party marketplace aggregators report different, generally higher counts (for example 454 listings for Asana), but those aren't the vendors' own published claims, so they were excluded from scoring.</p>
+        </div>
+        <div class="research-block">
+          <h4>Conflicts encountered and how they were resolved</h4>
+          <ul class="conflict-list">
+            <li>ClickUp's ease-of-use figure appeared in sources as both "88%" and "8.5/10" for what is the same underlying G2 dataset. Resolved by using the more frequently cited 88% (8.8/10 equivalent) and noting the discrepancy here rather than silently picking one.</li>
+            <li>Integration totals differ sharply between each vendor's own marketing page and third-party marketplace directories, because directories count every listed third-party connector while vendors round to a headline figure. Resolved by using only the vendor's own stated number for scoring, since that is what a founder will actually see on the pricing page.</li>
+            <li>G2's ease-of-use review pages returned a 403 error to direct automated fetching. Resolved by using search-indexed snippets of the same G2 pages and flagging any number without a directly confirmed sub-score as an estimate rather than presenting it with false precision.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container no-print" style="padding-bottom:64px; display:flex; justify-content:center;">
+  <button class="btn btn-primary" id="printBtn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Print comparison report
+  </button>
+</div>
+
+<footer>
+  <div class="container">
+    <p>Compare & Decide Builder. Data compiled July 2026 from vendor pricing pages and G2 review data. Not sponsored by Notion, Asana, monday.com, or ClickUp.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- Theme toggle ----
+  var root = document.documentElement;
+  var toggle = document.getElementById('themeToggle');
+  function setTheme(t){ root.setAttribute('data-theme', t); try{localStorage.setItem('cad-theme', t);}catch(e){} }
+  try{
+    var saved = localStorage.getItem('cad-theme');
+    if(saved) setTheme(saved);
+  }catch(e){}
+  toggle.addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme');
+    var isDark = cur === 'dark' || (!cur && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    setTheme(isDark ? 'light' : 'dark');
+  });
+
+  // ---- Data (sourced July 2026) ----
+  var TOOLS = [
+    {
+      id:'notion', name:'Notion',
+      price:{value:10, label:'$10/user/mo (Plus, annual)', free:'Free: 5MB file uploads, 10 guest limit, 7-day page history'},
+      ease:{score:9.2, sourced:false, label:'4.6/5 overall G2 rating (proxy)'},
+      features:{count:8, of:8, list:['Task management (databases)','Docs / wiki','Kanban view','Gantt / timeline view','Calendar view','Automations','Templates','AI (Business tier)']},
+      integrations:{label:'100+ native integrations (official)', score:6.5}
+    },
+    {
+      id:'asana', name:'Asana',
+      price:{value:10.99, label:'$10.99/user/mo (Starter, annual)', free:'Free: up to 2 users, unlimited tasks/projects'},
+      ease:{score:8.6, sourced:true, label:'8.6/10 ease-of-use (G2)'},
+      features:{count:6, of:8, list:['Task management','Kanban view','Gantt / timeline view','Calendar view','Automations (Starter+)','Templates']},
+      integrations:{label:'200+ apps (official)', score:7.5}
+    },
+    {
+      id:'monday', name:'monday.com',
+      price:{value:9, label:'$9/seat/mo (Basic, annual, 3-seat min)', free:'Free: 2 seats, 3 boards, 3 docs, 500MB'},
+      ease:{score:9.4, sourced:false, label:'4.7/5 overall G2 rating (proxy)'},
+      features:{count:8, of:8, list:['Task management (boards)','Docs','Kanban view','Gantt / timeline view','Calendar view','Automations (metered)','200+ templates','AI tools (tiered credits)']},
+      integrations:{label:'200+ integrations (official)', score:7.5}
+    },
+    {
+      id:'clickup', name:'ClickUp',
+      price:{value:7, label:'$7/user/mo (Unlimited, annual)', free:'Free Forever: 60MB total team storage, unlimited members/tasks'},
+      ease:{score:8.8, sourced:true, label:'88% / 8.8-10 ease-of-use (G2)'},
+      features:{count:8, of:8, list:['Task management','Docs','Kanban / board view','Gantt view','Calendar view','Automations','Large template library','AI "Brain" (paid add-on)']},
+      integrations:{label:'1,000+ tools, combined native + third-party (official)', score:10}
+    }
+  ];
+
+  var MIN_PRICE = Math.min.apply(null, TOOLS.map(function(t){return t.price.value;}));
+  TOOLS.forEach(function(t){
+    t.price.score = round1(10 * (MIN_PRICE / t.price.value));
+    t.features.score = round1((t.features.count / t.features.of) * 10);
+  });
+
+  var CRITERIA = [
+    {key:'price', label:'Price', icon:'dollar'},
+    {key:'ease', label:'Ease of use', icon:'smile'},
+    {key:'features', label:'Features', icon:'layers'},
+    {key:'integrations', label:'Integrations', icon:'link'}
+  ];
+
+  var weights = {price:25, ease:25, features:25, integrations:25};
+
+  function round1(n){ return Math.round(n*10)/10; }
+
+  // ---- Render weight sliders ----
+  var weightsGrid = document.getElementById('weightsGrid');
+  CRITERIA.forEach(function(c){
+    var wrap = document.createElement('div');
+    wrap.className = 'weight-item';
+    wrap.innerHTML =
+      '<label for="w-'+c.key+'"><span>'+c.label+'</span><span class="wval" id="wval-'+c.key+'">'+weights[c.key]+'%</span></label>'+
+      '<input type="range" min="0" max="100" step="5" value="'+weights[c.key]+'" id="w-'+c.key+'" aria-label="'+c.label+' weight">';
+    weightsGrid.appendChild(wrap);
+  });
+
+  CRITERIA.forEach(function(c){
+    document.getElementById('w-'+c.key).addEventListener('input', function(e){
+      weights[c.key] = parseInt(e.target.value, 10);
+      document.getElementById('wval-'+c.key).textContent = weights[c.key] + '%';
+      renderRanking();
+    });
+  });
+
+  document.getElementById('resetWeights').addEventListener('click', function(){
+    CRITERIA.forEach(function(c){
+      weights[c.key] = 25;
+      document.getElementById('w-'+c.key).value = 25;
+      document.getElementById('wval-'+c.key).textContent = '25%';
+    });
+    renderRanking();
+  });
+
+  // ---- Ranking calc + render ----
+  var rankList = document.getElementById('rankList');
+  var loadingState = document.getElementById('loadingState');
+  var rankSection = document.getElementById('rankSection');
+  var weightSummary = document.getElementById('weightSummary');
+  var renderTimer = null;
+
+  function normalizedWeights(){
+    var total = CRITERIA.reduce(function(s,c){ return s + weights[c.key]; }, 0);
+    var out = {};
+    if(total <= 0){
+      CRITERIA.forEach(function(c){ out[c.key] = 1/CRITERIA.length; });
+    } else {
+      CRITERIA.forEach(function(c){ out[c.key] = weights[c.key] / total; });
+    }
+    return out;
+  }
+
+  function computeScores(){
+    var nw = normalizedWeights();
+    return TOOLS.map(function(t){
+      var total = t.price.score*nw.price + t.ease.score*nw.ease + t.features.score*nw.features + t.integrations.score*nw.integrations;
+      return {tool:t, total: round1(total), nw: nw};
+    }).sort(function(a,b){ return b.total - a.total; });
+  }
+
+  function renderRanking(){
+    var total = CRITERIA.reduce(function(s,c){ return s + weights[c.key]; }, 0);
+    if(total === 0){
+      rankList.innerHTML = '';
+      rankSection.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      loadingState.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>All weights are at zero. Move at least one slider to see a ranking.</p>';
+      return;
+    }
+    loadingState.classList.add('hidden');
+    rankSection.classList.remove('hidden');
+
+    var ranked = computeScores();
+    var nw = ranked[0].nw;
+    var parts = CRITERIA.map(function(c){ return c.label + ' ' + Math.round(nw[c.key]*100) + '%'; });
+    weightSummary.textContent = parts.join(' · ');
+
+    rankList.innerHTML = ranked.map(function(r, idx){
+      var t = r.tool;
+      var isTop = idx === 0;
+      var bars = CRITERIA.map(function(c){
+        return '<div class="bar-row"><span class="bar-label">'+c.label+'</span><div class="bar-track"><div class="bar-fill" style="width:'+(t[c.key].score*10)+'%"></div></div><span>'+t[c.key].score+'</span></div>';
+      }).join('');
+      return (
+        '<div class="card rank-row'+(isTop?' top':'')+'">'+
+          '<div class="rank-num">'+(idx+1)+'</div>'+
+          '<div>'+
+            '<div class="rank-name-row"><span class="rank-name">'+t.name+'</span>'+(isTop?'<span class="pill pill-accent">Best match for your weights</span>':'')+'</div>'+
+            '<div class="rank-bars">'+bars+'</div>'+
+          '</div>'+
+          '<div class="rank-score"><div class="num">'+r.total.toFixed(1)+'</div><div class="cap">/ 10 weighted score</div></div>'+
+        '</div>'
+      );
+    }).join('');
+  }
+
+  // ---- Matrix table ----
+  var matrixBody = document.getElementById('matrixBody');
+  matrixBody.innerHTML = TOOLS.map(function(t){
+    return (
+      '<tr>'+
+        '<td class="tool-cell">'+t.name+'</td>'+
+        '<td>'+t.price.label+'<br><span style="color:var(--text-muted); font-size:12px;">'+t.price.free+'</span></td>'+
+        '<td>'+t.ease.label + (t.ease.sourced ? '' : '<span class="estimate-flag">ESTIMATE</span>') +'</td>'+
+        '<td>'+t.features.count+' / '+t.features.of+' checked'+'<br><span style="color:var(--text-muted); font-size:12px;">'+t.features.list.join(', ')+'</span></td>'+
+        '<td>'+t.integrations.label+(t.id==='clickup' ? '<span class="estimate-flag">MIXED FIGURE</span>' : '')+'</td>'+
+      '</tr>'
+    );
+  }).join('');
+
+  // ---- Sources ----
+  var SOURCES = [
+    {tag:'Pricing', name:'Notion Pricing', url:'https://www.notion.com/pricing', note:'Free / Plus / Business / Enterprise tiers, per-seat prices'},
+    {tag:'Integrations', name:'Notion Connections', url:'https://www.notion.com/connections', note:'Native integrations directory, "100+" language'},
+    {tag:'Pricing', name:'Asana Pricing', url:'https://asana.com/pricing', note:'Personal / Starter / Advanced / Enterprise tiers'},
+    {tag:'Integrations', name:'Asana Integrations', url:'https://asana.com/integrations', note:'"200+ apps" official figure'},
+    {tag:'Pricing', name:'monday.com Pricing', url:'https://monday.com/pricing', note:'Free / Basic / Standard / Pro / Enterprise tiers'},
+    {tag:'Integrations', name:'monday.com Marketplace', url:'https://monday.com/marketplace', note:'App marketplace, "200+ integrations" marketing figure'},
+    {tag:'Pricing', name:'ClickUp Pricing', url:'https://clickup.com/pricing', note:'Free Forever / Unlimited / Business / Enterprise tiers'},
+    {tag:'Integrations', name:'ClickUp Integrations', url:'https://clickup.com/integrations', note:'"1,000+ tools", combined native + third-party'},
+    {tag:'Ease of use', name:'G2 — Notion Reviews', url:'https://www.g2.com/products/notion/reviews', note:'Overall 4.6/5 rating, used as ease-of-use proxy (estimate)'},
+    {tag:'Ease of use', name:'G2 — Asana Reviews', url:'https://www.g2.com/products/asana/reviews', note:'Ease-of-use sub-score 8.6/10'},
+    {tag:'Ease of use', name:'G2 — monday.com Reviews', url:'https://www.g2.com/products/monday-com/reviews', note:'Overall 4.7/5 rating, used as ease-of-use proxy (estimate)'},
+    {tag:'Ease of use', name:'G2 — ClickUp Reviews', url:'https://www.g2.com/products/clickup/reviews', note:'Ease-of-use sub-score 88% (~8.8/10)'}
+  ];
+  var sourcesGrid = document.getElementById('sourcesGrid');
+  sourcesGrid.innerHTML = SOURCES.map(function(s){
+    return (
+      '<div class="source-item">'+
+        '<span class="stag">'+s.tag+'</span>'+
+        '<a href="'+s.url+'" target="_blank" rel="noopener noreferrer">'+s.name+'</a>'+
+        '<span class="snote">'+s.note+'</span>'+
+      '</div>'
+    );
+  }).join('');
+
+  // ---- Collapsible research panel ----
+  var panel = document.getElementById('researchPanel');
+  var researchToggle = document.getElementById('researchToggle');
+  var body = panel.querySelector('.collapsible-body');
+  researchToggle.addEventListener('click', function(){
+    var isOpen = panel.classList.toggle('open');
+    body.style.maxHeight = isOpen ? body.scrollHeight + 'px' : '0';
+  });
+  researchToggle.setAttribute('tabindex','0');
+  researchToggle.setAttribute('role','button');
+  researchToggle.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); researchToggle.click(); }
+  });
+
+  // ---- Print ----
+  document.getElementById('printBtn').addEventListener('click', function(){
+    if(!panel.classList.contains('open')){
+      panel.classList.add('open');
+      body.style.maxHeight = body.scrollHeight + 'px';
+    }
+    setTimeout(function(){ window.print(); }, 80);
+  });
+
+  // ---- Init ----
+  renderRanking();
+})();
+</script>
+</body>
+</html>
