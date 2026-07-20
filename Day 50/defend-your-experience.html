@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defend Your Experience</title>
+<style>
+:root{
+  --brand-orange:#FF6633; --brand-orange-hover:#FF7D52; --brand-orange-dim:#E04E1F;
+  --brand-navy:#0B1B33;
+  --orange-soft:rgba(255,102,51,0.08); --orange-glow:rgba(255,102,51,0.18);
+  --danger:#E04545; --danger-soft:rgba(224,69,69,0.07);
+
+  --bg-base:#F7F8FA; --bg-surface:#FFFFFF; --bg-card:#FFFFFF; --bg-card-hover:#FBFAF8;
+  --border-subtle:#E7E9EE; --border-active:#D4D8E0;
+
+  --text-primary:#0B1B33; --text-secondary:#5A6577; --text-muted:#9AA3B2;
+
+  --accent:#FF6633; --accent-hover:#FF7D52; --accent-dim:#E04E1F;
+  --accent-glow:rgba(255,102,51,0.18);
+
+  --shadow-card:0 1px 2px rgba(11,27,51,.05), 0 8px 24px rgba(11,27,51,.06);
+  --ease:cubic-bezier(.16,1,.3,1);
+
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-6:24px; --space-8:32px; --space-12:48px; --space-16:64px;
+  --radius-sm:8px; --radius:12px; --radius-lg:20px;
+}
+[data-theme="dark"]{
+  --bg-base:#0A0E1A; --bg-surface:#111827; --bg-card:#1A2235; --bg-card-hover:#202B42;
+  --border-subtle:#1E2D45; --border-active:#33405C;
+  --text-primary:#F1F5F9; --text-secondary:#9AA6B8; --text-muted:#5A6477;
+  --accent:#FF6633; --accent-hover:#FF7D52; --accent-dim:#E04E1F;
+  --accent-glow:rgba(255,102,51,0.22);
+  --shadow-card:0 6px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:"Inter",-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+  background:var(--bg-base); color:var(--text-primary);
+  -webkit-font-smoothing:antialiased;
+  transition:background .2s var(--ease), color .2s var(--ease);
+}
+::selection{background:var(--accent-glow);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
+a{color:inherit;}
+button{font-family:inherit;}
+
+.container{max-width:1100px;margin:0 auto;padding:0 20px;}
+
+/* ---------- App header ---------- */
+.app-head{display:flex;align-items:center;gap:10px;padding:12px 20px 16px;
+  border-bottom:1px solid var(--border-subtle); max-width:1100px;margin:0 auto;}
+.logo-dot{width:32px;height:32px;border-radius:8px;background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;flex:none;
+  box-shadow:0 3px 10px var(--accent-glow);}
+.app-head h1{font-size:15.5px;font-weight:700;letter-spacing:-.01em;}
+.app-head .sub{font-size:12px;color:var(--text-muted);margin-left:auto;display:flex;align-items:center;gap:14px;}
+.theme-toggle{background:transparent;border:1px solid var(--border-active);border-radius:8px;
+  padding:6px 8px;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;
+  transition:all .16s var(--ease);}
+.theme-toggle:hover{background:var(--bg-card-hover);transform:translateY(-1px);}
+
+/* ---------- Buttons ---------- */
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:10px;
+  padding:12px 24px;border:1px solid transparent;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:all .18s var(--ease); white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#fff;
+  box-shadow:0 4px 14px var(--accent-glow);}
+.btn-primary:hover:not(:disabled){background:var(--accent-hover);transform:translateY(-2px);
+  box-shadow:0 8px 22px var(--accent-glow);}
+.btn-secondary{background:transparent;color:var(--text-primary);
+  border-color:var(--border-active);}
+.btn-secondary:hover:not(:disabled){background:var(--bg-card-hover);transform:translateY(-2px);}
+.btn-lg{font-size:15px;padding:14px 30px;}
+.btn-sm{font-size:13px;padding:8px 16px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* ---------- Card ---------- */
+.card{background:var(--bg-card);border:1px solid var(--border-subtle);
+  border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-card);
+  transition:.18s var(--ease);}
+
+/* ---------- Pills ---------- */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 12px;
+  font-size:12px;font-weight:600;background:var(--bg-surface);color:var(--text-primary);
+  border:1px solid var(--border-subtle);}
+.pill-accent{background:var(--orange-soft);color:var(--brand-orange-dim);
+  border-color:var(--orange-glow);}
+.badge-strong{color:var(--accent);} .badge-fair{color:var(--text-secondary);}
+.badge-weak{color:var(--text-muted);}
+
+/* ---------- Inputs ---------- */
+.input, textarea.input{width:100%;font:inherit;font-size:15px;padding:12px 14px;
+  border-radius:10px;background:var(--bg-surface);color:var(--text-primary);
+  border:1px solid var(--border-subtle);transition:.16s var(--ease);resize:vertical;}
+.input:focus{outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-glow);}
+
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;}
+
+/* ---------- Screens ---------- */
+.screen{display:none;padding:24px 0 80px;}
+.screen.active{display:block;animation:enter .32s var(--ease);}
+@keyframes enter{from{opacity:0;transform:translateY(12px) scale(.99);}to{opacity:1;transform:none;}}
+
+/* ---------- Welcome / upload screen ---------- */
+.welcome-hero{text-align:center;max-width:640px;margin:32px auto 0;}
+.welcome-hero h2{font-size:clamp(28px,4vw,38px);font-weight:800;letter-spacing:-.02em;
+  line-height:1.15;margin:14px 0 12px;}
+.welcome-hero p{font-size:15.5px;color:var(--text-secondary);line-height:1.65;max-width:52ch;margin:0 auto;}
+
+.dropzone{margin:36px auto 0;max-width:680px;border:2px dashed var(--border-active);
+  border-radius:var(--radius-lg);padding:48px 24px;text-align:center;cursor:pointer;
+  background:var(--bg-surface); transition:.18s var(--ease);}
+.dropzone.drag{border-color:var(--accent);background:var(--orange-soft);}
+.dropzone:hover{border-color:var(--accent);}
+.dropzone .icon-well{width:56px;height:56px;border-radius:14px;background:var(--orange-soft);
+  color:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.dropzone h3{font-size:17px;font-weight:700;margin-bottom:6px;}
+.dropzone p{font-size:13.5px;color:var(--text-muted);margin-bottom:18px;}
+#file-input{display:none;}
+
+.or-divider{display:flex;align-items:center;gap:12px;max-width:680px;margin:24px auto;
+  color:var(--text-muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+.or-divider::before,.or-divider::after{content:"";flex:1;height:1px;background:var(--border-subtle);}
+
+.paste-box{max-width:680px;margin:0 auto;}
+.paste-box textarea{min-height:140px;}
+.paste-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;}
+
+.sample-row{max-width:680px;margin:28px auto 0;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.sample-chip{font-size:12.5px;padding:6px 14px;border-radius:999px;border:1px solid var(--border-subtle);
+  background:var(--bg-surface);color:var(--text-secondary);cursor:pointer;transition:.16s var(--ease);}
+.sample-chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px);}
+
+.history-strip{max-width:680px;margin:32px auto 0;}
+.history-strip h4{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);
+  margin-bottom:10px;font-weight:700;}
+.history-item{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 14px;border-radius:10px;border:1px solid var(--border-subtle);background:var(--bg-surface);
+  margin-bottom:8px;cursor:pointer;transition:.16s var(--ease);}
+.history-item:hover{border-color:var(--border-active);background:var(--bg-card-hover);}
+.history-item .meta{font-size:12px;color:var(--text-muted);}
+
+/* ---------- Claims review screen ---------- */
+.review-head{margin-bottom:24px;}
+.review-head h2{font-size:24px;font-weight:760;letter-spacing:-.02em;margin-bottom:6px;}
+.review-head p{font-size:14px;color:var(--text-secondary);}
+.claims-grid{display:grid;gap:12px;margin-top:20px;}
+.claim-row{display:flex;gap:14px;align-items:flex-start;padding:16px;border:1px solid var(--border-subtle);
+  border-radius:var(--radius);background:var(--bg-card);}
+.claim-row .num{flex:none;width:24px;height:24px;border-radius:7px;background:var(--orange-soft);
+  color:var(--accent-dim);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.claim-row p{font-size:14.5px;line-height:1.55;}
+.claim-row .tag{flex:none;}
+
+/* ---------- Interview screen ---------- */
+.interview-layout{display:grid;grid-template-columns:1fr 260px;gap:28px;align-items:start;}
+@media(max-width:860px){.interview-layout{grid-template-columns:1fr;}}
+
+.chat-panel{min-height:420px;display:flex;flex-direction:column;}
+.chat-scroll{flex:1;overflow-y:auto;max-height:56vh;padding-right:4px;}
+.msg{max-width:88%;margin-bottom:16px;animation:enter .26s var(--ease);}
+.msg.ai{margin-right:auto;}
+.msg.user{margin-left:auto;}
+.msg .bubble{padding:14px 16px;border-radius:14px;font-size:14.5px;line-height:1.6;}
+.msg.ai .bubble{background:var(--bg-surface);border:1px solid var(--border-subtle);border-top-left-radius:4px;}
+.msg.user .bubble{background:var(--accent);color:#fff;border-top-right-radius:4px;}
+.msg .who{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text-muted);margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.msg.user .who{justify-content:flex-end;}
+.msg .flag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;
+  color:var(--accent-dim);margin-top:8px;}
+
+.typing{display:flex;gap:4px;padding:14px 16px;}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--text-muted);animation:blink 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;} .typing span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
+
+.composer{display:flex;gap:10px;margin-top:16px;align-items:flex-end;}
+.composer textarea{min-height:52px;max-height:160px;}
+.composer .btn{flex:none;height:52px;}
+
+.side-col .card{margin-bottom:16px;}
+.side-col h4{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);
+  font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+
+.progress-track{height:6px;border-radius:999px;background:var(--border-subtle);overflow:hidden;margin-bottom:6px;}
+.progress-fill{height:100%;background:var(--accent);border-radius:999px;transition:width .4s var(--ease);}
+.progress-label{font-size:12px;color:var(--text-muted);display:flex;justify-content:space-between;}
+
+.conf-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.conf-row:last-child{margin-bottom:0;}
+.conf-row .name{font-size:12.5px;flex:1;color:var(--text-secondary);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.conf-bar{flex:none;width:70px;height:5px;border-radius:999px;background:var(--border-subtle);overflow:hidden;}
+.conf-bar i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .5s var(--ease);}
+.conf-num{font-size:11.5px;font-weight:700;color:var(--text-muted);width:26px;text-align:right;
+  font-variant-numeric:tabular-nums;}
+
+.stat-mini{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.stat-mini:last-child{margin-bottom:0;}
+.stat-mini span{font-size:12.5px;color:var(--text-secondary);}
+.stat-mini b{font-size:18px;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums;}
+
+.end-cta{margin-top:16px;}
+
+/* ---------- Report screen ---------- */
+.report-hero{text-align:center;margin-bottom:36px;}
+.report-hero .eyebrow{display:block;margin-bottom:10px;}
+.report-hero h2{font-size:clamp(26px,4vw,36px);font-weight:800;letter-spacing:-.02em;margin-bottom:10px;}
+.score-ring-wrap{display:flex;justify-content:center;margin:24px 0;}
+.score-ring{position:relative;width:160px;height:160px;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-ring .num b{font-size:38px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+.score-ring .num span{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;}
+
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:720px){.report-grid{grid-template-columns:1fr;}}
+
+.claim-report{border-left:3px solid var(--border-subtle);padding-left:16px;}
+.claim-report.strong{border-left-color:var(--accent);}
+.claim-report.weak{border-left-color:var(--text-muted);}
+.claim-report h4{font-size:14.5px;font-weight:700;margin-bottom:6px;}
+.claim-report p{font-size:13.5px;color:var(--text-secondary);line-height:1.55;margin-bottom:8px;}
+.claim-report .advice{font-size:13px;background:var(--orange-soft);color:var(--accent-dim);
+  padding:10px 12px;border-radius:8px;line-height:1.5;}
+.critical-box{background:var(--danger-soft);border:1px solid rgba(224,69,69,.25);border-radius:var(--radius);
+  padding:18px;margin-top:20px;}
+.critical-box h4{color:var(--danger);font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.critical-box p{font-size:13.5px;color:var(--text-secondary);line-height:1.55;}
+
+.report-actions{display:flex;gap:12px;justify-content:center;margin-top:32px;flex-wrap:wrap;}
+
+/* ---------- empty / loading states ---------- */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted);}
+.empty-state .icon-well{width:48px;height:48px;border-radius:12px;background:var(--bg-surface);
+  border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text-primary);
+  color:var(--bg-base);padding:12px 20px;border-radius:10px;font-size:13.5px;font-weight:600;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:999;display:flex;align-items:center;gap:8px;
+  opacity:0;pointer-events:none;transition:.25s var(--ease);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+.toast.error{background:var(--danger);color:#fff;}
+
+@media(prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+}
+</style>
+</head>
+<body>
+
+<header class="app-head">
+  <div class="logo-dot" id="icon-logo"></div>
+  <h1>Defend Your Experience</h1>
+  <div class="sub">
+    <span id="phase-label">Upload your experience</span>
+    <button class="theme-toggle" id="theme-btn" aria-label="Toggle dark mode" title="Toggle theme"></button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- SCREEN 1: Welcome / Upload -->
+  <section class="screen active" id="screen-upload">
+    <div class="welcome-hero">
+      <span class="eyebrow">Interview stress test</span>
+      <h2>Every claim you make should survive a follow-up question.</h2>
+      <p>Paste your resume, LinkedIn summary, project writeup, or performance review. This app finds every claim you make about yourself and challenges you to defend it, one question at a time, the way a real panel would.</p>
+    </div>
+
+    <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload a file">
+      <div class="icon-well" id="icon-upload"></div>
+      <h3>Drag and drop your document here</h3>
+      <p>Resume, LinkedIn export, portfolio doc, or plain text · .txt, .md supported</p>
+      <button class="btn btn-secondary" id="browse-btn" type="button">
+        <span id="icon-file"></span> Choose a file
+      </button>
+      <input type="file" id="file-input" accept=".txt,.md,text/plain">
+    </div>
+
+    <div class="or-divider">or paste it directly</div>
+
+    <div class="paste-box">
+      <textarea class="input" id="paste-input" placeholder="Paste your resume text, LinkedIn About section, project summary, or bio here..."></textarea>
+      <div class="paste-actions">
+        <button class="btn btn-primary" id="start-btn" type="button">
+          <span id="icon-arrow"></span> Analyze my claims
+        </button>
+      </div>
+    </div>
+
+    <div class="sample-row" id="sample-row">
+      <span class="sample-chip" data-sample="swe">Try a sample: Software engineer resume</span>
+      <span class="sample-chip" data-sample="pm">Try a sample: Product manager bio</span>
+      <span class="sample-chip" data-sample="founder">Try a sample: Startup founder story</span>
+    </div>
+
+    <div class="history-strip" id="history-strip" style="display:none;">
+      <h4>Recent sessions</h4>
+      <div id="history-list"></div>
+    </div>
+  </section>
+
+  <!-- SCREEN 2: Claim extraction review -->
+  <section class="screen" id="screen-claims">
+    <div class="review-head">
+      <h2>Here is every claim we found</h2>
+      <p>These are the specific, checkable statements from your document. Each one becomes a line of questioning in your interview. Nothing generic, only what you actually wrote.</p>
+    </div>
+    <div class="claims-grid" id="claims-list"></div>
+    <div class="report-actions">
+      <button class="btn btn-secondary" id="back-to-upload">Start over</button>
+      <button class="btn btn-primary btn-lg" id="begin-interview-btn">
+        <span id="icon-play"></span> Begin the defense
+      </button>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: Interview -->
+  <section class="screen" id="screen-interview">
+    <div class="interview-layout">
+      <div class="chat-panel card">
+        <div class="chat-scroll" id="chat-scroll"></div>
+        <div class="composer">
+          <textarea class="input" id="answer-input" placeholder="Type your answer..." rows="2"></textarea>
+          <button class="btn btn-primary" id="send-btn" type="button">
+            <span id="icon-send"></span> Send
+          </button>
+        </div>
+      </div>
+
+      <div class="side-col">
+        <div class="card">
+          <h4><span id="icon-progress"></span> Interview progress</h4>
+          <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+          <div class="progress-label"><span id="progress-text">0 of 0 claims covered</span><span id="progress-pct">0%</span></div>
+        </div>
+
+        <div class="card">
+          <h4><span id="icon-shield"></span> Confidence by claim</h4>
+          <div id="confidence-list"></div>
+        </div>
+
+        <div class="card">
+          <h4><span id="icon-target"></span> Session stats</h4>
+          <div class="stat-mini"><span>Follow-ups asked</span><b id="stat-followups">0</b></div>
+          <div class="stat-mini"><span>Vague answers flagged</span><b id="stat-vague">0</b></div>
+          <div class="stat-mini"><span>Strong evidence given</span><b id="stat-strong">0</b></div>
+        </div>
+
+        <button class="btn btn-secondary end-cta" id="end-interview-btn" style="width:100%;justify-content:center;">
+          <span id="icon-flag"></span> End and generate report
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 4: Report -->
+  <section class="screen" id="screen-report">
+    <div class="report-hero">
+      <span class="eyebrow">Defense report</span>
+      <h2>Here is how well you defended your experience</h2>
+      <div class="score-ring-wrap">
+        <div class="score-ring">
+          <svg width="160" height="160">
+            <circle cx="80" cy="80" r="70" stroke="var(--border-subtle)" stroke-width="12" fill="none"/>
+            <circle cx="80" cy="80" r="70" stroke="var(--accent)" stroke-width="12" fill="none"
+              stroke-linecap="round" id="ring-progress" stroke-dasharray="440" stroke-dashoffset="440"/>
+          </svg>
+          <div class="num"><b id="overall-score">0</b><span>Overall score</span></div>
+        </div>
+      </div>
+      <p id="report-summary" style="color:var(--text-secondary);font-size:14.5px;max-width:56ch;margin:0 auto;"></p>
+    </div>
+
+    <div class="report-grid" id="report-grid"></div>
+
+    <div class="critical-box" id="critical-box" style="display:none;">
+      <h4><span id="icon-alert"></span> Highest-risk claim</h4>
+      <p id="critical-text"></p>
+    </div>
+
+    <div class="report-actions">
+      <button class="btn btn-secondary" id="export-btn"><span id="icon-download"></span> Export report</button>
+      <button class="btn btn-secondary" id="restart-btn"><span id="icon-refresh"></span> Defend another document</button>
+      <button class="btn btn-primary" id="continue-btn"><span id="icon-msg"></span> Keep practicing this one</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- Lucide-style inline icons (stroke paths from lucide.dev) ---------------- */
+const ICONS = {
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>',
+  upload: '<path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/>',
+  file: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/>',
+  arrow: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  play: '<path d="m6 4 12 8-12 8V4Z"/>',
+  send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  progress: '<path d="M12 20v-6M6 20V10M18 20V4"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  flag: '<path d="M4 22V4"/><path d="M4 4h13l-2 5 2 5H4"/>',
+  alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  download: '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
+  refresh: '<path d="M21 12a9 9 0 0 1-15.3 6.4L3 15"/><path d="M3 3v6h6"/><path d="M3 12a9 9 0 0 1 15.3-6.4L21 9"/><path d="M21 21v-6h-6"/>',
+  msg: '<path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/>',
+};
+function svg(name,size){return `<svg width="${size||16}" height="${size||16}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex:none;">${ICONS[name]}</svg>`;}
+function mountIcons(){
+  document.getElementById('icon-logo').innerHTML = svg('shield',18);
+  document.getElementById('icon-upload').innerHTML = svg('upload',24);
+  document.getElementById('icon-file').innerHTML = svg('file',15);
+  document.getElementById('icon-arrow').innerHTML = svg('arrow',15);
+  document.getElementById('icon-play').innerHTML = svg('play',15);
+  document.getElementById('icon-send').innerHTML = svg('send',15);
+  document.getElementById('icon-progress').innerHTML = svg('progress',15);
+  document.getElementById('icon-shield').innerHTML = svg('shield',15);
+  document.getElementById('icon-target').innerHTML = svg('target',15);
+  document.getElementById('icon-flag').innerHTML = svg('flag',15);
+  document.getElementById('icon-alert').innerHTML = svg('alert',16);
+  document.getElementById('icon-download').innerHTML = svg('download',15);
+  document.getElementById('icon-refresh').innerHTML = svg('refresh',15);
+  document.getElementById('icon-msg').innerHTML = svg('msg',15);
+  document.getElementById('theme-btn').innerHTML = svg(document.documentElement.getAttribute('data-theme')==='dark' ? 'sun':'moon',15);
+}
+
+/* ---------------- Theme ---------------- */
+const themeBtn = document.getElementById('theme-btn');
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('dye-theme', t);
+  themeBtn.innerHTML = svg(t==='dark' ? 'sun':'moon',15);
+}
+applyTheme(localStorage.getItem('dye-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light'));
+themeBtn.addEventListener('click', ()=>{
+  applyTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light':'dark');
+});
+
+/* ---------------- Toast ---------------- */
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function toast(msg, isError){
+  clearTimeout(toastTimer);
+  toastEl.textContent = msg;
+  toastEl.className = 'toast show' + (isError ? ' error':'');
+  toastTimer = setTimeout(()=>toastEl.className='toast', 3200);
+}
+
+/* ---------------- State ---------------- */
+const state = {
+  sourceText: '',
+  claims: [],           // {id, text, confidence(0-100), status:'unasked'|'asked'|'strong'|'weak', evidence:[], vagueFlags:0}
+  messages: [],         // {role, text, flag}
+  followupCount: 0,
+  vagueCount: 0,
+  strongCount: 0,
+  currentClaimIdx: 0,
+  claimsAsked: 0,
+};
+
+const SAMPLES = {
+  swe: `Senior Software Engineer, 5 years experience.
+Led the migration of our monolith to microservices, improving deployment speed significantly.
+Built a real-time analytics dashboard used by the entire company.
+Reduced API latency by optimizing our database queries.
+Mentored three junior engineers who all got promoted.
+Owned the payments infrastructure serving millions of transactions.`,
+  pm: `Product Manager with a track record of shipping impactful features.
+Launched a new onboarding flow that increased activation.
+Drove cross-functional alignment between engineering, design, and sales.
+Managed the roadmap for our flagship product used by enterprise customers.
+Ran experiments that improved retention.
+Turned around a struggling feature that was at risk of being cut.`,
+  founder: `Founder of a seed-stage startup in the logistics space.
+Grew revenue from zero to meaningful ARR in the first year.
+Built and led a small team of engineers and designers.
+Raised a pre-seed round from angel investors.
+Pivoted the business model after early customer feedback.
+Personally closed our first ten enterprise customers.`
+};
+
+/* ---------------- Navigation ---------------- */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const labels = {
+    'screen-upload':'Upload your experience',
+    'screen-claims':'Review your claims',
+    'screen-interview':'Defense in progress',
+    'screen-report':'Defense report'
+  };
+  document.getElementById('phase-label').textContent = labels[id] || '';
+}
+
+/* ---------------- Claim extraction (heuristic, offline-friendly) ---------------- */
+function extractClaims(text){
+  const lines = text.split(/\n+/).map(l=>l.trim()).filter(Boolean);
+  const claims = [];
+  let id = 0;
+  lines.forEach(line=>{
+    // split on periods within a line too, keep meaningful chunks
+    line.split(/(?<=[.!?])\s+/).forEach(seg=>{
+      const s = seg.trim();
+      if(s.length < 12) return;
+      // skip pure headers/titles (very short, no verb-like pattern) heuristically by length + word count
+      const words = s.split(/\s+/);
+      if(words.length < 4) return;
+      claims.push({
+        id: 'c'+(id++),
+        text: s.replace(/^[-•*]\s*/, ''),
+        confidence: 40,
+        status: 'unasked',
+        evidence: [],
+        vagueFlags: 0,
+        askedCount: 0
+      });
+    });
+  });
+  return claims.slice(0, 12); // cap for a focused session
+}
+
+const VAGUE_WORDS = ['significantly','a lot','many','various','helped','worked on','involved in','some','several','improved','better','impactful','successful','strong','effective','optimized','leveraged','synergy'];
+const NUMBER_RE = /\d/;
+
+function analyzeAnswer(answerText, claim){
+  const lower = answerText.toLowerCase();
+  const hasNumber = NUMBER_RE.test(answerText);
+  const vagueHits = VAGUE_WORDS.filter(w=>lower.includes(w)).length;
+  const wordCount = answerText.trim().split(/\s+/).length;
+  const isShort = wordCount < 8;
+  let delta = 0;
+  let flag = null;
+  if(hasNumber && wordCount > 15){ delta += 18; flag = 'strong'; }
+  if(isShort){ delta -= 15; flag = 'vague'; }
+  if(vagueHits >= 2 && !hasNumber){ delta -= 12; flag = 'vague'; }
+  if(/because|so that|which led to|as a result/.test(lower)){ delta += 8; }
+  if(!hasNumber && !isShort && vagueHits === 0){ delta += 4; }
+  claim.confidence = Math.max(5, Math.min(98, claim.confidence + delta));
+  return flag;
+}
+
+/* ---------------- Claude API call ---------------- */
+async function askClaude(systemPrompt, userPrompt, maxTokens){
+  const body = {
+    model: "claude-sonnet-4-5",
+    max_tokens: maxTokens || 400,
+    messages: [{ role: "user", content: userPrompt }],
+    system: systemPrompt
+  };
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!resp.ok){
+    const errText = await resp.text().catch(()=> '');
+    throw new Error('API error ' + resp.status + ' ' + errText.slice(0,200));
+  }
+  const data = await resp.json();
+  return (data.content && data.content[0] && data.content[0].text) ? data.content[0].text.trim() : '';
+}
+
+async function askClaudeWithRetry(systemPrompt, userPrompt, maxTokens, retries){
+  retries = retries === undefined ? 2 : retries;
+  for(let attempt=0; attempt<=retries; attempt++){
+    try{
+      return await askClaude(systemPrompt, userPrompt, maxTokens);
+    }catch(err){
+      if(attempt === retries) throw err;
+      const wait = 600 * Math.pow(2, attempt);
+      toast('Rate limited, retrying...', false);
+      await new Promise(r=>setTimeout(r, wait));
+    }
+  }
+}
+
+/* ---------------- Upload screen wiring ---------------- */
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+const pasteInput = document.getElementById('paste-input');
+
+document.getElementById('browse-btn').addEventListener('click', e=>{ e.stopPropagation(); fileInput.click(); });
+dropzone.addEventListener('click', ()=> fileInput.click());
+dropzone.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') fileInput.click(); });
+
+['dragenter','dragover'].forEach(evt=>{
+  dropzone.addEventListener(evt, e=>{ e.preventDefault(); dropzone.classList.add('drag'); });
+});
+['dragleave','drop'].forEach(evt=>{
+  dropzone.addEventListener(evt, e=>{ e.preventDefault(); dropzone.classList.remove('drag'); });
+});
+dropzone.addEventListener('drop', e=>{
+  const file = e.dataTransfer.files[0];
+  if(file) readFile(file);
+});
+fileInput.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file) readFile(file);
+});
+function readFile(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{ pasteInput.value = reader.result; toast('File loaded: ' + file.name); };
+  reader.onerror = ()=> toast('Could not read that file', true);
+  reader.readAsText(file);
+}
+
+document.querySelectorAll('.sample-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    pasteInput.value = SAMPLES[chip.dataset.sample];
+    toast('Sample loaded');
+  });
+});
+
+document.getElementById('start-btn').addEventListener('click', ()=>{
+  const text = pasteInput.value.trim();
+  if(text.length < 20){ toast('Add a bit more detail first, at least a few sentences.', true); return; }
+  state.sourceText = text;
+  const claims = extractClaims(text);
+  if(!claims.length){ toast('No clear claims found. Try adding specific statements about what you did.', true); return; }
+  state.claims = claims;
+  renderClaimsScreen();
+  showScreen('screen-claims');
+});
+
+/* ---------------- Claims review screen ---------------- */
+function renderClaimsScreen(){
+  const list = document.getElementById('claims-list');
+  list.innerHTML = '';
+  state.claims.forEach((c, i)=>{
+    const row = document.createElement('div');
+    row.className = 'claim-row';
+    row.innerHTML = `<div class="num">${i+1}</div><p>${escapeHtml(c.text)}</p><span class="tag pill pill-accent">To defend</span>`;
+    list.appendChild(row);
+  });
+}
+document.getElementById('back-to-upload').addEventListener('click', ()=> showScreen('screen-upload'));
+document.getElementById('begin-interview-btn').addEventListener('click', startInterview);
+
+/* ---------------- Interview screen ---------------- */
+const chatScroll = document.getElementById('chat-scroll');
+const answerInput = document.getElementById('answer-input');
+const sendBtn = document.getElementById('send-btn');
+
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+function addMessage(role, text, flagLabel){
+  state.messages.push({role, text, flag:flagLabel});
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const flagHtml = flagLabel ? `<div class="flag">${svg('alert',12)} ${escapeHtml(flagLabel)}</div>` : '';
+  div.innerHTML = `<div class="who">${role==='ai' ? svg('shield',12)+' Interviewer' : 'You'}</div><div class="bubble">${escapeHtml(text)}</div>${flagHtml}`;
+  chatScroll.appendChild(div);
+  chatScroll.scrollTop = chatScroll.scrollHeight;
+}
+function showTyping(){
+  const div = document.createElement('div');
+  div.className = 'msg ai'; div.id = 'typing-indicator';
+  div.innerHTML = `<div class="who">${svg('shield',12)} Interviewer</div><div class="bubble typing"><span></span><span></span><span></span></div>`;
+  chatScroll.appendChild(div);
+  chatScroll.scrollTop = chatScroll.scrollHeight;
+}
+function hideTyping(){
+  const el = document.getElementById('typing-indicator');
+  if(el) el.remove();
+}
+
+function updateSidebar(){
+  const asked = state.claims.filter(c=>c.status!=='unasked').length;
+  const pct = Math.round((asked/state.claims.length)*100) || 0;
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('progress-text').textContent = `${asked} of ${state.claims.length} claims covered`;
+  document.getElementById('progress-pct').textContent = pct+'%';
+
+  const confList = document.getElementById('confidence-list');
+  confList.innerHTML = '';
+  state.claims.forEach((c, i)=>{
+    const row = document.createElement('div');
+    row.className = 'conf-row';
+    row.innerHTML = `<span class="name">Claim ${i+1}</span><div class="conf-bar"><i style="width:${c.confidence}%"></i></div><span class="conf-num">${c.confidence}</span>`;
+    confList.appendChild(row);
+  });
+
+  document.getElementById('stat-followups').textContent = state.followupCount;
+  document.getElementById('stat-vague').textContent = state.vagueCount;
+  document.getElementById('stat-strong').textContent = state.strongCount;
+}
+
+function buildSystemPrompt(){
+  return `You are a sharp, fair panel interviewer conducting a behavioral interview. You have a candidate's resume claims in front of you. Your job is to challenge each claim like a skeptical but professional interviewer: ask for specifics (numbers, your exact role, what you personally did vs the team, obstacles, what you'd do differently). Keep questions to 1-2 sentences, conversational, never robotic. Never repeat a question you already asked. Build on the candidate's previous answer specifically, referencing what they said. If an answer is vague, push back once, specifically, quoting the vague part. If an answer is strong and specific, acknowledge briefly then move to a harder follow-up or the next claim. Do not use markdown formatting, emojis, or headers. Output only the interviewer's next line of dialogue, nothing else.`;
+}
+
+async function startInterview(){
+  showScreen('screen-interview');
+  chatScroll.innerHTML = '';
+  state.messages = [];
+  state.currentClaimIdx = 0;
+  updateSidebar();
+  showTyping();
+  try{
+    const claim = state.claims[0];
+    const prompt = `The candidate's full document:\n${state.sourceText}\n\nAll claims to eventually cover:\n${state.claims.map((c,i)=>`${i+1}. ${c.text}`).join('\n')}\n\nBegin the interview. Greet briefly in one short sentence, then ask your first challenging question about claim 1: "${claim.text}"`;
+    const reply = await askClaudeWithRetry(buildSystemPrompt(), prompt, 200);
+    hideTyping();
+    addMessage('ai', reply || `Let's start with this: "${claim.text}" — walk me through exactly what you did, step by step.`);
+    claim.status = 'asked';
+    claim.askedCount++;
+  }catch(err){
+    hideTyping();
+    const claim = state.claims[0];
+    addMessage('ai', `Let's start here: "${claim.text}" — what was your specific, personal contribution, and can you put a number on the impact?`);
+    claim.status = 'asked';
+    toast('Running in offline fallback mode: ' + err.message, true);
+  }
+}
+
+async function sendAnswer(){
+  const text = answerInput.value.trim();
+  if(!text) return;
+  addMessage('user', text);
+  answerInput.value = '';
+  sendBtn.disabled = true;
+
+  const claim = state.claims[state.currentClaimIdx];
+  const flag = analyzeAnswer(text, claim);
+  if(flag === 'vague'){ state.vagueCount++; }
+  if(flag === 'strong'){ state.strongCount++; }
+  claim.status = claim.confidence >= 65 ? 'strong' : (claim.askedCount >= 2 ? 'weak' : 'asked');
+  state.followupCount++;
+  updateSidebar();
+
+  const movingOn = claim.status !== 'asked' || claim.askedCount >= 2;
+  const nextIdx = movingOn ? findNextUnaskedClaim() : state.currentClaimIdx;
+
+  showTyping();
+  try{
+    const recentHistory = state.messages.slice(-6).map(m=> (m.role==='ai'?'Interviewer: ':'Candidate: ')+m.text).join('\n');
+    let prompt;
+    if(nextIdx === -1){
+      prompt = `Interview transcript so far:\n${recentHistory}\n\nAll claims have now been discussed. Give one short closing line thanking the candidate and telling them their defense report is ready. One sentence only.`;
+    } else if(nextIdx === state.currentClaimIdx){
+      prompt = `Interview transcript so far:\n${recentHistory}\n\nThe candidate's last answer about claim "${claim.text}" needs a sharper follow-up. ${flag==='vague' ? 'Their answer was vague or lacked specifics, push back on exactly that.' : 'Dig one level deeper into a specific detail they mentioned.'} Ask one focused follow-up question.`;
+    } else {
+      const nextClaim = state.claims[nextIdx];
+      prompt = `Interview transcript so far:\n${recentHistory}\n\nMove on. Briefly acknowledge their last answer in one clause, then ask a challenging opening question about this new claim: "${nextClaim.text}"`;
+    }
+    const reply = await askClaudeWithRetry(buildSystemPrompt(), prompt, 200);
+    hideTyping();
+    addMessage('ai', reply || 'Can you be more specific about your exact role and the measurable outcome?');
+    if(nextIdx !== -1 && nextIdx !== state.currentClaimIdx){
+      state.currentClaimIdx = nextIdx;
+      state.claims[nextIdx].status = 'asked';
+      state.claims[nextIdx].askedCount++;
+    } else if(nextIdx === state.currentClaimIdx){
+      claim.askedCount++;
+    } else {
+      finishInterview();
+    }
+  }catch(err){
+    hideTyping();
+    addMessage('ai', flag==='vague'
+      ? `That answer stayed pretty general. Can you give a specific number or a concrete example for "${claim.text.slice(0,60)}..."?`
+      : `Good detail. What was the hardest part of that, and what would you do differently now?`);
+    toast('Connection issue, continuing in offline fallback mode.', true);
+  }
+  sendBtn.disabled = false;
+  updateSidebar();
+}
+
+function findNextUnaskedClaim(){
+  for(let i=0;i<state.claims.length;i++){
+    if(state.claims[i].status === 'unasked') return i;
+  }
+  return -1;
+}
+
+sendBtn.addEventListener('click', sendAnswer);
+answerInput.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendAnswer(); }
+});
+document.getElementById('end-interview-btn').addEventListener('click', finishInterview);
+
+/* ---------------- Report screen ---------------- */
+function finishInterview(){
+  buildReport();
+  showScreen('screen-report');
+  saveSession();
+}
+
+function buildReport(){
+  const avg = Math.round(state.claims.reduce((s,c)=>s+c.confidence,0)/state.claims.length) || 0;
+  document.getElementById('overall-score').textContent = avg;
+  const circumference = 440;
+  const offset = circumference - (circumference * avg/100);
+  document.getElementById('ring-progress').style.strokeDashoffset = offset;
+
+  let summary;
+  if(avg >= 70) summary = 'Your claims mostly held up under pressure. A few still need sharper evidence before a real panel.';
+  else if(avg >= 45) summary = 'About half your claims survived scrutiny. The rest need specific numbers, clearer ownership, or a stronger story.';
+  else summary = 'Most claims need real work before an interview. Add specifics, numbers, and your personal role to each one.';
+  document.getElementById('report-summary').textContent = summary;
+
+  const grid = document.getElementById('report-grid');
+  grid.innerHTML = '';
+  let weakest = null;
+  state.claims.forEach((c,i)=>{
+    if(!weakest || c.confidence < weakest.confidence) weakest = c;
+    const strength = c.confidence >= 65 ? 'strong' : (c.confidence >= 40 ? 'fair' : 'weak');
+    const div = document.createElement('div');
+    div.className = 'claim-report ' + (strength==='strong'?'strong':strength==='weak'?'weak':'');
+    const advice = strength === 'strong'
+      ? 'This claim is defense-ready. Keep the number and the specific example you gave.'
+      : strength === 'fair'
+      ? 'Add one concrete number and name your exact personal contribution before the real interview.'
+      : 'This needs rework: state what you personally did, the measurable result, and the obstacle you overcame.';
+    div.innerHTML = `
+      <h4>Claim ${i+1} <span class="pill ${strength==='strong'?'pill-accent':''}" style="margin-left:6px;">${strength==='strong'?'Well defended':strength==='fair'?'Needs polish':'Needs rework'}</span></h4>
+      <p>${escapeHtml(c.text)}</p>
+      <div class="conf-bar" style="width:100%;height:6px;margin-bottom:8px;"><i style="width:${c.confidence}%"></i></div>
+      <div class="advice">${advice}</div>
+    `;
+    grid.appendChild(div);
+  });
+
+  const criticalBox = document.getElementById('critical-box');
+  if(weakest && weakest.confidence < 40){
+    criticalBox.style.display = 'block';
+    document.getElementById('critical-text').textContent = `"${weakest.text}" scored lowest at ${weakest.confidence}/100. This is the claim most likely to unravel under a real follow-up question. Rehearse a specific, numbers-backed version of this story before your next interview.`;
+  } else {
+    criticalBox.style.display = 'none';
+  }
+}
+
+document.getElementById('restart-btn').addEventListener('click', ()=>{
+  pasteInput.value = '';
+  showScreen('screen-upload');
+});
+document.getElementById('continue-btn').addEventListener('click', ()=>{
+  showScreen('screen-interview');
+});
+document.getElementById('export-btn').addEventListener('click', ()=>{
+  const lines = [];
+  lines.push('DEFEND YOUR EXPERIENCE — DEFENSE REPORT');
+  lines.push('Generated: ' + new Date().toDateString());
+  lines.push('Overall score: ' + document.getElementById('overall-score').textContent + '/100');
+  lines.push('');
+  state.claims.forEach((c,i)=>{
+    lines.push(`Claim ${i+1}: ${c.text}`);
+    lines.push(`Confidence: ${c.confidence}/100`);
+    lines.push('');
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'defense-report.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Report exported');
+});
+
+/* ---------------- Local storage: session history ---------------- */
+function saveSession(){
+  try{
+    const sessions = JSON.parse(localStorage.getItem('dye-sessions') || '[]');
+    const avg = Math.round(state.claims.reduce((s,c)=>s+c.confidence,0)/state.claims.length) || 0;
+    sessions.unshift({
+      date: new Date().toISOString(),
+      preview: state.sourceText.slice(0,80),
+      score: avg,
+      claimCount: state.claims.length
+    });
+    localStorage.setItem('dye-sessions', JSON.stringify(sessions.slice(0,8)));
+  }catch(e){}
+}
+function loadHistory(){
+  try{
+    const sessions = JSON.parse(localStorage.getItem('dye-sessions') || '[]');
+    const strip = document.getElementById('history-strip');
+    const list = document.getElementById('history-list');
+    if(!sessions.length) return;
+    strip.style.display = 'block';
+    list.innerHTML = '';
+    sessions.forEach(s=>{
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      const d = new Date(s.date);
+      div.innerHTML = `<span>${escapeHtml(s.preview)}...</span><span class="meta">${s.score}/100 · ${d.toLocaleDateString()}</span>`;
+      list.appendChild(div);
+    });
+  }catch(e){}
+}
+
+/* ---------------- Init ---------------- */
+mountIcons();
+loadHistory();
+</script>
+</body>
+</html>
