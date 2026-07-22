@@ -6,9 +6,11 @@
 **Builder availability:** ~1 focused hour/day
 **Core flow (locked, do not change):** paste schema (`CREATE TABLE` text) → ask plain-English question → receive generated SQL + plain-English explanation. Single-shot. No login. No execution. No file upload.
 
+**Day 2 technical design docs (read these before starting Day 3):** `Day 52/ARCHITECTURE.md`, `Day 52/SCHEMA.md`, `Day 52/API.md`, `Day 52/UI-WIREFRAMES.md`, `Day 52/PROJECT-STRUCTURE.md`. All file paths referenced below (e.g. `app/api/generate.py`) live under `Day 52/querymind/`.
+
 ---
 
-## Day 2 — Tech Stack Decision + Project Setup
+## Day 2 — Tech Stack Decision + Project Setup ✅ COMPLETED
 
 🎯 **Objective:** Choose the simplest tech stack that fits a 1-hour/day, no-new-learning-curve constraint, and get a running skeleton project.
 
@@ -16,45 +18,48 @@
 
 🛠 **Features to build:** Empty but running app — one page that loads, nothing functional yet.
 
-📝 **Step-by-step plan:**
-1. Decide stack. Recommended default (builder already knows Python + a web framework): **Streamlit** for fastest single-day build (Python only, minimal frontend code) OR a simple **HTML/CSS/JS frontend + Python (Flask/FastAPI) backend** if more UI control is wanted for the "polished UI" priority. Given UI polish is the top success criterion, lean toward **Flask/FastAPI backend + hand-built HTML/CSS/JS frontend** for full styling control — but confirm based on comfort level.
-2. Create project folder structure (see below).
-3. Initialize git repo, first commit.
-4. Set up a virtual environment and install base dependencies (framework of choice + `anthropic` SDK for Claude API).
-5. Get a Claude API key and store it in a `.env` file (never commit it).
-6. Build a minimal "hello world" page to confirm the server runs locally.
+**FINALIZED STACK (see `ARCHITECTURE.md` for full rationale):**
+- Frontend: hand-built HTML/CSS/JS, no framework, no build step
+- Backend: Python + FastAPI + Uvicorn
+- Database: none (stateless app, no accounts/history per PRD)
+- Auth: none (per PRD)
+- AI: Claude API (Anthropic Messages API, Sonnet model)
+- Hosting: Render free Web Service tier
+- **Key simplification:** FastAPI serves the frontend as static files directly (`StaticFiles` mount) — one deployed service, not two. This removes CORS entirely from the project (the original Day 2/Day 4/Day 9 CORS warnings below no longer apply).
+- **Repo decision:** kept inside the existing `My-Claude-Journey_60Days` repo, under `Day 52/querymind/` (not a separate repo). Render will be configured on Day 9 with Root Directory = `Day 52/querymind`.
 
-📂 **Files/folders to create:**
+📂 **Actual folder structure created (see `PROJECT-STRUCTURE.md` for full detail):**
 ```
-querymind/
-  backend/
-    app.py
-    .env
-    requirements.txt
-  frontend/
-    index.html
-    style.css
-    script.js
+Day 52/querymind/
+  app/
+    main.py
+    api/{generate.py, health.py}
+    core/{config.py, claude_client.py}
+    prompts/sql_prompt.py
+    models/schemas.py
+    static/{index.html, css/style.css, js/script.js}
+  requirements.txt
+  .env.example
   .gitignore
   README.md
 ```
 
-🔗 **Tools to integrate:** Anthropic Claude API (get API key), chosen web framework, git/GitHub for version control.
+🔗 **Tools to integrate:** Anthropic Claude API (get API key), FastAPI/Uvicorn, `anthropic` Python SDK, `python-dotenv`, git/GitHub (existing repo).
 
 🧪 **Testing tasks:** Confirm local server starts without errors; confirm `.env` is git-ignored (no secrets committed).
 
 🐞 **Common issues:** Port already in use; missing `.env` causing crash on startup — add a clear error message instead of a stack trace.
 
 ✅ **End-of-day checklist:**
-- [ ] Tech stack decided and documented in README
-- [ ] Project folder structure created
-- [ ] Git repo initialized with first commit
-- [ ] Local server runs and shows a blank/hello page
-- [ ] Claude API key obtained and stored safely in `.env`
+- [x] Tech stack decided and documented (`ARCHITECTURE.md`)
+- [x] Project folder structure created (empty scaffold, no production code yet)
+- [ ] Git repo — commit pending at end of Day 2 session
+- [ ] Local server runs and shows a blank/hello page — **this happens Day 3**, since FastAPI app code (`main.py`) is written then, not today
+- [ ] Claude API key obtained and stored safely in `.env` — to confirm with builder before Day 3 starts
 
-📸 **Expected state/screenshot:** Terminal showing server running + browser showing a blank placeholder page.
+📸 **Expected state/screenshot:** Folder structure created; no running server yet (that's Day 3, since today was design-only per capstone rules).
 
-➡️ **Handoff notes:** Stack is locked — Day 3 builds the backend logic that calls Claude with schema + question and returns SQL + explanation. Do not revisit stack choice after today.
+➡️ **Handoff notes:** Stack is locked — Day 3 builds the backend logic that calls Claude with schema + question and returns SQL + explanation, using the exact file paths above (`app/main.py`, `app/api/generate.py`, `app/prompts/sql_prompt.py`, `app/models/schemas.py`). Full endpoint contract already specified in `API.md` — implement to that spec exactly, no redesign needed. Do not revisit stack choice after today.
 
 ---
 
@@ -73,7 +78,7 @@ querymind/
 4. Test with 3–4 sample schemas and questions manually (e.g., a simple `orders`/`customers` schema).
 5. Add a system-level instruction reminding Claude to only use tables/columns present in the given schema, and to say so clearly if the question can't be answered from the schema.
 
-📂 **Files to create/modify:** `backend/app.py` (add route), `backend/prompts.py` (prompt template), `backend/requirements.txt` (update if needed).
+📂 **Files to create/modify:** `app/api/generate.py` (route handler, per `API.md`), `app/prompts/sql_prompt.py` (prompt template + JSON parsing), `app/models/schemas.py` (Pydantic request/response models), `app/core/claude_client.py` (Claude API wrapper), `app/main.py` (wire the router in), `requirements.txt`.
 
 🔗 **Tools:** Anthropic Claude API (Messages API), structured output via JSON instruction.
 
@@ -108,13 +113,13 @@ querymind/
 4. Keep styling minimal/unstyled today — structure and function only.
 5. Manually test the full flow in the browser: paste schema → ask question → see SQL + explanation appear.
 
-📂 **Files to modify:** `frontend/index.html`, `frontend/script.js`.
+📂 **Files to modify:** `app/static/index.html`, `app/static/js/script.js`.
 
-🔗 **Tools:** Fetch API (or equivalent) to call backend; CORS setup if frontend/backend run on different ports.
+🔗 **Tools:** Fetch API calling `/api/generate` on the same origin (no CORS needed — FastAPI serves the frontend itself, per the Day 2 architecture decision).
 
 🧪 **Testing tasks:** Full manual end-to-end test with 3+ schema/question combos; test loading state appears; test error messages show correctly for empty inputs.
 
-🐞 **Common issues:** CORS errors (enable CORS on backend for local dev); button submitting multiple times if clicked repeatedly (disable button while loading).
+🐞 **Common issues:** Button submitting multiple times if clicked repeatedly (disable button while loading); forgetting to call `/api/generate` (not `/generate`) — check `API.md` for exact paths.
 
 ✅ **End-of-day checklist:**
 - [ ] Full flow works in browser: input → generate → output displayed
@@ -143,7 +148,7 @@ querymind/
 4. Add a lightweight validation step: check the returned SQL references only table/column names present in the pasted schema; if not, flag a warning in the UI.
 5. Add a clear on-screen disclaimer: "AI-generated — please review before running."
 
-📂 **Files to modify:** `backend/prompts.py`, `backend/app.py` (add validation logic), `frontend/index.html` (disclaimer text).
+📂 **Files to modify:** `app/prompts/sql_prompt.py`, `app/api/generate.py` (add validation logic), `app/static/index.html` (disclaimer text).
 
 🔗 **Tools:** None new — refinement of existing Claude integration.
 
@@ -177,7 +182,7 @@ querymind/
 3. Apply base CSS: typography, spacing, color tokens, button and input styling.
 4. Keep functionality untouched today — this is CSS/layout only, not logic changes.
 
-📂 **Files to modify:** `frontend/style.css` (full rewrite/expansion), `frontend/index.html` (structural/class updates if needed).
+📂 **Files to modify:** `app/static/css/style.css` (full rewrite/expansion), `app/static/index.html` (structural/class updates if needed).
 
 🔗 **Tools/skills:** `/minimalist-ui`, `/exl-branding`, `/exl` design skills for palette, spacing, and layout guidance.
 
@@ -213,7 +218,7 @@ querymind/
 5. Add "Copy SQL" button with a brief "Copied!" confirmation animation.
 6. Do a final visual QA pass: alignment, spacing consistency, font sizes, contrast/readability.
 
-📂 **Files to modify:** `frontend/style.css` (transitions/animations), `frontend/script.js` (copy-to-clipboard logic, class toggling for animations).
+📂 **Files to modify:** `app/static/css/style.css` (transitions/animations), `app/static/js/script.js` (copy-to-clipboard logic, class toggling for animations).
 
 🔗 **Tools/skills:** `/improve-animations` for motion guidance; native CSS transitions/keyframes (no animation libraries needed to keep it simple).
 
@@ -249,7 +254,7 @@ querymind/
 4. Test responsiveness again on mobile, tablet, and desktop widths.
 5. Ask 1–2 people (classmates/colleagues) to try it and give quick feedback, if time allows.
 
-📂 **Files to modify:** Whichever files bugs are found in (likely `script.js`, `app.py`, minor `style.css` fixes).
+📂 **Files to modify:** Whichever files bugs are found in (likely `app/static/js/script.js`, `app/api/generate.py`, minor `app/static/css/style.css` fixes).
 
 🔗 **Tools:** Browser dev tools (network throttling, device toolbar).
 
@@ -278,26 +283,27 @@ querymind/
 🛠 **Features to build:** None — deployment configuration only.
 
 📝 **Step-by-step plan:**
-1. Choose a free hosting platform appropriate to the chosen stack (e.g., Render/Railway free tier for a Flask/FastAPI backend, or a static host + serverless function if applicable). Confirm this fits "no paid tools" constraint.
-2. Set up environment variables (Claude API key) securely on the hosting platform — never hard-code or commit the key.
-3. Deploy backend; verify the API endpoint works via the live URL.
-4. Deploy/connect frontend (same host or a static hosting service) pointing to the live backend URL.
+1. Deploy to **Render (free Web Service tier)** — already decided Day 2. Create the service pointing at the existing GitHub repo, with **Root Directory set to `Day 52/querymind`** (since the app lives inside the larger challenge-journal repo, not its own repo).
+2. Set up the `ANTHROPIC_API_KEY` environment variable securely in the Render dashboard — never hard-code or commit the key.
+3. Set Render's Start Command to run Uvicorn against `app.main:app`.
+4. Deploy; verify both the frontend (`/`) and the API (`/api/generate`, `/api/health`) work via the live Render URL — this is a single service, so nothing extra to connect.
 5. Do a full end-to-end test on the live deployed link (not localhost).
-6. Update `README.md` with the live link and setup instructions.
+6. Update `querymind/README.md` with the live link and setup instructions.
 
-📂 **Files to modify:** Add hosting config files as required by chosen platform (e.g., `Procfile`, `render.yaml`, or platform-specific config); update `README.md`.
+📂 **Files to modify:** `requirements.txt` (confirm pinned versions), `querymind/README.md` (live link, setup instructions). No separate hosting config file needed if Render's dashboard build/start commands are used directly (simpler than maintaining a `render.yaml`).
 
-🔗 **Tools:** Free-tier hosting platform (to be selected based on stack), environment variable management on that platform.
+🔗 **Tools:** Render (free tier), environment variable management in the Render dashboard.
 
-🧪 **Testing tasks:** Full manual test on the live URL: paste schema, ask question, confirm SQL + explanation returned correctly; test on mobile via the live link too.
+🧪 **Testing tasks:** Full manual test on the live URL: paste schema, ask question, confirm SQL + explanation returned correctly; test on mobile via the live link too; hit `/api/health` to confirm the service is awake.
 
-🐞 **Common issues:** API key not set correctly in production causing 500 errors; CORS misconfiguration between deployed frontend and backend domains; cold-start delays on free-tier hosting (add a loading message if the first request is slow).
+🐞 **Common issues:** API key not set correctly in production causing 500 errors; wrong Root Directory setting in Render (must be `Day 52/querymind`, not the repo root); cold-start delays on Render's free tier after inactivity (add a loading message if the first request is slow, and do a warm-up ping before any live demo).
 
 ✅ **End-of-day checklist:**
-- [ ] Backend deployed and reachable via public URL
-- [ ] Frontend deployed and correctly calling the live backend
+- [ ] Render service created with Root Directory = `Day 52/querymind`
+- [ ] `ANTHROPIC_API_KEY` set in Render environment variables
+- [ ] App deployed and reachable via public URL (frontend + API both work, single service)
 - [ ] Full flow tested successfully on the live link
-- [ ] README updated with live link + setup instructions
+- [ ] `querymind/README.md` updated with live link + setup instructions
 - [ ] No secrets committed to the repository
 
 📸 **Expected state/screenshot:** Screenshot of the live deployed tool working, with the browser address bar showing the public URL.
