@@ -9,30 +9,41 @@ Day 52/
 ├── API.md
 ├── UI-WIREFRAMES.md
 ├── PROJECT-STRUCTURE.md
+├── SETUP.md
+├── ENVIRONMENT.md
+├── DAY3-SUMMARY.md
 └── querymind/                     <- deployable app root (Render "Root Directory" points here)
+    ├── venv/                      <- local virtual environment (git-ignored, not committed)
     ├── app/
-    │   ├── main.py                <- FastAPI app entrypoint: creates app, mounts static, includes routers
+    │   ├── __init__.py
+    │   ├── main.py                <- FastAPI app entrypoint: creates app, mounts static, includes routers ✅ built Day 3
     │   ├── api/
-    │   │   ├── generate.py        <- POST /api/generate route handler
-    │   │   └── health.py          <- GET /api/health route handler
+    │   │   ├── __init__.py
+    │   │   ├── generate.py        <- POST /api/generate route handler — ✅ stub built Day 3, real Claude call Day 4
+    │   │   └── health.py          <- GET /api/health route handler ✅ built Day 3
     │   ├── core/
-    │   │   ├── config.py          <- loads env vars (Claude API key, etc.) via python-dotenv
-    │   │   └── claude_client.py   <- thin wrapper around the Anthropic SDK call
+    │   │   ├── __init__.py
+    │   │   ├── config.py          <- loads env vars (Claude API key, etc.) via python-dotenv ✅ built Day 3
+    │   │   └── claude_client.py   <- thin wrapper around the Anthropic SDK call — ⏳ Day 4
     │   ├── prompts/
-    │   │   └── sql_prompt.py      <- the schema-grounded prompt template + JSON parsing/validation logic
+    │   │   ├── __init__.py
+    │   │   └── sql_prompt.py      <- schema-grounded prompt template + JSON parsing/validation — ⏳ Day 4
     │   ├── models/
-    │   │   └── schemas.py         <- Pydantic request/response models (GenerateRequest, GenerateResponse)
-    │   └── static/                <- the entire frontend, served directly by FastAPI
+    │   │   ├── __init__.py
+    │   │   └── schemas.py         <- Pydantic request/response models (GenerateRequest, GenerateResponse) ✅ built Day 3
+    │   └── static/                <- the entire frontend, served directly by FastAPI ✅ hello-world built Day 3
     │       ├── index.html
     │       ├── css/
     │       │   └── style.css
     │       └── js/
     │           └── script.js
-    ├── requirements.txt           <- fastapi, uvicorn, anthropic, python-dotenv, pydantic
-    ├── .env.example                <- documents required env vars without real secrets
-    ├── .gitignore                  <- excludes .env, __pycache__, venv
-    └── README.md                   <- project-specific README (separate from the challenge-journal README)
+    ├── requirements.txt           <- fastapi, uvicorn, anthropic, python-dotenv ✅ installed Day 3
+    ├── .env.example                <- documents required env vars without real secrets ✅ created Day 3
+    ├── .gitignore                  <- excludes .env, __pycache__, venv, *.log ✅ created Day 3
+    └── README.md                   <- project-specific README — ⏳ to be finalized Day 9/10
 ```
+
+**Status legend:** ✅ = built and verified working today (Day 3/53). ⏳ = scaffolded in design docs, implementation scheduled for a later day — do not build early.
 
 ## 2. What Every Folder Is Responsible For
 

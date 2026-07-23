@@ -65,7 +65,9 @@ Day 52/querymind/
 
 ## Day 3 — Backend: Core AI Query Generation Logic
 
-🎯 **Objective:** Build the backend endpoint that takes schema + question and returns SQL + explanation from Claude.
+**Resequencing note (added Day 53):** the prior session ("Day 53" in the challenge numbering) finished Day 2's leftover foundation checklist first — venv, dependencies, `.env.example`, and a working local server with `/`, `/api/health`, and a **stubbed** `/api/generate` (routing + Pydantic validation confirmed working, but returning placeholder data, no Claude call yet). So `app/main.py`, `app/api/health.py`, `app/api/generate.py` (stub), and `app/models/schemas.py` already exist — this section now only needs to add the real Claude logic into the existing stub, not build routing from scratch.
+
+🎯 **Objective:** Replace the `/api/generate` stub with the real backend logic that takes schema + question and returns SQL + explanation from Claude.
 
 📖 **What I'll learn:** Prompt engineering for structured, reliable AI output; basic API endpoint design.
 
