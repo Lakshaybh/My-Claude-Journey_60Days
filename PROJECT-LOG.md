@@ -19,6 +19,15 @@ Tracks daily progress for the 10-day capstone (Days 51-60 of the 60 Days of Clau
 - Day 3 readiness check: on track, no scope creep, no blockers — Day 3 can begin implementation immediately using `API.md` as the exact contract.
 - Pending: builder to create an Anthropic API key before Day 3 (local development only; nothing goes live until Day 9).
 
+## Day 53 — Project Setup & Foundation
+- Closed out Day 2's leftover checklist: created venv, installed dependencies (FastAPI, Uvicorn, Anthropic SDK, python-dotenv), set up `.env.example`/`.gitignore`.
+- Built and verified the FastAPI foundation locally: `main.py`, Pydantic request/response models, `GET /api/health`, and a **stubbed** `POST /api/generate` (routing/validation confirmed working, no Claude call yet).
+- Built a plain hello-world frontend served directly by FastAPI (no CORS needed, per Day 2's architecture).
+- Verified all three routes locally (`/`, `/api/health`, `/api/generate`) — all working.
+- Decided branching strategy: direct-to-`main`, small commits (no feature branches — solo, time-constrained build).
+- Deliverables: `SETUP.md`, `ENVIRONMENT.md`, `DAY3-SUMMARY.md`, updated `PROJECT-STRUCTURE.md` — saved in `Day 52/`.
+- Pending: builder still needs to create the Anthropic API key before Day 4 (only blocker for tomorrow).
+
 ---
 
-*Next: Day 53 (Day 3 of the blueprint) — implement the backend AI query generation logic.*
+*Next: Day 54 (Blueprint Day 3) — replace the `/api/generate` stub with the real Claude API call (prompt template + JSON parsing).*
