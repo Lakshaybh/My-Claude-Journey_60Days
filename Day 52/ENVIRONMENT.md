@@ -18,16 +18,16 @@ No IDE-specific extensions are strictly required, but if using VS Code, the **Py
 |---|---|
 | `fastapi` | The web framework — defines routes, validates requests automatically via Pydantic, and gives us a free interactive API tester at `/docs`. |
 | `uvicorn[standard]` | Runs the FastAPI app as an actual running web server. |
-| `anthropic` | Official Python SDK for calling the Claude API — used starting Day 4. |
+| `groq` | Official Python SDK for calling the Groq API (changed from `anthropic` on Day 54 — see `ARCHITECTURE.md` for why) — used starting Day 4. |
 | `python-dotenv` | Loads variables from `.env` into the app so secrets never get hard-coded into source code. |
 
 ## 3. Environment Variables
 
 | Variable | Where it's used | Required today? |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | `app/core/config.py` — will be passed to the Anthropic SDK starting Day 4 | No — only required starting Day 4 |
+| `GROQ_API_KEY` (changed from `ANTHROPIC_API_KEY` on Day 54) | `app/core/config.py` — passed to the Groq SDK in `app/core/groq_client.py` | Yes — set up and verified working Day 54 |
 
-**File:** `.env` (in `Day 52/querymind/`) — created by copying `.env.example` and filling in the real key. This file is git-ignored (see `.gitignore`) and must never be committed.
+**File:** `.env` (in `Day 52/querymind/`) — created by copying `.env.example` and filling in the real key (get one free, no card, at console.groq.com). This file is git-ignored (see `.gitignore`) and must never be committed.
 
 ## 4. Configuration Files
 

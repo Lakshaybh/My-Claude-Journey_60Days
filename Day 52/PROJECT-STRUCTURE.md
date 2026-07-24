@@ -19,15 +19,15 @@ Day 52/
     │   ├── main.py                <- FastAPI app entrypoint: creates app, mounts static, includes routers ✅ built Day 3
     │   ├── api/
     │   │   ├── __init__.py
-    │   │   ├── generate.py        <- POST /api/generate route handler — ✅ stub built Day 3, real Claude call Day 4
+    │   │   ├── generate.py        <- POST /api/generate route handler — ✅ real AI call wired up Day 4
     │   │   └── health.py          <- GET /api/health route handler ✅ built Day 3
     │   ├── core/
     │   │   ├── __init__.py
-    │   │   ├── config.py          <- loads env vars (Claude API key, etc.) via python-dotenv ✅ built Day 3
-    │   │   └── claude_client.py   <- thin wrapper around the Anthropic SDK call — ⏳ Day 4
+    │   │   ├── config.py          <- loads GROQ_API_KEY via python-dotenv ✅ built Day 3, updated Day 4
+    │   │   └── groq_client.py     <- thin wrapper around the Groq SDK call (was claude_client.py — see ARCHITECTURE.md) ✅ built Day 4
     │   ├── prompts/
     │   │   ├── __init__.py
-    │   │   └── sql_prompt.py      <- schema-grounded prompt template + JSON parsing/validation — ⏳ Day 4
+    │   │   └── sql_prompt.py      <- schema-grounded prompt template + JSON parsing/validation ✅ built Day 4
     │   ├── models/
     │   │   ├── __init__.py
     │   │   └── schemas.py         <- Pydantic request/response models (GenerateRequest, GenerateResponse) ✅ built Day 3
@@ -37,8 +37,8 @@ Day 52/
     │       │   └── style.css
     │       └── js/
     │           └── script.js
-    ├── requirements.txt           <- fastapi, uvicorn, anthropic, python-dotenv ✅ installed Day 3
-    ├── .env.example                <- documents required env vars without real secrets ✅ created Day 3
+    ├── requirements.txt           <- fastapi, uvicorn, groq, python-dotenv ✅ installed Day 3, updated Day 4
+    ├── .env.example                <- documents required env vars (GROQ_API_KEY) without real secrets ✅ created Day 3, updated Day 4
     ├── .gitignore                  <- excludes .env, __pycache__, venv, *.log ✅ created Day 3
     └── README.md                   <- project-specific README — ⏳ to be finalized Day 9/10
 ```

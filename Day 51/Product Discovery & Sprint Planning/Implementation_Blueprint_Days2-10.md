@@ -55,7 +55,7 @@ Day 52/querymind/
 - [x] Project folder structure created (empty scaffold, no production code yet)
 - [ ] Git repo — commit pending at end of Day 2 session
 - [ ] Local server runs and shows a blank/hello page — **this happens Day 3**, since FastAPI app code (`main.py`) is written then, not today
-- [ ] Claude API key obtained and stored safely in `.env` — to confirm with builder before Day 3 starts
+- [x] AI provider API key obtained and stored safely in `.env` — done Day 54 using Groq (not Claude — see Day 3 section for why)
 
 📸 **Expected state/screenshot:** Folder structure created; no running server yet (that's Day 3, since today was design-only per capstone rules).
 
@@ -63,11 +63,13 @@ Day 52/querymind/
 
 ---
 
-## Day 3 — Backend: Core AI Query Generation Logic
+## Day 3 — Backend: Core AI Query Generation Logic ✅ COMPLETED (Day 54)
 
-**Resequencing note (added Day 53):** the prior session ("Day 53" in the challenge numbering) finished Day 2's leftover foundation checklist first — venv, dependencies, `.env.example`, and a working local server with `/`, `/api/health`, and a **stubbed** `/api/generate` (routing + Pydantic validation confirmed working, but returning placeholder data, no Claude call yet). So `app/main.py`, `app/api/health.py`, `app/api/generate.py` (stub), and `app/models/schemas.py` already exist — this section now only needs to add the real Claude logic into the existing stub, not build routing from scratch.
+**Resequencing note (added Day 53):** the prior session ("Day 53" in the challenge numbering) finished Day 2's leftover foundation checklist first — venv, dependencies, `.env.example`, and a working local server with `/`, `/api/health`, and a **stubbed** `/api/generate` (routing + Pydantic validation confirmed working, but returning placeholder data, no Claude call yet). So `app/main.py`, `app/api/health.py`, `app/api/generate.py` (stub), and `app/models/schemas.py` already exist — this section now only needs to add the real AI logic into the existing stub, not build routing from scratch.
 
-🎯 **Objective:** Replace the `/api/generate` stub with the real backend logic that takes schema + question and returns SQL + explanation from Claude.
+**⚠️ AI provider change (Day 54):** this section was originally written for Claude. On Day 54, the builder's Anthropic account had no usable credit and adding paid credits was ruled out; a local Ollama model was also ruled out (disk space). The project now uses **Groq** (Llama 3.3 70B) instead — free, no card, no disk footprint. See `ARCHITECTURE.md` section "AI Model/API" for the full reasoning. Everywhere below that says "Claude," read "Groq" — the approach (schema-grounded prompt, structured JSON output) is identical, only the provider changed.
+
+🎯 **Objective:** Replace the `/api/generate` stub with the real backend logic that takes schema + question and returns SQL + explanation from Groq. — **DONE, verified working Day 54.**
 
 📖 **What I'll learn:** Prompt engineering for structured, reliable AI output; basic API endpoint design.
 
@@ -80,19 +82,19 @@ Day 52/querymind/
 4. Test with 3–4 sample schemas and questions manually (e.g., a simple `orders`/`customers` schema).
 5. Add a system-level instruction reminding Claude to only use tables/columns present in the given schema, and to say so clearly if the question can't be answered from the schema.
 
-📂 **Files to create/modify:** `app/api/generate.py` (route handler, per `API.md`), `app/prompts/sql_prompt.py` (prompt template + JSON parsing), `app/models/schemas.py` (Pydantic request/response models), `app/core/claude_client.py` (Claude API wrapper), `app/main.py` (wire the router in), `requirements.txt`.
+📂 **Files created/modified (Day 54):** `app/api/generate.py` (route handler, per `API.md`), `app/prompts/sql_prompt.py` (prompt template + JSON parsing), `app/models/schemas.py` (Pydantic request/response models, built Day 53), `app/core/groq_client.py` (Groq API wrapper — replaces the originally-planned `claude_client.py`), `app/core/config.py` (loads `GROQ_API_KEY`), `requirements.txt` (swapped `anthropic` for `groq`).
 
-🔗 **Tools:** Anthropic Claude API (Messages API), structured output via JSON instruction.
+🔗 **Tools:** Groq API (OpenAI-compatible chat completions, `llama-3.3-70b-versatile` model), structured output via JSON instruction. (Originally planned: Anthropic Claude API — changed Day 54, see note above.)
 
-🧪 **Testing tasks:** Test with valid schema/question pairs; test with a nonsensical question; test with an empty schema; confirm JSON output parses correctly every time.
+🧪 **Testing tasks:** ✅ Tested with valid schema/question pairs (single-table, multi-table joins, aggregation + LIMIT — all correct); ✅ tested empty-input validation (returns 422 as designed); JSON output parsed correctly on every test.
 
-🐞 **Common issues:** Claude wrapping output in markdown code fences (strip them before parsing); inconsistent JSON formatting (add explicit "respond with ONLY valid JSON" instruction); API key not loading (double-check `.env` loading).
+🐞 **Common issues encountered today:** Anthropic account had no credit balance (blocked entirely — this is what triggered the provider switch to Groq); a stale local server process left over from Day 53 occupied port 8000 and had to be killed before the new code would run — worth remembering to fully stop `uvicorn` (Ctrl+C) before restarting in future sessions.
 
 ✅ **End-of-day checklist:**
-- [ ] `/generate` endpoint works via a manual test (Postman, curl, or simple script)
-- [ ] Returns clean `sql` and `explanation` fields
-- [ ] Handles empty/invalid input gracefully
-- [ ] Tested with at least 3 different schema/question pairs
+- [x] `/api/generate` endpoint works via real HTTP test (curl)
+- [x] Returns clean `sql` and `explanation` fields
+- [x] Handles empty/invalid input gracefully (422 with clear validation detail)
+- [x] Tested with 3+ different schema/question pairs, including a 3-table join
 
 📸 **Expected state:** Terminal or API client showing a successful JSON response with SQL + explanation for a test question.
 
@@ -145,7 +147,7 @@ Day 52/querymind/
 
 📝 **Step-by-step plan:**
 1. Test with harder schemas: multiple tables with foreign keys, ambiguous column names, larger schemas (5+ tables).
-2. Test with vague/unclear questions and confirm Claude either makes a reasonable assumption and states it, or asks for clarification within the explanation (not a chat — just a clear disclaimer in the explanation text).
+2. Test with vague/unclear questions and confirm the AI (Groq/Llama 3.3, per the Day 54 provider change) either makes a reasonable assumption and states it, or asks for clarification within the explanation (not a chat — just a clear disclaimer in the explanation text).
 3. Refine the prompt template based on failures observed (e.g., wrong joins, hallucinated columns not in schema).
 4. Add a lightweight validation step: check the returned SQL references only table/column names present in the pasted schema; if not, flag a warning in the UI.
 5. Add a clear on-screen disclaimer: "AI-generated — please review before running."
