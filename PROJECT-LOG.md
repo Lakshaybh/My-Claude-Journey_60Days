@@ -28,6 +28,19 @@ Tracks daily progress for the 10-day capstone (Days 51-60 of the 60 Days of Clau
 - Deliverables: `SETUP.md`, `ENVIRONMENT.md`, `DAY3-SUMMARY.md`, updated `PROJECT-STRUCTURE.md` — saved in `Day 52/`.
 - Pending: builder still needs to create the Anthropic API key before Day 4 (only blocker for tomorrow).
 
+## Day 54 — Core Feature Implementation
+- Replaced the `/api/generate` stub with real AI-powered SQL generation (schema-grounded prompt + defensive JSON parsing).
+- Anthropic account had no usable credit and paid billing was ruled out; switched AI provider to **Groq** (Llama 3.3 70B, free, no card, no disk footprint). Documented transparently in `ARCHITECTURE.md`.
+- Verified with multi-table joins, aggregation, and `LIMIT` queries — all correct.
+- Deliverables: `Day 54/day54.md` summary + key learnings.
+
+## Day 55 — Reliability Pass + Frontend Build
+- Built `app/prompts/validator.py` — flags generated SQL that references tables not present in the pasted schema (hallucination safety net).
+- Caught and fixed a gap: Blueprint Day 4's frontend form had never actually been built (only a hello-world stub existed) — built it today so the warning/disclaimer UI had somewhere to attach.
+- Ran 11 total test cases (8 varied schema/question pairs including multi-table FKs, ambiguous columns, vague/unrelated questions, typos, special characters; 3 validator unit tests) — all passed, zero false positives.
+- Added the "AI-generated — please review" disclaimer to the UI.
+- Deliverables: `Day 55/day55.md` summary + key learnings.
+
 ---
 
-*Next: Day 54 (Blueprint Day 3) — replace the `/api/generate` stub with the real Claude API call (prompt template + JSON parsing).*
+*Next: Day 56 (Blueprint Day 6) — visual design direction: colors, typography, layout polish on top of the now-functional plain UI.*
