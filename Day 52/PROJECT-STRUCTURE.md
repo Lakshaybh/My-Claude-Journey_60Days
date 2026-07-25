@@ -27,11 +27,12 @@ Day 52/
     │   │   └── groq_client.py     <- thin wrapper around the Groq SDK call (was claude_client.py — see ARCHITECTURE.md) ✅ built Day 4
     │   ├── prompts/
     │   │   ├── __init__.py
-    │   │   └── sql_prompt.py      <- schema-grounded prompt template + JSON parsing/validation ✅ built Day 4
+    │   │   ├── sql_prompt.py      <- schema-grounded prompt template + JSON parsing/validation ✅ built Day 4
+    │   │   └── validator.py       <- checks generated SQL only references tables in the pasted schema ✅ built Day 5
     │   ├── models/
     │   │   ├── __init__.py
     │   │   └── schemas.py         <- Pydantic request/response models (GenerateRequest, GenerateResponse) ✅ built Day 3
-    │   └── static/                <- the entire frontend, served directly by FastAPI ✅ hello-world built Day 3
+    │   └── static/                <- the entire frontend, served directly by FastAPI ✅ hello-world Day 3, functional form + disclaimer built Day 5
     │       ├── index.html
     │       ├── css/
     │       │   └── style.css

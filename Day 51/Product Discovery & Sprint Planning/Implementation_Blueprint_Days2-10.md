@@ -102,9 +102,11 @@ Day 52/querymind/
 
 ---
 
-## Day 4 — Frontend: Core UI Structure + Wiring
+## Day 4 — Frontend: Core UI Structure + Wiring ✅ COMPLETED (built retroactively during Day 55, see note)
 
-🎯 **Objective:** Build the functional (unstyled) UI and connect it to the backend so the full flow works end-to-end.
+**Note (added Day 55):** this section was skipped during the actual Day 4 session (which focused entirely on the AI provider pivot to Groq). The gap was caught at the start of Day 55 while reviewing existing code before adding the reliability-pass features, since there was no real form for the warning/disclaimer to attach to. Built as the first part of Day 55 instead, then Day 5's actual work (validator, disclaimer) layered on top the same session. No functionality here differs from what was originally planned — timing only.
+
+🎯 **Objective:** Build the functional (unstyled) UI and connect it to the backend so the full flow works end-to-end. — **DONE**
 
 📖 **What I'll learn:** Connecting a frontend form to a backend API; handling loading/error states in the UI.
 
@@ -126,10 +128,10 @@ Day 52/querymind/
 🐞 **Common issues:** Button submitting multiple times if clicked repeatedly (disable button while loading); forgetting to call `/api/generate` (not `/generate`) — check `API.md` for exact paths.
 
 ✅ **End-of-day checklist:**
-- [ ] Full flow works in browser: input → generate → output displayed
-- [ ] Loading state visible during generation
-- [ ] Error states display clearly for bad input
-- [ ] No CORS or console errors
+- [x] Full flow works in browser: input → generate → output displayed
+- [x] Loading state visible during generation (button text changes to "Generating...", disabled while in flight)
+- [x] Error states display clearly for bad input
+- [x] No CORS issues (single-origin, as designed)
 
 📸 **Expected state/screenshot:** Browser screenshot showing schema pasted, question typed, and SQL + explanation displayed on screen (unstyled is fine).
 
@@ -137,9 +139,9 @@ Day 52/querymind/
 
 ---
 
-## Day 5 — Reliability Pass: Prompt Refinement + Edge Cases
+## Day 5 — Reliability Pass: Prompt Refinement + Edge Cases ✅ COMPLETED (Day 55)
 
-🎯 **Objective:** Make the AI output consistently correct and handle real-world messy input gracefully.
+🎯 **Objective:** Make the AI output consistently correct and handle real-world messy input gracefully. — **DONE**
 
 📖 **What I'll learn:** Iterative prompt refinement; defensive handling of unpredictable AI output.
 
@@ -152,19 +154,19 @@ Day 52/querymind/
 4. Add a lightweight validation step: check the returned SQL references only table/column names present in the pasted schema; if not, flag a warning in the UI.
 5. Add a clear on-screen disclaimer: "AI-generated — please review before running."
 
-📂 **Files to modify:** `app/prompts/sql_prompt.py`, `app/api/generate.py` (add validation logic), `app/static/index.html` (disclaimer text).
+📂 **Files created/modified (Day 55):** `app/prompts/validator.py` (new — table-level hallucination check), `app/api/generate.py` (wired validator in, returns `warning` field), `app/static/index.html` + `app/static/js/script.js` (built the full missing form + disclaimer + warning display, see Day 4 note above).
 
-🔗 **Tools:** None new — refinement of existing Claude integration.
+🔗 **Tools:** None new — refinement of existing Groq integration (originally planned for Claude, switched Day 54).
 
-🧪 **Testing tasks:** Run 8–10 varied schema/question tests; log which fail and why; confirm disclaimer displays; confirm validation warning triggers correctly on a deliberately bad case.
+🧪 **Testing tasks:** ✅ 11 total test cases run — 8 varied schema/question pairs via live HTTP (5-table FK schema, ambiguous columns, vague question, unrelated question, 7-table schema, typos/informal language, special characters) all produced correct SQL; 3 direct validator unit tests (valid query, hallucinated table, case-insensitivity) all passed with zero false positives.
 
-🐞 **Common issues:** Over-fitting the prompt to one test case and breaking another — keep a running list of test cases and re-run all of them after each prompt change.
+🐞 **Common issues encountered today:** column-level validation was considered but deliberately dropped — too many false-positive risks (aliases, computed columns) for the value it added; table-level validation alone is reliable and sufficient. Also: venv activation failed silently in one terminal session — running via `venv\Scripts\python.exe -m uvicorn ...` directly (bypassing `activate`) resolved it.
 
 ✅ **End-of-day checklist:**
-- [ ] 8+ test cases run, most producing correct/reasonable SQL
-- [ ] Validation warning works for hallucinated table/column names
-- [ ] Disclaimer visible in UI
-- [ ] Prompt template finalized (documented in `prompts.py` comments)
+- [x] 8+ test cases run, all producing correct/reasonable SQL (11 total including unit tests)
+- [x] Validation warning works for hallucinated tables (column-level validation deliberately scoped out — see above)
+- [x] Disclaimer visible in UI
+- [x] Prompt template held up without needing changes — no failures observed across all 11 tests
 
 📸 **Expected state:** Screenshot of a successful complex-schema test, and one showing the validation warning triggering correctly.
 

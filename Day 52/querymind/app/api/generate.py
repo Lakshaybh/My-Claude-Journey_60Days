@@ -6,6 +6,7 @@ from groq import APIError
 from app.core.groq_client import call_ai_for_sql
 from app.models.schemas import GenerateRequest, GenerateResponse
 from app.prompts.sql_prompt import extract_json
+from app.prompts.validator import build_warning
 
 router = APIRouter()
 
@@ -30,4 +31,6 @@ def generate_sql(request: GenerateRequest):
             detail="Could not generate a valid response. Please try rephrasing your question.",
         )
 
-    return GenerateResponse(sql=sql, explanation=explanation, warning=None)
+    warning = build_warning(sql, request.schema_text)
+
+    return GenerateResponse(sql=sql, explanation=explanation, warning=warning)

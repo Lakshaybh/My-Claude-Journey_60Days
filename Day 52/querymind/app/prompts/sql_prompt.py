@@ -24,7 +24,7 @@ Question:
 
 
 def extract_json(raw_text: str) -> dict:
-    """Claude is instructed to return pure JSON, but this defensively handles
+    """The AI is instructed to return pure JSON, but this defensively handles
     accidental markdown fences or stray text around the JSON object."""
     text = raw_text.strip()
 

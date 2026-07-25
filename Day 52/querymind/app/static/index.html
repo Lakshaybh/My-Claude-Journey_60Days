@@ -7,8 +7,35 @@
 </head>
 <body>
   <h1>QueryMind</h1>
-  <p>Hello World — foundation is running. Core features build starting Day 4.</p>
-  <p id="health-status">Checking API...</p>
+  <p>Ask your data a question. Get the SQL instantly.</p>
+
+  <label for="schema-input">1. Paste your database schema</label><br />
+  <textarea id="schema-input" rows="8" cols="60" placeholder="CREATE TABLE customers (id INT, name TEXT, region TEXT);"></textarea>
+
+  <br /><br />
+
+  <label for="question-input">2. Ask your question in plain English</label><br />
+  <textarea id="question-input" rows="2" cols="60" placeholder="e.g. show total sales by region last quarter"></textarea>
+
+  <br /><br />
+
+  <button id="generate-btn">Generate SQL</button>
+
+  <p><small>AI-generated — please review before running.</small></p>
+
+  <p id="error-message" style="color: red; display: none;"></p>
+
+  <div id="result-section" style="display: none;">
+    <h2>Generated SQL</h2>
+    <pre id="sql-output"></pre>
+    <button id="copy-btn">Copy SQL</button>
+    <p id="copy-confirmation" style="display: none;">Copied!</p>
+
+    <h2>What this query does</h2>
+    <p id="explanation-output"></p>
+
+    <p id="warning-output" style="color: darkorange; display: none;"></p>
+  </div>
 
   <script src="/js/script.js"></script>
 </body>
