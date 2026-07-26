@@ -174,9 +174,11 @@ Day 52/querymind/
 
 ---
 
-## Day 6 — UI Design Direction + Branding
+## Day 6 — UI Design Direction + Branding ⚠️ SCOPE COMPRESSED (Day 56)
 
-🎯 **Objective:** Establish the visual identity and layout direction before writing final CSS — avoid random styling decisions.
+**Note (added Day 56):** the Day 56 session prompt asked for a complete working MVP **and deployment today**, rather than the design-direction-only scope originally planned here. Rather than block on the conflict, this was treated as a deliberate scope compression: instead of the full `/exl-branding` + `/minimalist-ui` design system pass described below, a **lightweight, presentable styling pass** was built (card layout, spacing, color accent, styled SQL output block, responsive breakpoint) — good enough for a real demo, not yet the final polished branding. **The app was also deployed live today** (originally Day 9): https://querymind-3msv.onrender.com — verified working end-to-end (styled UI, footer, real AI generation) on the live URL. The full branding/design-system pass below is **deferred to Day 7**, which now absorbs both the original Day 6 and Day 7 scope. Day 9 becomes a lighter "final deploy refresh" day rather than a first-time deployment.
+
+🎯 **Objective:** Establish the visual identity and layout direction before writing final CSS — avoid random styling decisions. — **Partially done Day 56 (functional/presentable); full pass moved to Day 7.**
 
 📖 **What I'll learn:** Applying a design system (branding, spacing, typography, color) consistently to a real product.
 
@@ -280,7 +282,9 @@ Day 52/querymind/
 
 ---
 
-## Day 9 — Deployment
+## Day 9 — Deployment ⚠️ ALREADY LIVE (deployed early, Day 56)
+
+**Note (added Day 56):** initial deployment happened early — see Day 6 note above. Live URL: https://querymind-3msv.onrender.com, verified working (styled UI, footer, real AI generation) via the actual live link. This section now becomes a **final deploy refresh** — pushing the polished Day 7/8 work live and re-verifying — rather than a first-time setup.
 
 🎯 **Objective:** Get the tool live on a public, shareable URL using a free hosting option.
 

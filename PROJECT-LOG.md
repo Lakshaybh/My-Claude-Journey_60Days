@@ -41,6 +41,14 @@ Tracks daily progress for the 10-day capstone (Days 51-60 of the 60 Days of Clau
 - Added the "AI-generated — please review" disclaimer to the UI.
 - Deliverables: `Day 55/day55.md` summary + key learnings.
 
+## Day 56 — Complete the MVP & Deliver a Working Demo
+- Today's prompt asked for a full MVP + live deployment, ahead of the original Day 9 deployment schedule — treated as a deliberate scope compression: lightweight presentable styling now (card layout, styled SQL block, responsive), full branding pass deferred to Day 7.
+- Added the required footer: "Built with Claude as part of the AB Talks 60-Day Claude AI Challenge."
+- **Deployed live to Render (free tier):** https://querymind-3msv.onrender.com — Root Directory `Day 52/querymind`, `GROQ_API_KEY` set via Render's environment variables (never touched git).
+- Caught a real mistake: the first deploy check showed the *old* unstyled site live, because today's changes had been tested locally but not yet pushed to GitHub. Committed, pushed, and confirmed the fresh deploy went live.
+- Verified the live public URL end-to-end: styled homepage, footer present, health check passing, and a real AI-generated SQL query returned correctly through the live server.
+- Deliverables: `Day 56/day56.md` summary + key learnings.
+
 ---
 
-*Next: Day 56 (Blueprint Day 6) — visual design direction: colors, typography, layout polish on top of the now-functional plain UI.*
+*Next: Day 57 (now absorbing original Day 6 + Day 7 scope) — full branding/design-system pass plus motion/micro-interaction polish, on top of today's live MVP.*
