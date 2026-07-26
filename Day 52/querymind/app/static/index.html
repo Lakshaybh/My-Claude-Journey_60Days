@@ -2,40 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QueryMind</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <h1>QueryMind</h1>
-  <p>Ask your data a question. Get the SQL instantly.</p>
+  <main class="container">
+    <header class="app-header">
+      <h1>QueryMind</h1>
+      <p class="tagline">Ask your data a question. Get the SQL instantly.</p>
+    </header>
 
-  <label for="schema-input">1. Paste your database schema</label><br />
-  <textarea id="schema-input" rows="8" cols="60" placeholder="CREATE TABLE customers (id INT, name TEXT, region TEXT);"></textarea>
+    <section class="card">
+      <label for="schema-input">1. Paste your database schema</label>
+      <textarea id="schema-input" rows="8" placeholder="CREATE TABLE customers (id INT, name TEXT, region TEXT);"></textarea>
 
-  <br /><br />
+      <label for="question-input">2. Ask your question in plain English</label>
+      <textarea id="question-input" rows="2" placeholder="e.g. show total sales by region last quarter"></textarea>
 
-  <label for="question-input">2. Ask your question in plain English</label><br />
-  <textarea id="question-input" rows="2" cols="60" placeholder="e.g. show total sales by region last quarter"></textarea>
+      <button id="generate-btn">Generate SQL</button>
 
-  <br /><br />
+      <p class="disclaimer">AI-generated — please review before running.</p>
 
-  <button id="generate-btn">Generate SQL</button>
+      <p id="error-message" class="error-message" style="display: none;"></p>
+    </section>
 
-  <p><small>AI-generated — please review before running.</small></p>
+    <section id="result-section" class="card result-card" style="display: none;">
+      <h2>Generated SQL</h2>
+      <pre id="sql-output"></pre>
+      <button id="copy-btn">Copy SQL</button>
+      <span id="copy-confirmation" class="copy-confirmation" style="display: none;">Copied!</span>
 
-  <p id="error-message" style="color: red; display: none;"></p>
+      <h2>What this query does</h2>
+      <p id="explanation-output"></p>
 
-  <div id="result-section" style="display: none;">
-    <h2>Generated SQL</h2>
-    <pre id="sql-output"></pre>
-    <button id="copy-btn">Copy SQL</button>
-    <p id="copy-confirmation" style="display: none;">Copied!</p>
+      <p id="warning-output" class="warning-message" style="display: none;"></p>
+    </section>
+  </main>
 
-    <h2>What this query does</h2>
-    <p id="explanation-output"></p>
-
-    <p id="warning-output" style="color: darkorange; display: none;"></p>
-  </div>
+  <footer class="app-footer">
+    Built with Claude as part of the AB Talks 60-Day Claude AI Challenge.
+  </footer>
 
   <script src="/js/script.js"></script>
 </body>
