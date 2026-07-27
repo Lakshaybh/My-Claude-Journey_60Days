@@ -210,9 +210,11 @@ Day 52/querymind/
 
 ---
 
-## Day 7 — Motion Polish + Final UI Refinement
+## Day 7 — Motion Polish + Final UI Refinement ✅ COMPLETED (Day 57, combined with deferred Day 6 branding scope)
 
-🎯 **Objective:** Add subtle, professional micro-interactions and fix any remaining visual rough edges.
+**Note (added Day 57):** completed together with the full branding/design-system pass deferred from Day 6 (see Day 6 note above) — one combined polish session covering color system (incl. automatic dark mode), typography, spacing, AND motion/micro-interactions/accessibility. All items below were built.
+
+🎯 **Objective:** Add subtle, professional micro-interactions and fix any remaining visual rough edges. — **DONE**
 
 📖 **What I'll learn:** Using restrained animation to make a UI feel more premium without being distracting.
 
@@ -235,11 +237,11 @@ Day 52/querymind/
 🐞 **Common issues:** Overusing animation making the UI feel busy — keep motion subtle and purposeful; copy-to-clipboard failing on some browsers due to permissions — use the standard Clipboard API with a fallback message.
 
 ✅ **End-of-day checklist:**
-- [ ] Loading animation implemented
-- [ ] Output appears with a smooth transition
-- [ ] Hover/focus states present on all interactive elements
-- [ ] Copy-to-clipboard works with confirmation feedback
-- [ ] Final visual QA pass complete
+- [x] Loading animation implemented (spinner in Generate button)
+- [x] Output appears with a smooth transition (fade-in + auto-scroll)
+- [x] Hover/focus states present on all interactive elements
+- [x] Copy-to-clipboard works with confirmation feedback ("Copied!" + color change)
+- [x] Final visual QA pass complete — also added: automatic dark mode, accessibility (aria-live, focus rings, reduced-motion support), Enter-to-submit
 
 📸 **Expected state/screenshot:** Short screen recording or before/after screenshots showing the loading and output-appear animations.
 
