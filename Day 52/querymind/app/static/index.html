@@ -3,40 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Paste a database schema, ask a question in plain English, get back a correct SQL query with an explanation." />
   <title>QueryMind</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <main class="container">
     <header class="app-header">
+      <div class="logo-mark" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M3 7l9 5 9-5M12 12v10" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+      </div>
       <h1>QueryMind</h1>
       <p class="tagline">Ask your data a question. Get the SQL instantly.</p>
     </header>
 
-    <section class="card">
-      <label for="schema-input">1. Paste your database schema</label>
-      <textarea id="schema-input" rows="8" placeholder="CREATE TABLE customers (id INT, name TEXT, region TEXT);"></textarea>
+    <section class="card" aria-labelledby="form-heading">
+      <h2 id="form-heading" class="sr-only">Generate a SQL query</h2>
 
-      <label for="question-input">2. Ask your question in plain English</label>
-      <textarea id="question-input" rows="2" placeholder="e.g. show total sales by region last quarter"></textarea>
+      <div class="field">
+        <label for="schema-input">
+          <span class="step-badge" aria-hidden="true">1</span>
+          Paste your database schema
+        </label>
+        <textarea
+          id="schema-input"
+          rows="8"
+          placeholder="CREATE TABLE customers (id INT, name TEXT, region TEXT);"
+          aria-describedby="schema-hint"
+        ></textarea>
+        <p id="schema-hint" class="field-hint">Standard <code>CREATE TABLE</code> statements work best.</p>
+      </div>
 
-      <button id="generate-btn">Generate SQL</button>
+      <div class="field">
+        <label for="question-input">
+          <span class="step-badge" aria-hidden="true">2</span>
+          Ask your question in plain English
+        </label>
+        <textarea
+          id="question-input"
+          rows="2"
+          placeholder="e.g. show total sales by region last quarter"
+        ></textarea>
+      </div>
+
+      <button id="generate-btn" type="button">
+        <span class="btn-spinner" aria-hidden="true"></span>
+        <span class="btn-label">Generate SQL</span>
+      </button>
 
       <p class="disclaimer">AI-generated — please review before running.</p>
 
-      <p id="error-message" class="error-message" style="display: none;"></p>
+      <p id="error-message" class="error-message" role="alert" aria-live="assertive" style="display: none;"></p>
     </section>
 
-    <section id="result-section" class="card result-card" style="display: none;">
-      <h2>Generated SQL</h2>
-      <pre id="sql-output"></pre>
-      <button id="copy-btn">Copy SQL</button>
-      <span id="copy-confirmation" class="copy-confirmation" style="display: none;">Copied!</span>
+    <section
+      id="result-section"
+      class="card result-card"
+      aria-live="polite"
+      aria-labelledby="result-heading"
+      style="display: none;"
+    >
+      <h2 id="result-heading" class="sr-only">Result</h2>
 
-      <h2>What this query does</h2>
-      <p id="explanation-output"></p>
+      <div class="result-block">
+        <div class="result-block-header">
+          <h3>Generated SQL</h3>
+          <button id="copy-btn" type="button" class="copy-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            <span id="copy-btn-label">Copy SQL</span>
+          </button>
+        </div>
+        <pre id="sql-output"></pre>
+      </div>
 
-      <p id="warning-output" class="warning-message" style="display: none;"></p>
+      <div class="result-block">
+        <h3>What this query does</h3>
+        <p id="explanation-output"></p>
+      </div>
+
+      <p id="warning-output" class="warning-message" role="alert" style="display: none;"></p>
     </section>
   </main>
 
