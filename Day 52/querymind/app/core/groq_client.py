@@ -3,7 +3,7 @@ from groq import Groq
 from app.core.config import GROQ_API_KEY
 from app.prompts.sql_prompt import SYSTEM_PROMPT, build_user_prompt
 
-_client = Groq(api_key=GROQ_API_KEY)
+_client = Groq(api_key=GROQ_API_KEY, timeout=30.0, max_retries=1)
 
 MODEL = "llama-3.3-70b-versatile"
 
