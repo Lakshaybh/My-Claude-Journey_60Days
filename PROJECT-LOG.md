@@ -56,6 +56,14 @@ Tracks daily progress for the 10-day capstone (Days 51-60 of the 60 Days of Clau
 - Committed, pushed, confirmed Render auto-deployed, and re-verified the live URL (footer, health check, real multi-table AI generation all still working).
 - Deliverables: `Day 57/day57.md` summary + key learnings.
 
+## Day 58 — Testing, Debugging & Production Optimization
+- Senior QA/security/performance review of the full codebase found 6 real production-readiness gaps (not new features): no rate limiting, narrow error handling, no request timeout, no server-side logging, missing favicon (console error), no basic security headers.
+- Fixed all 6: added `app/core/rate_limit.py` (per-IP, 15 req/min), broadened exception handling with a global JSON error handler, added a 30s timeout + retry to the Groq client, added logging, added an inline favicon, added security headers middleware.
+- Ran 14 edge-case test categories (empty/missing/malformed/oversized input, wrong content-type, wrong method, 404s, injection-style text, unicode/emoji, rate-limit triggering, malformed-AI-response resilience) — all passed.
+- Confirmed the no-SQL-execution design (from Day 51) doubles as a security boundary — injection-style input is harmless since nothing ever runs the generated SQL.
+- Deployed, and re-verified everything on the live public URL (not just localhost).
+- Deliverables: `Day 58/day58.md` summary + key learnings.
+
 ---
 
-*Next: Day 58 (Blueprint Day 8) — dedicated testing pass: edge cases, bug fixes, cross-browser/responsive re-check.*
+*Next: Day 59 — final documentation pass, README polish, and demo/pitch prep ahead of Day 60's submission.*

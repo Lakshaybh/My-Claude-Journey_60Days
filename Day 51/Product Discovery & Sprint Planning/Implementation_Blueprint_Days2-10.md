@@ -249,9 +249,11 @@ Day 52/querymind/
 
 ---
 
-## Day 8 — Testing Pass
+## Day 8 — Testing Pass ✅ COMPLETED (Day 58, expanded scope)
 
-🎯 **Objective:** Systematically test the full product for bugs, edge cases, and rough UX moments before deployment.
+**Note (added Day 58):** since deployment already happened early (Day 56, see Day 6/9 notes above), this session went beyond the original checklist into a full production-readiness pass — rate limiting, error handling, security headers, logging, timeouts — appropriate given the app is already publicly live, not still pre-launch.
+
+🎯 **Objective:** Systematically test the full product for bugs, edge cases, and rough UX moments before deployment. — **DONE, plus production hardening since the app is already live.**
 
 📖 **What I'll learn:** Structured manual QA — writing and executing a test plan like a real product team would.
 
@@ -273,10 +275,10 @@ Day 52/querymind/
 🐞 **Common issues:** Fixing one bug introduces another — always re-run the full checklist after any fix, not just the failing case.
 
 ✅ **End-of-day checklist:**
-- [ ] Full test checklist executed and documented
-- [ ] All critical bugs fixed
-- [ ] Responsiveness re-confirmed
-- [ ] Outside feedback gathered (if possible)
+- [x] Full test checklist executed and documented (14 categories, see `Day 58/day58.md`)
+- [x] All critical bugs fixed (6 production-readiness gaps found and fixed: rate limiting, error handling, timeout, logging, favicon, security headers)
+- [x] Responsiveness re-confirmed (unchanged since Day 57, no regressions)
+- [ ] Outside feedback gathered — not yet done, consider for Day 59/60
 
 📸 **Expected state:** Screenshot or note of the completed test checklist with pass/fail results.
 
