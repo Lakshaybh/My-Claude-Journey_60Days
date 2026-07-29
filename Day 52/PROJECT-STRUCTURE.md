@@ -41,7 +41,8 @@ Day 52/
     ├── requirements.txt           <- fastapi, uvicorn, groq, python-dotenv ✅ installed Day 3, updated Day 4
     ├── .env.example                <- documents required env vars (GROQ_API_KEY) without real secrets ✅ created Day 3, updated Day 4
     ├── .gitignore                  <- excludes .env, __pycache__, venv, *.log ✅ created Day 3
-    └── README.md                   <- project-specific README — ⏳ to be finalized Day 9/10
+    ├── README.md                   <- project-specific README ✅ built Day 9
+    └── LICENSE                     <- MIT license ✅ built Day 9
 ```
 
 **Status legend:** ✅ = built and verified working today (Day 3/53). ⏳ = scaffolded in design docs, implementation scheduled for a later day — do not build early.

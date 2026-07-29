@@ -313,12 +313,12 @@ Day 52/querymind/
 🐞 **Common issues:** API key not set correctly in production causing 500 errors; wrong Root Directory setting in Render (must be `Day 52/querymind`, not the repo root); cold-start delays on Render's free tier after inactivity (add a loading message if the first request is slow, and do a warm-up ping before any live demo).
 
 ✅ **End-of-day checklist:**
-- [ ] Render service created with Root Directory = `Day 52/querymind`
-- [ ] `ANTHROPIC_API_KEY` set in Render environment variables
-- [ ] App deployed and reachable via public URL (frontend + API both work, single service)
-- [ ] Full flow tested successfully on the live link
-- [ ] `querymind/README.md` updated with live link + setup instructions
-- [ ] No secrets committed to the repository
+- [x] Render service created with Root Directory = `Day 52/querymind` (done Day 56)
+- [x] `GROQ_API_KEY` set in Render environment variables (changed from `ANTHROPIC_API_KEY` — see Day 3 note)
+- [x] App deployed and reachable via public URL: https://querymind-3msv.onrender.com
+- [x] Full flow tested successfully on the live link — verified Day 9 with a 10-point production check
+- [x] `querymind/README.md` created with live link + setup instructions (Day 9)
+- [x] No secrets committed to the repository — confirmed via `git status` before every commit throughout the capstone
 
 📸 **Expected state/screenshot:** Screenshot of the live deployed tool working, with the browser address bar showing the public URL.
 
