@@ -143,6 +143,17 @@ By Day 60, I want to:
 
 ---
 
+## 🚀 Capstone Project: QueryMind
+
+Days 51-60 of this challenge are a 10-day capstone: an AI-powered SQL query generator built end-to-end, following a real software development lifecycle (discovery → design → setup → implementation → testing → deployment).
+
+- **Live demo:** https://querymind-3msv.onrender.com
+- **Source code:** [`Day 52/querymind/`](Day%2052/querymind/)
+- **Full day-by-day build log:** [`PROJECT-LOG.md`](PROJECT-LOG.md)
+- **Project README:** [`Day 52/querymind/README.md`](Day%2052/querymind/README.md)
+
+---
+
 ## 📚 Repository Structure
 
 ```text
