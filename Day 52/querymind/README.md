@@ -1,10 +1,18 @@
 # QueryMind
 
+**Version:** v1.0.0 · **Status:** Live
+
 AI-powered SQL query generator for data analysts. Paste a database schema, ask a question in plain English, get back a correct SQL query with a plain-English explanation.
 
 **Live demo:** https://querymind-3msv.onrender.com
 
 Built as a 10-day capstone project for the **AB Talks 60-Day Claude AI Challenge**.
+
+---
+
+## Screenshots
+
+*(Add screenshots here from the live app: the main input screen, a generated result with SQL + explanation, and the mobile view. Capture directly from https://querymind-3msv.onrender.com and drop the image files into a `screenshots/` folder in this directory, then reference them here, e.g. `![QueryMind main screen](screenshots/main.png)`.)*
 
 ---
 

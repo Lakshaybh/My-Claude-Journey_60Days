@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>60 Days of Claude AI — Skills Evolution</title>
+<style>
+  :root {
+    --accent: #4f46e5;
+    --accent-2: #0f9d6e;
+    --bg: #0d0d10;
+    --panel: #17171c;
+    --border: #2a2a32;
+    --text: #f4f3f1;
+    --text-muted: #9a99a3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(circle at 50% 0%, #1a1a24 0%, #0d0d10 55%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 3rem 1.5rem 4rem;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 3.5rem; }
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(79, 70, 229, 0.12);
+    border: 1px solid rgba(79, 70, 229, 0.3);
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    margin-bottom: 1.25rem;
+  }
+  h1 {
+    font-family: Georgia, "Iowan Old Style", serif;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.75rem;
+    line-height: 1.1;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .timeline {
+    position: relative;
+    margin: 3rem 0;
+    padding-left: 2.2rem;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  }
+  .stage {
+    position: relative;
+    padding-bottom: 1.9rem;
+  }
+  .stage:last-child { padding-bottom: 0; }
+  .stage-dot {
+    position: absolute;
+    left: -2.2rem;
+    top: 0.3rem;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 2px solid var(--accent);
+  }
+  .stage-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.1rem 1.4rem;
+  }
+  .stage-range {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+  .stage-title {
+    font-size: 1.08rem;
+    font-weight: 700;
+    margin: 0 0 0.35rem;
+  }
+  .stage-desc {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .capstone {
+    margin-top: 1rem;
+    background: linear-gradient(135deg, rgba(79,70,229,0.18), rgba(15,157,110,0.12));
+    border: 1px solid var(--accent);
+  }
+  .capstone .stage-dot {
+    background: var(--accent);
+    border-color: #fff;
+    box-shadow: 0 0 0 4px rgba(79,70,229,0.25);
+  }
+  .capstone .stage-range { color: #a5b4fc; }
+  .capstone .stage-title { font-size: 1.25rem; }
+  .stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+  }
+  .stat {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text);
+  }
+  .stat strong { color: var(--accent-2); }
+  footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  @media print {
+    body { background: #0d0d10; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="eyebrow">AB Talks · 60-Day Claude AI Challenge</span>
+      <h1>From First Prompt to Production Launch</h1>
+      <p class="subtitle">How 60 days of deliberate, escalating AI practice culminated in QueryMind — a live, production-hardened application shipped in a 10-day solo capstone sprint.</p>
+    </header>
+
+    <div class="timeline">
+      <div class="stage">
+        <div class="stage-dot"></div>
+        <div class="stage-card">
+          <div class="stage-range">Weeks 1-2 · AI Foundations &amp; Effective Prompting</div>
+          <div class="stage-title">Learning to think in prompts</div>
+          <p class="stage-desc">Understanding how large language models actually work, and moving from vague requests to clear, structured, intent-driven prompts — the foundation every later skill builds on.</p>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-dot"></div>
+        <div class="stage-card">
+          <div class="stage-range">Weeks 2-3 · Reasoning &amp; Research Workflows</div>
+          <div class="stage-title">Using AI to think, not just answer</div>
+          <p class="stage-desc">Building multi-step reasoning workflows and AI-assisted research habits — the discipline that later shaped how QueryMind's own problem was discovered through structured interview questions, not guesswork.</p>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-dot"></div>
+        <div class="stage-card">
+          <div class="stage-range">Weeks 3-4 · Automation &amp; Product Thinking</div>
+          <div class="stage-title">From tasks to systems</div>
+          <p class="stage-desc">Automating repetitive workflows and learning to scope a real product — the exact instinct that shaped QueryMind's deliberate v1.0 cuts (no DAX, no execution, no chat) on Day 51 of the capstone.</p>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-dot"></div>
+        <div class="stage-card">
+          <div class="stage-range">Weeks 4-6 · Increasingly Sophisticated AI Projects</div>
+          <div class="stage-title">Raising the bar project by project</div>
+          <p class="stage-desc">Each build more ambitious than the last, compounding into the confidence to design a full production system: architecture, API contracts, and a database rationale, before a single line of app code was written.</p>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-dot"></div>
+        <div class="stage-card">
+          <div class="stage-range">Weeks 6-7 · Multimodal AI &amp; Knowledge Systems</div>
+          <div class="stage-title">Working across formats and memory</div>
+          <p class="stage-desc">Extending beyond text into structured knowledge and multimodal workflows — groundwork for treating a pasted database schema as structured input an AI could reason over reliably.</p>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-dot"></div>
+        <div class="stage-card">
+          <div class="stage-range">Weeks 7-8 · Autonomous Agents &amp; Multi-Agent Collaboration</div>
+          <div class="stage-title">Directing AI as a working partner</div>
+          <p class="stage-desc">Learning to collaborate with AI as an autonomous, pair-programming partner — precisely the working relationship that carried the entire 10-day capstone, through a real AI-provider pivot, a caught missing feature, and a full UI redesign and reversal.</p>
+        </div>
+      </div>
+
+      <div class="stage capstone">
+        <div class="stage-dot"></div>
+        <div class="stage-card">
+          <div class="stage-range">Days 51-60 · The Capstone</div>
+          <div class="stage-title">QueryMind — shipped, live, v1.0.0</div>
+          <p class="stage-desc">Every prior skill converged into one real software development lifecycle: discovery → architecture → implementation → a mid-build pivot handled transparently → UI/UX design → security &amp; QA hardening → production deployment. Not a tutorial project — a live tool a stranger can open right now.</p>
+          <div class="stat-row">
+            <span class="stat"><strong>10</strong> days, solo, ~1hr/day</span>
+            <span class="stat"><strong>1</strong> AI-provider pivot, handled live</span>
+            <span class="stat"><strong>25+</strong> deliberate test cases run</span>
+            <span class="stat"><strong>6</strong> production gaps found &amp; fixed</span>
+            <span class="stat"><strong>v1.0.0</strong> shipped &amp; live</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Generated as part of the AB Talks 60-Day Claude AI Challenge capstone graduation.
+      <br />
+      <a href="https://www.abtalks.in/" target="_blank" rel="noopener">abtalks.in</a> ·
+      <a href="https://www.linkedin.com/company/abtalks-on-ai/" target="_blank" rel="noopener">AB Talks on LinkedIn</a>
+    </footer>
+  </div>
+</body>
+</html>

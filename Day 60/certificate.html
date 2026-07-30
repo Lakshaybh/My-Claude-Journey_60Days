@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Certificate of Completion — QueryMind</title>
+<style>
+  @page { size: landscape; margin: 0; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #e8e6e1;
+    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  .certificate {
+    width: 100%;
+    max-width: 980px;
+    aspect-ratio: 1.414 / 1;
+    background: #fffdf9;
+    border: 10px solid #4f46e5;
+    outline: 1px solid #d8d4ca;
+    outline-offset: -18px;
+    padding: 3.2rem 4rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .corner {
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    border: 2px solid #e7b65e;
+  }
+  .corner.tl { top: 18px; left: 18px; border-right: none; border-bottom: none; }
+  .corner.tr { top: 18px; right: 18px; border-left: none; border-bottom: none; }
+  .corner.bl { bottom: 18px; left: 18px; border-right: none; border-top: none; }
+  .corner.br { bottom: 18px; right: 18px; border-left: none; border-top: none; }
+
+  .brand-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .abtalks-logo {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    color: #17171a;
+  }
+  .abtalks-logo span { color: #4f46e5; }
+  .abtalks-logo small {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: #6b6a70;
+    text-transform: uppercase;
+    margin-top: 0.15rem;
+  }
+  .cert-id {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.7rem;
+    color: #9a99a3;
+    text-align: right;
+  }
+
+  .cert-body { text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #4f46e5;
+    margin-bottom: 0.6rem;
+  }
+  h1 {
+    font-size: 2.5rem;
+    margin: 0 0 1.1rem;
+    color: #17171a;
+    font-weight: 700;
+  }
+  .presented-to {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.85rem;
+    color: #6b6a70;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .recipient-name {
+    font-size: 2.5rem;
+    color: #4f46e5;
+    font-weight: 700;
+    margin: 0 0 1.4rem;
+    border-bottom: 2px solid #e7b65e;
+    display: inline-block;
+    padding-bottom: 0.3rem;
+  }
+  .cert-text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 1rem;
+    color: #17171a;
+    line-height: 1.75;
+    max-width: 640px;
+    margin: 0 auto 0.5rem;
+  }
+  .cert-text strong { color: #4f46e5; }
+  .project-line {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.95rem;
+    color: #6b6a70;
+    margin-top: 0.75rem;
+  }
+  .project-line .badge {
+    display: inline-block;
+    background: #4f46e5;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    margin-left: 0.35rem;
+  }
+
+  .footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .sign-block { text-align: center; min-width: 190px; }
+  .sign-line {
+    border-top: 1.5px solid #17171a;
+    margin-bottom: 0.4rem;
+    padding-top: 0.4rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .sign-role {
+    font-size: 0.72rem;
+    color: #6b6a70;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .links-block {
+    text-align: center;
+    font-size: 0.72rem;
+    color: #6b6a70;
+  }
+  .links-block a {
+    color: #4f46e5;
+    text-decoration: none;
+    display: block;
+    margin-top: 0.15rem;
+  }
+  .date-block { text-align: center; min-width: 190px; }
+
+  .print-btn {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: block;
+    margin: 1.5rem auto 0;
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.6rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .certificate { border-width: 8px; box-shadow: none; }
+    .print-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div>
+    <div class="certificate">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+
+      <div class="brand-row">
+        <div class="abtalks-logo">
+          AB<span>Talks</span>
+          <small>AI Learning &amp; Challenges</small>
+        </div>
+        <div class="cert-id">Certificate No. QM-CAP-2026-001<br />AB Talks 60-Day Claude AI Challenge</div>
+      </div>
+
+      <div class="cert-body">
+        <div class="eyebrow">Certificate of Completion</div>
+        <h1>10-Day Capstone Sprint</h1>
+
+        <div class="presented-to">This certifies that</div>
+        <div class="recipient-name">Lakshay Sharma</div>
+
+        <p class="cert-text">
+          has successfully completed the <strong>AB Talks 10-Day Capstone Sprint</strong>, part of the
+          <strong>AB Talks 60-Day Claude AI Challenge</strong>, by independently designing, building, testing,
+          and deploying a production-ready AI application through a complete software development lifecycle —
+          from product discovery to a live, publicly released Version 1.0.0.
+        </p>
+
+        <div class="project-line">
+          Capstone Project: <strong>QueryMind</strong> — AI-Powered SQL Query Generator
+          <span class="badge">v1.0.0</span>
+        </div>
+      </div>
+
+      <div class="footer-row">
+        <div class="sign-block">
+          <div class="sign-line">Claude (Free Tier)</div>
+          <div class="sign-role">AI Pair Programmer &amp; Mentor</div>
+        </div>
+
+        <div class="date-block">
+          <div class="sign-line" id="cert-date"></div>
+          <div class="sign-role">Date of Completion</div>
+        </div>
+
+        <div class="links-block">
+          <div style="font-weight:700; color:#17171a;">AB Talks</div>
+          <a href="https://www.abtalks.in/" target="_blank" rel="noopener">abtalks.in</a>
+          <a href="https://www.linkedin.com/company/abtalks-on-ai/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+
+    <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+  <script>
+    document.getElementById("cert-date").textContent = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  </script>
+</body>
+</html>
